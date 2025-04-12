@@ -7,20 +7,25 @@ from prompt_toolkit.document import Document
 from joblib import Parallel, delayed
 from tabulate import tabulate
 from tqdm import tqdm
+import json
 
 market_items = wfm.get_market_item_list()
 market_map = wfm.get_market_items_name_map(market_items)
 
-def print_item_info(market_item_ls: list[wfm.MarketItem]):
-    wfm.prepare_market_items(market_item_ls)
-
-    headers = ['Name', 'Plat(48hr)', 'R.Max Plat(48hr)', 'Volume(48hr)', 'WFM URL']
+def print_item_info(market_item_ls: list[wfm.MarketItem], do_prepare=True):
+    if do_prepare:
+        wfm.prepare_market_items(market_item_ls)
 
     name_ls = []
     plat_48hr_ls = []
     vol_48hr_ls = []
+    plat_times21_48hr_ls = []       # plat * 21, for arcane price comparison
+    rmax_plat_div21_48hr_ls = []    # rmax_plat / 21, for arcane price comparison
     url_ls = []
     rmax_plat_48hr_ls = []
+
+    show_arcane_plat_comparison = False
+
     for item in market_item_ls:
         name_ls.append(item.item_name)
         plat_48hr_ls.append(item.price.get_oracle_price_48hrs())
@@ -29,14 +34,25 @@ def print_item_info(market_item_ls: list[wfm.MarketItem]):
         
         if item.is_mod_info_available and item.is_mod:
             rmax_plat_48hr_ls.append(item.price.get_oracle_price_48hrs(mod_rank_range=[item.mod_max_rank]))
+            plat_times21_48hr_ls.append(plat_48hr_ls[-1] * 21)
+            rmax_plat_div21_48hr_ls.append(rmax_plat_48hr_ls[-1] / 21)
+            show_arcane_plat_comparison = True
         else:
-            rmax_plat_48hr_ls.append(-1)
+            rmax_plat_48hr_ls.append(None)
+            plat_times21_48hr_ls.append(None)
+            rmax_plat_div21_48hr_ls.append(None)
 
     # do transpose
-    table_ls = list(zip(name_ls, plat_48hr_ls, rmax_plat_48hr_ls, vol_48hr_ls, url_ls))
-    print(tabulate(table_ls, headers=headers, tablefmt='rounded_outline'))
+    if show_arcane_plat_comparison:
+        headers = ['Name', 'Plat\n(48hr)', 'RMP/21\n(Arcane)', 'R.Max Plat\n(48hr)', 'P*21\n(Arcane)', 'Volume\n(48hr)', 'WFM URL']
+        table_ls = list(zip(name_ls, plat_48hr_ls, rmax_plat_div21_48hr_ls, rmax_plat_48hr_ls, plat_times21_48hr_ls, vol_48hr_ls, url_ls))
+    else:
+        headers = ['Name', 'Plat\n(48hr)', 'R.Max Plat\n(48hr)', 'Volume\n(48hr)', 'WFM URL']
+        table_ls = list(zip(name_ls, plat_48hr_ls, rmax_plat_48hr_ls, vol_48hr_ls, url_ls))
 
-def print_syndicate_info(syndicate_name: str):
+    print(tabulate(table_ls, headers=headers, floatfmt=".2f", missingval=' '))
+
+def _deprecated_print_syndicate_info(syndicate_name: str):
     market_items = wfm.get_syndicate_items(syndicate_name)
 
     def task(item: wfm.MarketItem):
@@ -58,6 +74,23 @@ def print_syndicate_info(syndicate_name: str):
     print_formatted_text(HTML(f""))
     print_formatted_text(HTML(f"Sorted by volume:"))
     print_all_item(sorted(result, key=lambda a:a[2], reverse=True)[:15], "    ")
+
+def print_syndicate_info(syndicate_name: str):
+    market_items = wfm.get_syndicate_items(syndicate_name)
+    wfm.prepare_market_items(market_items)
+    
+    print_formatted_text(HTML(f"Sorted by price:"))
+    items = [(market_item, market_item.price.get_oracle_price_48hrs()) for market_item in market_items]
+    items = sorted(items, key=lambda a:a[1], reverse=True)[:15]
+    items = [item[0] for item in items]
+    print_item_info(items, do_prepare=False)
+
+    print_formatted_text(HTML(f""))
+    print_formatted_text(HTML(f"Sorted by volume:"))
+    items = [(market_item, market_item.statistic.get_volume_for_last_hours(48)) for market_item in market_items]
+    items = sorted(items, key=lambda a:a[1], reverse=True)[:15]
+    items = [item[0] for item in items]
+    print_item_info(items, do_prepare=False)
 
 def print_relic_info(relic_data=None, level='Radiant'):
     """
@@ -143,6 +176,20 @@ def print_relic_info(relic_data=None, level='Radiant'):
         headers=['Relic', 'Plat'], tablefmt="grid", colalign=("left", "right")
     ))
   
+def print_transient_reward_info(reward_data):
+    """
+        reward_data: dict{rotation: list of dict{item_name, rarity, chance}}
+    """
+    # prepare as a batch
+    rewards = []
+    for rotation, rotation_rewards in reward_data.items():
+        rewards.extend([market_map[r['item_name']] for r in rotation_rewards if r['item_name'] in market_map])
+    wfm.prepare_market_items(rewards)
+    
+    for rotation, rotation_rewards in reward_data.items():
+        print(f'\nRotation {rotation}:')
+        print_item_info([market_map[r['item_name']] for r in rotation_rewards if r['item_name'] in market_map], do_prepare=False)
+
 def item_function():
     item_selecter = WordCompleter(list(market_map.keys()) + ['Quit', 'quit'], 
                                   ignore_case=True, sentence=True, match_middle=True)
@@ -171,7 +218,7 @@ def syndicate_function():
             "Cephalon Simaris", "New Loka", "Cephalon Suda", "Red Veil", "The Perrin Sequence", 
             "Solaris United", "Entrati", "Ostron", "The Holdfasts", "Kahl's Garrison", "Operational Supply", 
             "Conclave",
-        ] + ['Cavia']
+        ] + ['Cavia', 'The Hex']
     syndicate_selecter = WordCompleter(syndicate_ls + ['Quit', 'quit'], ignore_case=True, sentence=True, match_middle=True)
     while True:
         text = prompt('Enter syndicate (or type "Quit" to quit): ', completer=syndicate_selecter)
@@ -191,7 +238,8 @@ def relic_plat_function():
         relic_name: [relic_name]
         for relic_name in all_relic_data_map
     }
-    syndicate_selecter = WordCompleter(list(relic_choice.keys()) + ['Quit', 'quit'], ignore_case=True)
+    syndicate_selecter = WordCompleter(list(relic_choice.keys()) + ['Quit', 'quit'],
+                                       ignore_case=True, sentence=True, match_middle=True)
     while True:
         text = prompt('Enter relic name (or type "Quit" to quit): ', completer=syndicate_selecter)
         if text in ['Quit', 'quit']:
@@ -231,6 +279,19 @@ def relic_item_function():
                 if name_in_relic(relic_data, text)
             })
 
+def transient_mission_reward_function():
+    transient_mission_reward = wfm.get_transient_mission_rewards()
+    syndicate_selecter = WordCompleter(list(transient_mission_reward.keys()) + ['Quit', 'quit'], 
+                                       ignore_case=True, sentence=True, match_middle=True)
+    while True:
+        text = prompt('Enter syndicate (or type "Quit" to quit): ', completer=syndicate_selecter)
+        if text in ['Quit', 'quit']:
+            break
+        elif text not in transient_mission_reward:
+            print_formatted_text(HTML('Reward not found.'))
+        else:
+            print_transient_reward_info(transient_mission_reward[text])
+    
 def quit_function():
     exit()
 
@@ -268,6 +329,7 @@ def main_interactive():
         'Relic Plat': relic_plat_function,
         'Relic Item': relic_item_function,
         'Syndicate': syndicate_function,
+        'Transient Reward': transient_mission_reward_function,
         'Quit': quit_function,
         'quit': quit_function
     }

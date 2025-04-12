@@ -13,5 +13,10 @@ additional_syndicates = {
             'Fabrica Anatomica Scene', 'Eidolon Zenuric Lens', 'Eidolon Naramon Lens', 'Eidolon Unairu Lens', 
             'Eidolon Vazarin Lens', 'Eidolon Madurai Lens'
         ]
+    },
+    'The Hex': {
+        'names': [
+            '16-Bit Girls With Machine Guns', 'Anna Ki In The G.o.b.', 'Psycho Killian', 'Lundora Calling', 'Anna Ki Is A Punk Rocker', 'Kick Out The Guns', 'I Wanna Be Your G.o.b.', 'Biz-Marque Bop', 'Cyte-09 Chassis Blueprint', 'Cyte-09 Neuroptics Blueprint', 'Cyte-09 Systems Blueprint', 'Cyte-09 Blueprint', 'AX-52 Blueprint', 'Vesper 77 Blueprint', 'Vesper 77 Barrel Blueprint', 'Vesper 77 Receiver Blueprint', 'Vesper 77 Handle Blueprint', 'Reconifex Blueprint', 'Reconifex Barrel Blueprint', 'Reconifex Receiver Blueprint', 'Reconifex Stock Blueprint', 'Leftovers Sigil', 'Fresh Slice Sigil', '2-For-1 Sigil', 'Hot & Fresh Sigil', 'Pizza Party Sigil', 'Ligumi Ink', 'Yoshijo Ink', 'Miyeti Ink', 'Fumiro Ink', 'Arthur Pixel Glyph', 'Aoi Pixel Glyph', 'Amir Pixel Glyph', 'Eleanor Pixel Glyph', 'Lettie Pixel Glyph', 'Quincy Pixel Glyph', 'Protokol Spectre Pistol Skin', 'Protokol Vekesk Pistol Skin', 'Protokol Tekna Pistol Skin', 'Protokol 95 Pistol Skin', 'Höllvanian Terrace In Summer', 'Höllvanian Tenements In Summer', 'Tech Titan Electronics Store', 'Höllvania Central Mall Subway', 'Höllvanian Intersection In Winter', 'Höllvanian Historic Quarter In Spring', 'Höllvanian Old Town In Fall', 'Orbit Arcade', 'Central Mall Backroom', 'Höllvanian Courtyard Simulacrum', 'Mall Rotunda Simulacrum', 'Primary Crux', 'Melee Doughty', 'Arcane Camisado', 'Arcane Impetus', 'Arcane Truculence', 'Arcane Bellicose', 'Secondary Enervate', 'Arcane Crepuscular'
+        ]
     }
 }

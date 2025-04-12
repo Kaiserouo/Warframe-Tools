@@ -1,7 +1,17 @@
 relic_set_map = {
-    'Ember/Rhino Prime (202407)': ['Lith E1', 'Meso S14', 'Meso B10', 'Neo G6', 'Axi R4'],
-    'Mesa/Limbo Prime (202408)': ['Lith D5', 'Lith P7', 'Meso L2', 'Neo A9', 'Neo R5', 'Axi M4'],
-    'Sevagoth Prime (202408)': ['Lith C12', '', 'Lith N15']
+    # 'Ember/Rhino Prime (202407)': ['Lith E1', 'Meso S14', 'Meso B10', 'Neo G6', 'Axi R4'],
+    # 'Mesa/Limbo Prime (202408)': ['Lith D5', 'Lith P7', 'Meso L2', 'Neo A9', 'Neo R5', 'Axi M4'],
+    # 'Nezha/Octavia Prime (202409)': ['Lith G7', 'Lith O3', 'Meso N15', 'Meso Z5', 'Neo T8', 'Axi P5'],
+    # 'Trinity/Nova Prime (202410)': ['Lith K4', 'Meso D5', 'Neo N12', 'Axi S7'],
+    # 'Garuda/Khora Prime (202411)': ['Lith D6', 'Meso H8', 'Neo C5', 'Neo K8', 'Axi G13', 'Axi N11'],
+    # 'Ivara/Oberon Prime (202412)': ['Lith B9', 'Meso O6', 'Neo I3', 'Neo S16', 'Axi A15', 'Axi S13']
+    'Mag/Frost Prime (202412)': ['Lith M8', 'Lith L4', 'Meso F4', 'Axi D4'],
+    'Rhino/Nyx Prime (202412)': ['Lith B4', 'Meso N6', 'Neo R1', 'Axi S3'],
+    'Volt/Loki Prime (202412)': ['Lith O2', 'Meso O3', 'Neo V8', 'Axi L4'],
+    'All': ['Lith M8', 'Lith L4', 'Meso F4', 'Axi D4',
+            'Lith B4', 'Meso N6', 'Neo R1', 'Axi S3',
+            'Lith O2', 'Meso O3', 'Neo V8', 'Axi L4'],
+    'Vauban': ['Lith V9', 'Meso T6', 'Meso V8', 'Axi F1']
 }
 
 relic_data_map = {
@@ -60,6 +70,27 @@ relic_data_map = {
         'Common': ['Destreza Prime Handle', 'Vasto Prime Barrel'],
         'Uncommon': ['Limbo Prime Neuroptics Blueprint', 'Redeemer Prime Blueprint'],
         'Rare': ['Mesa Prime Neuroptics Blueprint']
+    },
+    
+    'Lith K4': {
+        'Common': ['Dual Kamas Prime Blueprint', 'Nova Prime Neuroptics Blueprint'],
+        'Uncommon': ['Soma Prime Receiver', 'Trinity Prime Blueprint'],
+        'Rare': ['Kavasa Prime Buckle']
+    },
+    'Meso D5': {
+        'Common': ['Soma Prime Barrel', 'Trinity Prime Neuroptics Blueprint'],
+        'Uncommon': ['Nova Prime Blueprint', 'Vasto Prime Blueprint'],
+        'Rare': ['Dual Kamas Prime Blade']
+    },
+    'Neo N12': {
+        'Common': ['Soma Prime Blueprint', 'Trinity Prime Systems Blueprint', 'Vasto Prime Receiver'],
+        'Uncommon': ['Dual Kamas Prime Handle', 'Kavasa Prime Band'],
+        'Rare': ['Kavasa Prime Buckle']
+    },
+    'Axi S7': {
+        'Common': ['Nova Prime Systems Blueprint', 'Vasto Prime Barrel'],
+        'Uncommon': ['Kavasa Prime Kubrow Collar Blueprint', 'Trinity Prime Chassis Blueprint'],
+        'Rare': ['Soma Prime Stock']
     },
 }
 

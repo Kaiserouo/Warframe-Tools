@@ -10,6 +10,7 @@ import datetime
 import math
 import itertools
 import statistics
+from collections import defaultdict
 
 import util
 from tqdm import tqdm
@@ -29,7 +30,7 @@ def retry_request(*args, **kwargs):
 
         # wait a random time because there may be multiple requests
         # at the exact same time as this
-        time.sleep(random.uniform(0, 1))    
+        time.sleep(random.uniform(0, 1))
     return r
 
 class Orders:
@@ -215,6 +216,33 @@ class Statistic:
         ]
 
         return valid_stats
+    
+    def get_stat_before_last_days(self, days: int, 
+                               basis_time: datetime.datetime | None = None,
+                               mod_rank_range: list | range = [0]):
+        """
+            get the closed trade stat before {days} days
+            days in range [1, 90], might not be up to 90 because it depends on
+            how many timeslots the API sends back for 90days.
+
+            the records are made on the day in UTC
+
+            some details refer to get_volume_for_last_hours
+            may return empty list
+        """
+        if basis_time is None:
+            if self.basis_time is None:
+                basis_time = datetime.datetime.now(datetime.timezone.utc)
+            else:
+                basis_time = self.basis_time
+
+        valid_stats = [
+            stat for stat in self.statistics['statistics_closed']['90days']
+            if stat['datetime'] < basis_time - datetime.timedelta(days=days)
+            and stat['mod_rank'] in mod_rank_range
+        ]
+
+        return valid_stats
 
     """
         The actual statistic calculation part.
@@ -312,14 +340,34 @@ class PriceOracle:
             return statistics.mean(prices)
         return statistics.mean(top_K)
 
+    def get_top_k_median_price_before_last_days(self, days: int, ratio: float = 1, **stat_filter):
+        """
+            actually take the volume into account
+            ratio: pick the top `ratio` prices to calculate average
+        """
+        stats = self.statistic.get_stat_before_last_days(days, **stat_filter)
+        if len(stats) == 0:
+            return 0
+        
+        prices = [[stat['median']] * stat['volume'] for stat in stats]
+        prices = list(itertools.chain.from_iterable(prices))
+        prices = sorted(prices, reverse=True)
+
+        top_K = prices[:int(len(prices) * ratio)]
+        if len(top_K) == 0:
+            return statistics.median(prices)
+        return statistics.median(top_K)
+    
     def get_oracle_price_48hrs(self, **stat_filter):
         """
             For the best price that probably applies to everything
             must be prepare()-ed first
         """
         # return self.get_avg_median_price_for_last_hours(48, 0.5, **stat_filter)
-        return self.get_top_k_avg_price_for_last_hours(48, 0.3, **stat_filter)
-        # price = self.get_top_k_avg_price_for_last_hours(3, 1, **stat_filter)
+        # return self.get_top_k_avg_price_for_last_hours(48, 0.3, **stat_filter)
+        # return self.get_top_k_avg_price_for_last_hours(48, 1, **stat_filter)
+        # return self.get_top_k_median_price_before_last_days(25, 0.3, **stat_filter)
+        # price = self.get_top_k_avg_price_for_last_hours(8, 1, **stat_filter)
         # if price > 0: return price
 
         # price = self.get_top_k_avg_price_for_last_hours(48, 0.3, **stat_filter)
@@ -354,7 +402,7 @@ class MarketItem:
         if api_version == 'v1':
             self.id = market_json['id']
             self.url_name = market_json['url_name']
-            self.thumb = market_json['thumb']
+            self.thumb = market_json['']
             self.item_name = market_json['item_name']
             self.orders: Orders | None = None
             self.statistic: Statistic | None = None
@@ -363,7 +411,7 @@ class MarketItem:
         
         elif api_version == 'v2':
             self.id = market_json['id']
-            self.url_name = market_json['urlName']
+            self.url_name = market_json['slug']
             self.thumb = market_json['i18n']['en'].get('thumb', None)
             self.item_name = market_json['i18n']['en']['name']
             self.orders = None
@@ -505,3 +553,37 @@ def get_relic_data(discard_forma: bool = False) -> dict[str, dict[str, list[str]
         relic_map[f"{relic_data['tier']} {relic_data['relicName']}"] = relic
 
     return relic_map
+
+def get_transient_mission_rewards() -> dict[str, list[str]]:
+    """
+        only fetch from drops.warframestat.us
+        if you have any other manually recorded data then do it on your own
+
+        return {node name -> {rotation -> list of {item_name, rarity, chance}}}
+    """
+    mission_reward = retry_request('https://drops.warframestat.us/data/transientRewards.json')
+    mission_reward = json.loads(mission_reward.content)['transientRewards']
+    ret_reward = {}
+    for mission in mission_reward:
+        rewards = defaultdict(list)
+        for reward in mission['rewards']:
+            if 'rotation' not in reward:
+                rewards['no_rotation'].append({
+                    'item_name': reward['itemName'],
+                    'rarity': reward['rarity'],
+                    'chance': reward['chance'] / 100
+                })
+            else:
+                rewards[reward['rotation']].append({
+                    'item_name': reward['itemName'],
+                    'rarity': reward['rarity'],
+                    'chance': reward['chance'] / 100
+                })
+        ret_reward[mission['objectiveName']] = dict(rewards)
+    return ret_reward
+        
+
+if __name__ == '__main__':
+    # market_items = get_market_item_list()
+    rewards = get_transient_mission_rewards()
+    print(rewards.keys())
