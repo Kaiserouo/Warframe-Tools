@@ -11,6 +11,7 @@ import math
 import itertools
 import statistics
 from collections import defaultdict
+from typing import *
 
 import util
 from tqdm import tqdm
@@ -36,16 +37,21 @@ def retry_request(*args, **kwargs):
 class Orders:
     """
         existing orders on warframe market
+        note that this is a list for SAME ITEM ID orders
     """
 
     @dataclass
     class Order():
+        item_id: str
         order_type: str
         visible: bool
         platinum: int
         quantity: int
         user_reputation: int
         user_status: str
+        user_in_game_name: str
+        user_slug: str
+        user_id: str
         mod_rank: int
 
         @property
@@ -60,23 +66,46 @@ class Orders:
         def is_ingame(self):
             return self.user_status == 'ingame'
 
-    def __init__(self, order_json):
+    def __init__(self, order_json, version: Literal['v1', 'v2'] = 'v2'):
         """
             order_json: is a list of dict that has keys like [visible, user, quantity, ...] 
         """
 
         self.orders: list[self.Order] = []
-        for order in order_json:
-            cur_order = self.Order(**{
-                'order_type': order['order_type'],
-                'visible': order['visible'],
-                'platinum': order['platinum'],
-                'quantity': order['quantity'],
-                'user_reputation': order['user']['reputation'],
-                'user_status': order['user']['status'], # can be ['offline', 'online', 'ingame']
-                'mod_rank': order.get('mod_rank', 0)
-            })
-            self.orders.append(cur_order)
+        if version == 'v1':
+            for order in order_json:
+                cur_order = self.Order(**{
+                    'item_id': None,    # not supported
+                    'order_type': order['order_type'],
+                    'visible': order['visible'],
+                    'platinum': order['platinum'],
+                    'quantity': order['quantity'],
+                    'user_reputation': order['user']['reputation'],
+                    'user_status': order['user']['status'], # can be ['offline', 'online', 'ingame']
+                    'user_in_game_name': order['user']['ingame_name'],
+                    'user_slug': order['user']['slug'],
+                    'user_id': order['user']['id'],
+                    'mod_rank': order.get('mod_rank', 0)
+                })
+                self.orders.append(cur_order)
+        elif version == 'v2':
+            for order in order_json:
+                cur_order = self.Order(**{
+                    'item_id': order['itemId'],
+                    'order_type': order['type'],
+                    'visible': order['visible'],
+                    'platinum': order['platinum'],
+                    'quantity': order['quantity'],
+                    'user_reputation': order['user']['reputation'],
+                    'user_status': order['user']['status'], # can be ['offline', 'online', 'ingame']
+                    'user_in_game_name': order['user']['ingameName'],
+                    'user_slug': order['user']['slug'],
+                    'user_id': order['user']['id'],
+                    'mod_rank': order.get('mod_rank', 0)
+                })
+                self.orders.append(cur_order)
+        else:
+            raise ValueError("version must be either 'v1' or 'v2'")
             
     def get_ingame_lowest_sell_price(self, mod_rank_range: list | range = [0]):
         return min([
@@ -100,6 +129,7 @@ class Orders:
             if order.is_buy and order.visible and order.is_ingame and order.mod_rank in mod_rank_range 
         ], reverse=True)
         return buy_list[:k]
+
 
 class Statistic:
     """
@@ -364,7 +394,7 @@ class PriceOracle:
             must be prepare()-ed first
         """
         # return self.get_avg_median_price_for_last_hours(48, 0.5, **stat_filter)
-        # return self.get_top_k_avg_price_for_last_hours(48, 0.3, **stat_filter)
+        return self.get_top_k_avg_price_for_last_hours(48, 0.3, **stat_filter)
         # return self.get_top_k_avg_price_for_last_hours(48, 1, **stat_filter)
         # return self.get_top_k_median_price_before_last_days(25, 0.3, **stat_filter)
         # price = self.get_top_k_avg_price_for_last_hours(8, 1, **stat_filter)
@@ -376,30 +406,71 @@ class PriceOracle:
         # return self.orders.get_ingame_topK_buy_price(5, mod_rank_range=stat_filter.get('mod_rank_range', [0]))
 
 class MarketItem:
-    def __init__(self, market_json: dict, api_version: str = 'v1'):
+    """
+    Defines an item in the market
+
+    Attributes:
+        id (str): The id in game (or on warframe.market?), a hex string
+        url_name (str): The name of this item appeared in the URL, also called slug
+        thumb (Optional[str]): The thumbnail URL of this item
+        item_name (str): The proper item name you can see and search on warframe.market
+        tags (list[str]): The tags from warframe.market to identify some of the traits of this item, ref. note below
+        game_ref (str): The reference string for the item in-game
+        orders (Optional[Order]): The order object for this item. Need to be prepare() first
+        statistic (Optional[Statistic]): The statistic object for this item. Need to be prepare() first
+        price (Optional[PriceOracle]): The price oracle object for this item. Need to be prepare() first
+        is_mod_info_available (bool): Whether the mod related information is available. If it is not, do not access
+                                      the below 2 attributes
+        is_mod (bool): Whether this item is a mod or not. Only accessible if `is_mod_info_available`.
+                       Note that some other things (e.g., arcane) also count as mods. Basically anything that has
+                       a "Rank (All / Maxed)" option will have this boolean as True
+        mod_max_rank (int): The max rank of this item. Only accessible if `is_mod_info_available and is_mod`
+
+    Note:
+        - The tags are basically defined by warframe.market. They might have in-game counterparts, but the name is mostly
+          by warframe.market
+          The possible tags are:
+            - General types (a rough list),
+                e.g., 'gem', 'fish', 'arcane_enhancement', 'mod', 'misc', 'key' (alad v assassination), 
+                'syndicate' (no augment mods), 'veiled_riven', 'damaged' (necramech parts), 'locator' (grendel stuff), 
+                'triangulator' (weird), 'weapon' (mostly for prime parts), 'warframe' (for prime parts and mods),
+                'consumable' (mostly antitoxin), 'scene', 'emote', 'ayatan_star', 'imprint', 'focus', 'lens' (these 2 often appear together)
+            - Weapon types (typically for mods), e.g., 'assult_rifle', 'primary'
+            - Rarity, e.g., 'common', 'uncommon', 'rare', 'legendary'
+            - Relic types, e.g., 'axi'
+            - Mods (sometimes arcanes) marked that can only be equipped for something, 
+                e.g., 'pistol_(no_aoe)', 'warframe', 'excalibur', 'dread', 'operator'
+            - Special markers for stuff, e.g., 'blueprint', 'component'
+          If you need a list of all the tags:
+            >>> set(itertools.chain(*[i.tags for i in market_items]))
+          Since we can't really afford sorting all of these manually, if you wanna check something (e.g., whether a thing is arcane),
+          we don't have special functions for that, please just do `'arcane_enhancement' in item.tags`
+    """
+    def __init__(self, market_json: dict, api_version: str = 'v2'):
         """
             market_json: differs according to API version 
                 'v1': has keys like ['id', 'url_name', 'thumb', 'item_name']
-                'v2': {
-                    gameRef: "/Lotus/Powersuits/Ember/FireBlastAugmentCard"
-                    i18n: {en: {name: "Healing Flame",…}}
-                        en: {name: "Healing Flame",…}
-                            name: "Healing Flame"
-                            thumb: "items/images/en/thumbs/healing_flame.0672e5552e12d348dbc0521e3841c9a1.128x128.png"
-                    id: "54e0c9eee7798903744178ae"
-                    tags: []
-                    urlName: "healing_flame"
-                    maxRank: 3  # may appear
-                }
-
-            accessible traits:
-                - id, url_name, thumb, item_name: accessible
-                - orders, statistics: need to prepare() first, else None
-                - is_mod_info_available: accessible, and if True:
-                    - is_mod: accessible
-                    - mod_max_rank: accessible, 0 if not is_mod 
+                'v2': {Dict[len=7](
+                    "id": "62a2baebfbd62c00450b71d9",
+                    "slug": "molt_augmented",
+                    "gameRef": "/Lotus/Upgrades/CosmeticEnhancers/Offensive/PowerStrengthOnKill",
+                    "tags": List[len=2](
+                        "rare",
+                        "arcane_enhancement"
+                    ),
+                    "bulkTradable": True,
+                    "maxRank": 5,
+                    "i18n": Dict[len=1](
+                        "en": Dict[len=3](
+                            "name": "Molt Augmented",
+                            "icon": "items/images/en/molt_augmented.9def654a0d24b7f085940dfc8ef843b5.png",
+                            "thumb": "items/images/en/thumbs/molt_augmented.9def654a0d24b7f085940dfc8ef843b5.128x128.png"
+                        )
+                    )
+                )
         """
         if api_version == 'v1':
+            # mostly deprecated, don't maintain this
             self.id = market_json['id']
             self.url_name = market_json['url_name']
             self.thumb = market_json['']
@@ -414,6 +485,8 @@ class MarketItem:
             self.url_name = market_json['slug']
             self.thumb = market_json['i18n']['en'].get('thumb', None)
             self.item_name = market_json['i18n']['en']['name']
+            self.tags = market_json['tags']
+            self.game_ref = market_json['gameRef']
             self.orders = None
             self.statistic = None
             self.price = None
@@ -422,13 +495,20 @@ class MarketItem:
             self.mod_max_rank = market_json.get('maxRank', 0)
 
     def _get_orders(self):
-        r = retry_request(f'https://api.warframe.market/v1/items/{self.url_name}/orders', headers={
+        # r = retry_request(f'https://api.warframe.market/v1/items/{self.url_name}/orders', headers={
+        #     'accept': 'application/json',
+        #     'Platform': 'pc',
+        #     'User-agent': USER_AGENT
+        # })
+
+        # return Orders(json.loads(r.content)['payload']['orders'], version='v1')
+        r = retry_request(f'https://api.warframe.market/v2/orders/item/{self.url_name}', headers={
             'accept': 'application/json',
             'Platform': 'pc',
             'User-agent': USER_AGENT
         })
 
-        return Orders(json.loads(r.content)['payload']['orders'])
+        return Orders(json.loads(r.content)['data'], version='v2')
 
     def _get_statistic(self):
         r = retry_request(f'https://api.warframe.market/v1/items/{self.url_name}/statistics', headers={
@@ -461,6 +541,58 @@ class MarketItem:
     def __repr__(self):
         return f'<MarketItem "{self.item_name}">'
 
+class User:
+    """
+    a user on the market
+    """
+    def __init__(self, user_slug: str = None, user_id: str = None):
+        self.user_slug = user_slug
+        self.user_id = user_id
+        self.user_ingame_name = None
+        self.orders = None
+    
+    def fetch_data(self):
+        # TODO: maybe should've used Order...? maybe not tbh
+        if self.user_id is not None:
+            order_r = retry_request(f'https://api.warframe.market/v2/orders/userId/{self.user_id}', headers={
+                'accept': 'application/json',
+                'Platform': 'pc',
+                'User-agent': USER_AGENT
+            })  
+            user_r = retry_request(f'https://api.warframe.market/v2/userId/{self.user_id}', headers={
+                'accept': 'application/json',
+                'Platform': 'pc',
+                'User-agent': USER_AGENT
+            })  
+            
+        elif self.user_slug is not None:
+            order_r = retry_request(f'https://api.warframe.market/v2/orders/user/{self.user_slug}', headers={
+                'accept': 'application/json',
+                'Platform': 'pc',
+                'User-agent': USER_AGENT
+            })
+            user_r = retry_request(f'https://api.warframe.market/v2/user/{self.user_slug}', headers={
+                'accept': 'application/json',
+                'Platform': 'pc',
+                'User-agent': USER_AGENT
+            })
+        else:
+            raise ValueError("Either user_slug or user_id must be provided")
+
+        self.user_id = json.loads(user_r.content)['data']['id']
+        self.user_slug = json.loads(user_r.content)['data']['slug']
+        self.user_ingame_name = json.loads(user_r.content)['data']['ingameName']
+        self.orders = [
+            {
+                'item_id': order['itemId'],
+                'order_type': order['type'],
+                'visible': order['visible'],
+                'platinum': order['platinum'],
+                'quantity': order['quantity'],
+            }
+            for order in json.loads(order_r.content)['data']
+        ]
+
 def get_market_item_list() -> list[MarketItem]:
     r = retry_request('https://api.warframe.market/v2/items', headers={
         'accept': 'application/json',
@@ -482,6 +614,18 @@ def prepare_market_items(market_items: list[MarketItem]):
 
     for i in range(len(market_items)):
         market_items[i] = results[i]
+
+def fetch_users_data(user_ls: list[User]):
+    "does parallel"
+    def task(user: User):
+        user.fetch_data()
+        return user
+    
+    with util.tqdm_joblib(tqdm(range(len(user_ls)), 'Fetching users...')) as tqdm_progress:
+        results = Parallel(n_jobs=5, require='sharedmem')(delayed(task)(user) for user in user_ls)
+
+    for i in range(len(user_ls)):
+        user_ls[i] = results[i]
         
 def get_syndicate_items(syndicate_name: str, market_map: None | list[MarketItem] = None) -> list[MarketItem]:
     """
@@ -521,6 +665,11 @@ def get_market_items_name_map(market_items: None | list[MarketItem] = None) -> d
     if market_items is None:
         market_items = get_market_item_list()
     return {i.item_name: i for i in market_items}
+
+def get_market_items_id_map(market_items: None | list[MarketItem] = None) -> dict[str, MarketItem]:
+    if market_items is None:
+        market_items = get_market_item_list()
+    return {i.id: i for i in market_items}
 
 def get_relic_data(discard_forma: bool = False) -> dict[str, dict[str, list[str]]]:
     """
@@ -582,8 +731,9 @@ def get_transient_mission_rewards() -> dict[str, list[str]]:
         ret_reward[mission['objectiveName']] = dict(rewards)
     return ret_reward
         
-
 if __name__ == '__main__':
     # market_items = get_market_item_list()
-    rewards = get_transient_mission_rewards()
-    print(rewards.keys())
+    # rewards = get_transient_mission_rewards()
+    # print(rewards.keys())
+    p = Player(user_slug='kaiserouo')
+    p.fetch_data()

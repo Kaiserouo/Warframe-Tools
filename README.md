@@ -55,3 +55,15 @@ Note:
 I tried to use some python REPL on browser stuff to make this thing run directly on browser (because i just don't wanna properly port a CLI program onto browser myself). It turns out to be almost impossible, at least without some heavy code changing:
 - All `requests` cannot be done if not using javascript's fetch (probably because of some CORS stuff). This is a relatively small problem as long as I can know if the code is currently running in browser.
 - `prompt_toolkit` is doomed. Pyodite claimed that the module `termios` (which is required by `wcwidth`, further which is required by `prompt_toolkit`) is not possible on pyodute due to "browser limits"
+
+## TODO
+- warframe data/ scripts that fetches data from warframe wiki: use new wiki instead
+- when you wanna buy multiple stuff, find the best trade strategy (or simply just, who do you wanna trade with in order to minimize trade times)
+  - 1. get a list of items you wanna buy (maybe make a function in the main program to record this in a prettier format, with intellisence)
+  - 2. for each item, get all players online and put them in a set
+  - 3. in the player set, query all player's orders and see:
+    - 1. what items do they have?
+    - 2. for their price, how much do they deviate from the oracle price we have?
+    - 3. in total, how much IN TOTAL do they deviate from the price? (sum 2. together)
+  - 4. sort the players by (1) the items they have (2) the price they DONT deviate from the oracle price (minimize additional cost)
+  - 5. list everything 

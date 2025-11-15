@@ -31,8 +31,6 @@ def tqdm_joblib(tqdm_object):
         joblib.parallel.BatchCompletionCallBack = old_batch_callback
         tqdm_object.close()
 
-
-
 def str_type_indent(obj, iter_limit_items: int = 10, dict_limit_items: int = 1000000, 
                     explicit_type: bool=False, indent="    ") -> str:
     """
