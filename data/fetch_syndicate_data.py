@@ -28,6 +28,16 @@ syndicates = [
             {'selector': "//*[@id='mw-customcollapsible-Eleanor']/div[1]/div"}
         ],
     },
+    {
+        'name': 'Roathe',
+        'url': 'https://wiki.warframe.com/w/Roathe',
+        'sections': [
+            {'selector': "//*[@id='mw-customcollapsible-Surplus']/div[1]/div"},
+            {'selector': "//*[@id='mw-customcollapsible-Amir']/div[1]/div"},
+            {'selector': "//*[@id='mw-customcollapsible-Quincy']/div[1]/div"},
+            {'selector': "//*[@id='mw-customcollapsible-Eleanor']/div[1]/div"}
+        ],
+    },
 ]
 
 def default_mapper():
@@ -61,4 +71,7 @@ def get_syndicate_data(syndicate: dict) -> dict[str, int]:
     items = list(itertools.chain.from_iterable([html.xpath(section['selector']) for section in syndicate['sections']]))
     return [parse_syndicate_div(item) for item in items]
 
-print(get_syndicate_data(syndicates[0]))
+for syndicate in syndicates:
+    data = get_syndicate_data(syndicate)    # list[{'name': str, 'standing': int}]
+    names = [item['name'] for item in data]
+    print(names)

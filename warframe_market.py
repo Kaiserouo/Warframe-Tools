@@ -13,6 +13,8 @@ import statistics
 from collections import defaultdict
 from typing import *
 
+from data.syndicate_data import additional_syndicates
+
 import util
 from tqdm import tqdm
 
@@ -31,7 +33,7 @@ def retry_request(*args, **kwargs):
 
         # wait a random time because there may be multiple requests
         # at the exact same time as this
-        time.sleep(random.uniform(0, 1))
+        time.sleep(random.uniform(0, 3))
     return r
 
 class Orders:
@@ -369,7 +371,25 @@ class PriceOracle:
         if len(top_K) == 0:
             return statistics.mean(prices)
         return statistics.mean(top_K)
+    
+    def get_bottom_k_avg_price_for_last_hours(self, hours: int, ratio: float = 1, **stat_filter):
+        """
+            actually take the volume into account
+            ratio: pick the top `ratio` prices to calculate average
+        """
+        stats = self.statistic.get_stat_for_last_hours(hours, **stat_filter)
+        if len(stats) == 0:
+            return 0
+        
+        prices = [[stat['median']] * stat['volume'] for stat in stats]
+        prices = list(itertools.chain.from_iterable(prices))
+        prices = sorted(prices, reverse=False)
 
+        top_K = prices[:int(len(prices) * ratio)]
+        if len(top_K) == 0:
+            return statistics.mean(prices)
+        return statistics.mean(top_K)
+    
     def get_top_k_median_price_before_last_days(self, days: int, ratio: float = 1, **stat_filter):
         """
             actually take the volume into account
@@ -388,6 +408,13 @@ class PriceOracle:
             return statistics.median(prices)
         return statistics.median(top_K)
     
+    def get_cur_lowest_price(self, **stat_filter):
+        """
+            For the best price that probably applies to everything
+            must be prepare()-ed first
+        """
+        return self.orders.get_ingame_lowest_sell_price(mod_rank_range=stat_filter.get('mod_rank_range', [0]))
+
     def get_oracle_price_48hrs(self, **stat_filter):
         """
             For the best price that probably applies to everything
@@ -405,6 +432,7 @@ class PriceOracle:
 
         # return self.orders.get_ingame_topK_buy_price(5, mod_rank_range=stat_filter.get('mod_rank_range', [0]))
 
+@dataclass
 class MarketItem:
     """
     Defines an item in the market
@@ -446,6 +474,18 @@ class MarketItem:
           Since we can't really afford sorting all of these manually, if you wanna check something (e.g., whether a thing is arcane),
           we don't have special functions for that, please just do `'arcane_enhancement' in item.tags`
     """
+    
+    id: Any
+    url_name: Any
+    thumb: Any
+    item_name: Any
+    orders: Any
+    statistic: Any
+    price: Any
+    is_mod_info_available: Any
+    is_mod: Any
+    mod_max_rank: Any
+    
     def __init__(self, market_json: dict, api_version: str = 'v2'):
         """
             market_json: differs according to API version 
@@ -479,20 +519,27 @@ class MarketItem:
             self.statistic: Statistic | None = None
             self.price: PriceOracle | None = None
             self.is_mod_info_available = False
+            self.is_mod = None
+            self.mod_max_rank = None
         
         elif api_version == 'v2':
             self.id = market_json['id']
             self.url_name = market_json['slug']
             self.thumb = market_json['i18n']['en'].get('thumb', None)
+            self.icon = market_json['i18n']['en'].get('icon', None)
             self.item_name = market_json['i18n']['en']['name']
             self.tags = market_json['tags']
             self.game_ref = market_json['gameRef']
-            self.orders = None
-            self.statistic = None
-            self.price = None
             self.is_mod_info_available = True
             self.is_mod = ('maxRank' in market_json)
             self.mod_max_rank = market_json.get('maxRank', 0)
+
+            # the below needs to be prepare()-ed first
+            self.wiki_link = None
+            self.description = None
+            self.orders = None
+            self.statistic = None
+            self.price = None
 
     def _get_orders(self):
         # r = retry_request(f'https://api.warframe.market/v1/items/{self.url_name}/orders', headers={
@@ -519,6 +566,13 @@ class MarketItem:
 
         return Statistic(json.loads(r.content)['payload'])
     
+    def _get_other_item_info(self):
+        # get wiki link from drops.warframestat.us
+        r = retry_request(f'https://api.warframe.market/v2/item/{self.url_name}')
+        items_data = json.loads(r.content)['data']
+        self.wiki_link = items_data['i18n']['en'].get('wikiLink', None)
+        self.description = items_data['i18n']['en'].get('description', None)
+
     def prepare(self):
         """
             fetch anything it can first and store inside itself
@@ -527,6 +581,7 @@ class MarketItem:
         self.orders = self._get_orders()
         self.statistic = self._get_statistic()
         self.price = PriceOracle(self, self.orders, self.statistic)
+        self._get_other_item_info()
 
         return self.orders, self.statistic, self.price
 
@@ -535,7 +590,19 @@ class MarketItem:
             make warframe market URL
         """
         return f"https://warframe.market/items/{self.url_name}"
-
+    
+    def get_thumbnail_url(self):
+        """
+            get thumbnail URL
+        """
+        return f"https://warframe.market/static/assets/{self.thumb}"
+    
+    def get_icon_url(self):
+        """
+            get icon URL
+        """
+        return f"https://warframe.market/static/assets/{self.icon}"
+    
     def __str__(self):
         return f'<MarketItem "{self.item_name}">'
     def __repr__(self):
@@ -609,7 +676,7 @@ def prepare_market_items(market_items: list[MarketItem]):
         item.prepare()
         return item
     
-    with util.tqdm_joblib(tqdm(range(len(market_items)), 'Fetching items...')) as tqdm_progress:
+    with util.tqdm_joblib(tqdm(range(len(market_items)), 'Fetching items...', leave=False)) as tqdm_progress:
         results = Parallel(n_jobs=5, require='sharedmem')(delayed(task)(item) for item in market_items)
 
     for i in range(len(market_items)):
@@ -626,19 +693,32 @@ def fetch_users_data(user_ls: list[User]):
 
     for i in range(len(user_ls)):
         user_ls[i] = results[i]
-        
+
+def get_syndicate_names() -> list[str]:
+    """
+    get supported syndicate names
+
+    e.g., [
+        "Arbiters of Hexis", "Steel Meridian", "The Quills", "NecraLoid", "Vox Solaris", "Ventkids", 
+        "Cephalon Simaris", "New Loka", "Cephalon Suda", "Red Veil", "The Perrin Sequence", 
+        "Solaris United", "Entrati", "Ostron", "The Holdfasts", "Kahl's Garrison", "Operational Supply", 
+        "Conclave",
+    ] + ['Cavia']
+    """
+
+    r = requests.get('https://drops.warframestat.us/data/syndicates.json')
+    syndicate_names = json.loads(r.content)['syndicates'].keys()
+
+    return syndicate_names + additional_syndicates.keys()
+
 def get_syndicate_items(syndicate_name: str, market_map: None | list[MarketItem] = None) -> list[MarketItem]:
     """
-        e.g., [
-            "Arbiters of Hexis", "Steel Meridian", "The Quills", "NecraLoid", "Vox Solaris", "Ventkids", 
-            "Cephalon Simaris", "New Loka", "Cephalon Suda", "Red Veil", "The Perrin Sequence", 
-            "Solaris United", "Entrati", "Ostron", "The Holdfasts", "Kahl's Garrison", "Operational Supply", 
-            "Conclave",
-        ] + ['Cavia']
+    get syndicate items from drops.warframestat.us
+    ref. https://github.com/WFCD/warframe-drop-data
 
-        ref. https://github.com/WFCD/warframe-drop-data
+    return list of MarketItem
     """
-    from data.syndicate_data import additional_syndicates
+
     if market_map is None:
         market_map = get_market_items_name_map()
 
@@ -660,6 +740,42 @@ def get_syndicate_items(syndicate_name: str, market_map: None | list[MarketItem]
     syndicate_item_names = syndicate_item_names & set(market_map.keys())
 
     return [market_map[name] for name in syndicate_item_names]
+
+def get_all_syndicate_items(market_map: None | list[MarketItem] = None) -> dict[str, list[MarketItem]]:
+    """
+    return item list for all syndicate
+
+    return {syndicate name -> list of MarketItem}
+    """
+
+    if market_map is None:
+        market_map = get_market_items_name_map()
+
+    syndicate_map = {}
+
+    r = requests.get('https://drops.warframestat.us/data/syndicates.json')
+    syndicates = json.loads(r.content)['syndicates']
+
+    for syndicate_name in list(syndicates.keys()) + list(additional_syndicates.keys()):
+        syndicate_item_names: list[str] = None
+        if syndicate_name in additional_syndicates:
+            syndicate_item_names = additional_syndicates[syndicate_name]['names']
+        else:
+            syndicate_item_names = syndicates[syndicate_name]
+            syndicate_item_names = [i['item'] for i in syndicate_item_names]
+        
+        # deal with warframe mods that has trailing names and parenthesis in them
+        parenthesis_item_names = [
+            name[:name.index('(') - 1]
+            for name in syndicate_item_names if '(' in name
+        ]
+        syndicate_item_names = set(syndicate_item_names) | set(parenthesis_item_names)
+
+        syndicate_item_names = syndicate_item_names & set(market_map.keys())
+
+        syndicate_map[syndicate_name] = [market_map[name] for name in syndicate_item_names]
+
+    return syndicate_map
 
 def get_market_items_name_map(market_items: None | list[MarketItem] = None) -> dict[str, MarketItem]:
     if market_items is None:
@@ -699,7 +815,10 @@ def get_relic_data(discard_forma: bool = False) -> dict[str, dict[str, list[str]
                 relic['Uncommon'].append(reward['itemName'])
             else:
                 relic['Rare'].append(reward['itemName'])
-        relic_map[f"{relic_data['tier']} {relic_data['relicName']}"] = relic
+        try:
+            relic_map[f"{relic_data['tier']} {relic_data['relicName']}"] = relic
+        except:
+            print("Failed to add relic:", relic_data)
 
     return relic_map
 
@@ -732,8 +851,9 @@ def get_transient_mission_rewards() -> dict[str, list[str]]:
     return ret_reward
         
 if __name__ == '__main__':
-    # market_items = get_market_item_list()
+    market_items = get_market_item_list()
+    print(util.str_type(market_items[0], print_unknown_obj_vars=True))
     # rewards = get_transient_mission_rewards()
     # print(rewards.keys())
-    p = Player(user_slug='kaiserouo')
-    p.fetch_data()
+    # p = Player(user_slug='kaiserouo')
+    # p.fetch_data()
