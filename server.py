@@ -186,7 +186,7 @@ def item_infobox():
         'wiki_link': item.wiki_link,
         'market_link': item.get_wfm_url(),
 
-        'last_update': market_data_update_date.isoformat() if market_data_update_date else None,
+        'last_update': item.prepare_datetime.isoformat() if item.prepare_datetime else None,
     }
 
 @app.route('/api/relic_data')

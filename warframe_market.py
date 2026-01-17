@@ -535,6 +535,7 @@ class MarketItem:
             self.mod_max_rank = market_json.get('maxRank', 0)
 
             # the below needs to be prepare()-ed first
+            self.prepare_datetime = None
             self.wiki_link = None
             self.description = None
             self.orders = None
@@ -582,6 +583,7 @@ class MarketItem:
         self.statistic = self._get_statistic()
         self.price = PriceOracle(self, self.orders, self.statistic)
         self._get_other_item_info()
+        self.prepare_datetime = datetime.datetime.now()
 
         return self.orders, self.statistic, self.price
 

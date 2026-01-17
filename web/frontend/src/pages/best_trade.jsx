@@ -49,6 +49,7 @@ export default function BestTrade({setting}) {
     <div className="mx-4 my-4">
         <div className="text-2xl font-bold text-white my-2">
             <p>Best Trade</p>
+            <p className='text-red-400 font-extrabold'>NOT FINISHED YET!</p>
         </div>
         <div className="text-white font-mono my-2">
             <p>Type whole name (e.g., "Serration"), or separate by "+" (e.g., "Serration + Hornet Strike")</p>

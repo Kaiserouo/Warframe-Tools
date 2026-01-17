@@ -25,10 +25,10 @@ function ItemInfoboxInner({ itemData }) {
         <div >
           {itemData.type ? <><span className="text-green-500">{itemData.type}</span><br /></> : null}
           
-          <a href={itemData.market_link} className="text-blue-400 font-bold hover:underline" target="_blank" rel="noopener noreferrer">
+          <a href={itemData.market_link} className="text-blue-400 font-bold underline decoration-dashed hover:decoration-solid " target="_blank" rel="noopener noreferrer">
             Market
           </a> <span> | </span>
-          <a href={itemData.wiki_link} className="text-blue-400 font-bold hover:underline" target="_blank" rel="noopener noreferrer">
+          <a href={itemData.wiki_link} className="text-blue-400 font-bold underline decoration-dashed hover:decoration-solid " target="_blank" rel="noopener noreferrer">
             Wiki
           </a><br />
           
@@ -36,7 +36,7 @@ function ItemInfoboxInner({ itemData }) {
           <span className="text-yellow-300"> Lowest</span> <span className="font-bold">{formatPrice(itemData.cur_lowest_sell_price)}</span>{plat}<br />
 
           <span className="text-purple-400">Sold <span className="text-white">{itemData['48h_volume']}</span> in 48h, <span className="text-white">{itemData['90d_volume']}</span> in 90d</span><br />
-          {itemData['last_update']}<span className="text-green-300"></span>
+          <span className="text-gray-500 text-xs">(Data fetched at {new Intl.DateTimeFormat("en-US", {timeStyle: "medium", dateStyle: "medium",}).format(new Date(Date.parse(itemData['last_update'])))})</span>
         </div>
       </div>
     </div>

@@ -44,7 +44,7 @@ let pageMap = {
 };
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('best_trade');
+  const [currentPage, setCurrentPage] = useState('home');
   const [setting, setSetting] = useState({
     'oracle_type': 'default_oracle_price_48h',
     'update_count': 1,

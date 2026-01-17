@@ -1,5 +1,7 @@
 # Warframe CLI Tool
 
+> For Web GUI, refer to [Web GUI Readme](./web/README.md).
+
 ![](./asset/screenshot.png)
 
 I need some functionality that I want full control of, so, um, this.
