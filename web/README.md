@@ -16,11 +16,26 @@ Function:
     - Find Best Trade: For a list of items, find the best users to trade with to minimize total price deviation from oracle price. (also serves as mass query for multiple items' current market prices & best to buy item currently)
 ```
 
-## Run
+## Install
+
+```bash
+# we use conda here, ref. https://www.anaconda.com/docs/getting-started/miniconda/install
+conda create --name warframe python=3.12
+conda activate warframe
+
+# install packages
+pip install -r requirement.txt
+
+# we use node.js, ref. https://nodejs.org/en/download
+# note that we use the newest version, versions too old wouldn't be able to run
+cd web/frontend
+npm install
+```
+
 
 ### Docker
 
-You can use docker compose to run the app:
+You can also use docker compose to run the app:
 > TODO: make a docker compose file for this
 
 ### Build & Run

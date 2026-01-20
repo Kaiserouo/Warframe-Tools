@@ -22,11 +22,20 @@ The supported functionalities are: *(note that Web GUI implement them a bit diff
 - Transient Reward: Get available transient mission rewards and show market price.
 - Find Best Trade: For a list of items, find the best users to trade with to minimize total price deviation from oracle price.
 
+## Install
+
+```bash
+# we use conda here, ref. https://www.anaconda.com/docs/getting-started/miniconda/install
+conda create --name warframe python=3.12
+conda activate warframe
+
+# install packages
+pip install -r requirement.txt
+```
+
 ## Run
 
-I run python 3.12.3 but you could use other versions. You can `pip install -r requirements.txt`, and if there are.
-
-```
+```bash
 python main.py
 ```
 
