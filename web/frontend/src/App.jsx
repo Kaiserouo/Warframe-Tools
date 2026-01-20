@@ -14,6 +14,8 @@ import ItemInfo from "./pages/item_info.jsx";
 import Syndicate from './pages/syndicate.jsx';
 import TransientReward from './pages/transient_reward.jsx';
 import BestTrade from './pages/best_trade.jsx';
+import Test from './pages/test.jsx';
+
 import NavbarSettingMenu from './components/navbar_setting_menu.jsx';
 
 let pageMap = {
@@ -40,11 +42,15 @@ let pageMap = {
   'best_trade': {
     'name': 'Best Trade',
     'factory': (setting) => (<BestTrade setting={setting} />)
+  },
+  'test': {
+    'name': 'Test',
+    'factory': (setting) => (<Test setting={setting} />)
   }
 };
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState('test');
   const [setting, setSetting] = useState({
     'oracle_type': 'default_oracle_price_48h',
     'update_count': 1,
@@ -74,7 +80,7 @@ function Navbar({setCurrentPage, setting, setSetting}) {
   return (<>
     <header className="fixed top-0 left-0 right-0 bg-[#222831] text-white p-4 z-50">
       <nav className="flex justify-between items-center space-x-8">
-        <span className="text-3xl font-bold">Warframe Tools</span>
+        <span className="text-3xl font-bold hover:cursor-pointer" onClick={() => setCurrentPage('home')}>Warframe Tools</span>
         <ul className="flex space-x-8 items-center">
           {Object.entries(pageMap).slice().map(([key, value]) => (
             <NavbarPage key={key} name={value.name} value={key} setCurrentPage={setCurrentPage} />

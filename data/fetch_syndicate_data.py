@@ -40,6 +40,8 @@ syndicates = [
     },
 ]
 
+"//*[@id='mw-customcollapsible-vrelics']//tabber//tr"
+
 def default_mapper():
     pass
 

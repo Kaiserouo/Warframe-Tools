@@ -1,4 +1,6 @@
 import operator
+import threading
+import uuid
 from flask import Flask, render_template, request, Response
 import warframe_market as wfm
 import interactive as wfi
@@ -6,6 +8,7 @@ import datetime
 import dataclasses
 from pathlib import Path
 import os
+import time
 
 app = Flask(__name__)
 
@@ -196,15 +199,23 @@ def relic_data():
 
     returns:
     {
-        relic_name: {   # e.g., 'Lith A1'
-            'Common': list[item_name: str],
-            'Uncommon': [...],
-            'Rare': [...]
+        "relics": {
+            relic_name: {   # e.g., 'Lith A1'
+                'Common': list[item_name: str],
+                'Uncommon': [...],
+                'Rare': [...]
+            },
+            ...
         },
-        ...
+        "varzia_relics": list[relic_name: str]
     }
     """
-    return use('relic_data', lambda: wfm.get_relic_data(discard_forma=False))
+    def _get_relic_data():
+        return {
+            "relics": wfm.get_relic_data(discard_forma=False),
+            "varzia_relics": wfm.get_varzia_relics()
+        }
+    return use('relic_data', _get_relic_data)
 
 @app.route('/api/syndicate_data')
 def syndicate_data():
@@ -245,7 +256,6 @@ def transient_reward_data():
         return transient_rewards
     print(use('transient_data', _get_transient_data))
     return use('transient_data', _get_transient_data)
-
 
 def get_function_item_format(market_item_ls, oracle_type):
     item_info = wfi.get_item_info(market_item_ls, do_prepare=False, oracle_price_fn=oracle_prince_fn_map[oracle_type])
@@ -333,7 +343,72 @@ def function_item():
         return {"error": "Too many items matched. Please narrow down your search."}, 400
     wfm.prepare_market_items([item for item in market_item_ls if item.price is None])
     return get_function_item_format(market_item_ls, data['oracle_type'])
+
+@app.route('/api/varzia_relics')
+def varzia_relics():
+    """
+    Gets all varzia relic data
+
+    returns:
+    {
+        transient_name: list[item names]
+    }
+    """
+    def _get_varzia_relics():
+        return wfm.get_varzia_relics()
+    print(use('varzia_relics', _get_varzia_relics))
+    return use('varzia_relics', _get_varzia_relics)
+
+# ---
+
+"""
+i need a functionality
+
+i have a data at "/api/data", it will get some data based on some input, it will return a task ID
+"/api/progress/${id}" can fetch the progress of the data preparation: {'status': 'preparing', 'total': 100, 'current': 30}, or when its done, {'status': 'done', 'data': data}, where data is just some plain string
+
+Make an input as a textbox, and when submit, there's a Loading component that show the progress, and when it's done, show the data content on the screen
+"""
+
+TASK_STATUS = {}
+
+def run_tasks(task_id, data):
+    TASK_STATUS[task_id] = {
+        "current": 0,
+        "total": 10,
+        "status": "processing"
+    }
+    try:
+        for i in range(10):
+            time.sleep(1)  # simulate work
+            TASK_STATUS[task_id]["current"] += 1
+            print(f"Task {task_id} current: {TASK_STATUS[task_id]['current']}/{TASK_STATUS[task_id]['total']}")
+
+        TASK_STATUS[task_id]["data"] = data
+        TASK_STATUS[task_id]["status"] = "done"
+    except Exception as e:
+        TASK_STATUS[task_id]["status"] = "error"
+        TASK_STATUS[task_id]["error"] = str(e)
+
+@app.route("/api/data", methods=["POST"])
+def start():
+    data = request.json
+    import uuid
+    task_id = str(uuid.uuid4())
+    thread = threading.Thread(target=run_tasks, args=(task_id, data))
+    thread.start()
+
+    return {"task_id": task_id}
+
+
+@app.route("/api/progress/<task_id>")
+def progress(task_id):
+    status = TASK_STATUS.get(task_id)
+    if status is None:
+        return {"error": "invalid task id"}, 404
+    return status
     
+
 
 if __name__ == '__main__':
     refresh()

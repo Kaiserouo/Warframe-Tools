@@ -851,7 +851,27 @@ def get_transient_mission_rewards() -> dict[str, list[str]]:
                 })
         ret_reward[mission['objectiveName']] = dict(rewards)
     return ret_reward
-        
+
+def get_varzia_relics() -> list[str]:
+    """
+    get the list of relics that varzia sells for now
+    note that this data comes from https://wiki.warframe.com/w/Varzia, which means:
+    (1) it might not be up-to-date
+    (2) if the webpage is changed then this function might break
+    """
+    try:
+        import itertools
+        from lxml import etree
+        r = requests.get("https://wiki.warframe.com/w/Varzia")
+        html = etree.HTML(r.content)
+        a = html.xpath("//*[@id='mw-customcollapsible-vrelics']//td//text()")   # ['\xa0', 'Lith\xa0A1', '\n', '☒', '\n', '\xa0', 'Lith\xa0A2', '\n', '☒', '\n'], ...
+        a = [i.replace('\xa0', ' ') for i in a if i not in ['\n', '\xa0']]  # ['Lith A1', '☒', 'Lith A2', '☒', ...
+        a = [i for i, j in itertools.batched(a, 2) if j == '☑']
+        return a
+    except:
+        return []
+
+
 if __name__ == '__main__':
     market_items = get_market_item_list()
     print(util.str_type(market_items[0], print_unknown_obj_vars=True))

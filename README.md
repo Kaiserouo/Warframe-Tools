@@ -6,13 +6,25 @@
 
 I need some functionality that I want full control of, so, um, this.
 
-I parsed some warframe market API (api.warframe.market) related to current price or past statistics so I guess you can yoink my code.
+This acts as some sort of warframe market bulk search / analysis tool, which I have control over e.g., how to calculate a reasonable price for an item (i.e., price oracle). The functionality includes:
 
-Under constant change and I won't put the newest code up here. You can say it's for record.
+The supported functionalities are: *(note that Web GUI implement them a bit different, please refer to the description on web GUI readme / homepage)*
+
+- Item Info: Show market information about items. It can search in bulk by searching information for all items with a substring.
+  - e.g., to search all component blueprint price of Volt Prime, type `Volt Prime` and it will show all component and set price at once.
+- Relic Plat: Gives expected plat reward for specific relic (set), similar to how Alecaframe implements them (but I can control the price used in the calculation)
+- Relic Item: Get all relics containing item and give expected plat for each relic.
+- Relic Plat Multiple: Can input multiple items.
+  - e.g., type "Lith B9 + Lith C5 + Lith D6" to search their expected plat at once.
+  - Useful for determining which relic to buy from Varzia. You can use [this page](https://wiki.warframe.com/w/Varzia) to get a list of relics
+- Syndicate: Show item market price sold by syndicate. 
+  - Useful for determining what thing to buy to sell on the market
+- Transient Reward: Get available transient mission rewards and show market price.
+- Find Best Trade: For a list of items, find the best users to trade with to minimize total price deviation from oracle price.
 
 ## Run
 
-I run python 3.12.3 but i guess you can use a lower version. You can `pip install -r requirements.txt` if you want.
+I run python 3.12.3 but you could use other versions. You can `pip install -r requirements.txt`, and if there are.
 
 ```
 python main.py

@@ -1,13 +1,12 @@
-export function Loading() {
+export function Loading({ message = 'Loading' }) {
+    let display_message = message + "...... ";
     return (
-        <div className="text-white font-mono my-2">[ Loading
-            <span className="animate-pulse">.</span>
-            <span className="animate-pulse" style={{ animationDelay: '0.2s' }}>.</span>
-            <span className="animate-pulse" style={{ animationDelay: '0.4s' }}>.</span>
-            <span className="animate-pulse" style={{ animationDelay: '0.6s' }}>.</span>
-            <span className="animate-pulse" style={{ animationDelay: '0.8s' }}>.</span>
-            <span className="animate-pulse" style={{ animationDelay: '1.0s' }}>. </span>
-            ]
+        <div className="text-white font-mono my-2 font-extrabold">[ {
+            display_message.split('').map((char, index) => 
+                <span key={index} className="animate-pulse" style={{ animationDelay: `${index * 0.15}s` }}>{char}</span>
+            )
+        }
+        ]
         </div>
     );
 }

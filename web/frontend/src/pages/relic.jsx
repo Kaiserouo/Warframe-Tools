@@ -11,8 +11,8 @@ function getRelicTable(relicData, searchType, searchText) {
   const relicTable = [];
   if (searchType === 'item') {
     // we search by item name contained in relic rewards, case insensitive, partial match
-    for (let relicName in relicData) {
-      let rewards = relicData[relicName];
+    for (let relicName in relicData.relics) {
+      let rewards = relicData.relics[relicName];
       let found = false;
       for (let rarity in rewards) {
         for (let item of rewards[rarity]) {
@@ -33,16 +33,28 @@ function getRelicTable(relicData, searchType, searchText) {
   }
 
   else if (searchType === 'relic') {
-    // we search by full relic name, may be separated by "+"
-    for (let relicName of searchText.split('+').map(i => i.trim()).filter(i => i.length > 0)) {
-      if (relicName in relicData) {
+    if (searchText.trim().toLowerCase() === 'varzia') {
+      // special case: Varzia sells all currently available relics
+      for (let relicName of relicData.varzia_relics) {
         relicTable.push({
           'relic_name': relicName,
           'level': 'Radiant',
-          'rewards': relicData[relicName]
+          'rewards': relicData.relics[relicName]
         });
       }
+    } else {
+      // we search by full relic name, may be separated by "+"
+      for (let relicName of searchText.split('+').map(i => i.trim()).filter(i => i.length > 0)) {
+        if (relicName in relicData.relics) {
+          relicTable.push({
+            'relic_name': relicName,
+            'level': 'Radiant',
+            'rewards': relicData.relics[relicName]
+          });
+        }
+      }
     }
+
   }
 
   return relicTable;
@@ -99,7 +111,8 @@ export default function Relic({setting}) {
   let searchBarItems = [];
   if (searchType === 'relic') {
     if (!relicIsPending && !relicError && relicData) {
-      searchBarItems = Object.keys(relicData);
+      searchBarItems = Object.keys(relicData.relics);
+      searchBarItems.push('Varzia');  // add Varzia as a special search term
     }
   } else {
     if (!marketIsPending && !marketError && marketData) {
@@ -107,32 +120,6 @@ export default function Relic({setting}) {
     }
   }
 
-
-  // fetch relic table by searchText and searchType
-  // let relicTable = [
-  //   {'relic_name': 'Lith O2', 'level': 'Radiant', 'rewards': {'Common': ['Volt Prime Blueprint', 'Bo Prime Blueprint', 'Wyrm Prime Cerebrum'], 'Uncommon': ['Loki Prime Chassis Blueprint'], 'Rare': ['Odonata Prime Wings Blueprint']}}, {'relic_name': 'Meso O3', 'level': 'Radiant', 'rewards': {'Common': ['Loki Prime Neuroptics Blueprint', 'Odonata Prime Systems Blueprint'], 'Uncommon': ['Volt Prime Chassis Blueprint', 'Wyrm Prime Systems'], 'Rare': ['Odonata Prime Wings Blueprint']}}, {'relic_name': 'Neo V8', 'level': 'Radiant', 'rewards': {'Common': ['Loki Prime Blueprint', 'Odonata Prime Harness Blueprint', 'Wyrm Prime Blueprint'], 'Uncommon': ['Bo Prime Handle'], 'Rare': ['Volt Prime Neuroptics Blueprint']}}, {'relic_name': 'Axi L4', 'level': 'Radiant', 'rewards': {'Common': ['Bo Prime Ornament', 'Wyrm Prime Carapace'], 'Uncommon': ['Volt Prime Systems Blueprint', 'Odonata Prime Blueprint'], 'Rare': ['Loki Prime Systems Blueprint']}}, {'relic_name': 'Vanguard L4', 'level': 'Radiant', 'rewards': {'Common': ['Bo Prime Ornament', 'Wyrm Prime Carapace'], 'Uncommon': ['Volt Prime Systems Blueprint', 'Odonata Prime Blueprint'], 'Rare': ['Loki Prime Systems Blueprint']}},
-  // ];
-  // let priceOracle = {
-  //   'Bo Prime Blueprint': 12.25,
-  //   'Bo Prime Handle': 16.71875,
-  //   'Bo Prime Ornament': 16.470588235294116,
-  //   'Loki Prime Blueprint': 10.0,
-  //   'Loki Prime Chassis Blueprint': 15.135714285714286,
-  //   'Loki Prime Neuroptics Blueprint': 16.21,
-  //   'Loki Prime Systems Blueprint': 24.62264150943396,
-  //   'Odonata Prime Blueprint': 6.444444444444445,
-  //   'Odonata Prime Harness Blueprint': 9.833333333333334,
-  //   'Odonata Prime Systems Blueprint': 7.761904761904762,
-  //   'Odonata Prime Wings Blueprint': 15.266666666666667,
-  //   'Volt Prime Blueprint': 9.803418803418804,
-  //   'Volt Prime Chassis Blueprint': 8.456521739130435,
-  //   'Volt Prime Neuroptics Blueprint': 14.445859872611464,
-  //   'Volt Prime Systems Blueprint': 8.222222222222221,
-  //   'Wyrm Prime Blueprint': 11.210526315789474,
-  //   'Wyrm Prime Carapace': 10.071428571428571,
-  //   'Wyrm Prime Cerebrum': 14.51086956521739,
-  //   'Wyrm Prime Systems': 20.688524590163933,
-  // };
   return (<>
     <div className="mx-4 my-4">
         <div className="text-2xl font-bold text-white my-2">
@@ -146,6 +133,7 @@ export default function Relic({setting}) {
           </div> : 
           searchType === 'relic' ? <div className="text-white font-mono my-2">
             <p>Type whole relic name (e.g., "Axi A14"), or separate by "+" (e.g., "Axi A14 + Meso S14")</p>
+            <p>You can search "Varzia" to see all currently available relics Varzia sells (may take a minute to fetch all items)</p>
           </div> : null
         }
         <SearchBar 
