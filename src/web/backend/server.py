@@ -16,7 +16,7 @@ from ... import util as util
 
 app = Flask(__name__)
 
-BUILD_DIR = Path('./web/frontend/build/')
+BUILD_DIR = Path('../frontend/build/')
 HOST, PORT = 'localhost', 5000
 
 # wfm.RETRY_MAX_TIME = 3    # reduce retry time for better responsiveness
