@@ -31,6 +31,7 @@ def retry_request(*args, **kwargs):
         r = requests.get(*args, **kwargs)
 
         if r.status_code == 200:
+            print(f'{util.GREEN}[Warframe Market] Success!{util.RESET}')
             break
 
         # wait a random time because there may be multiple requests
