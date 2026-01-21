@@ -1,6 +1,4 @@
 from typing import *
-import warframe_market as wfm
-import util
 import prompt_toolkit
 from prompt_toolkit import prompt, print_formatted_text
 from prompt_toolkit.completion import WordCompleter, CompleteEvent
@@ -14,7 +12,10 @@ import sys
 from pathlib import Path
 import operator
 
-from data.syndicate_data import additional_syndicates
+from . import warframe_market as wfm
+from . import util
+from .data.syndicate_data import additional_syndicates
+from .data.relic_data import relic_data_map, relic_set_map
 
 market_items = wfm.get_market_item_list()
 market_map = wfm.get_market_items_name_map(market_items)
@@ -270,7 +271,6 @@ def syndicate_function():
             print_syndicate_info(text)
 
 def relic_plat_function():
-    from data.relic_data import relic_data_map, relic_set_map
 
     all_relic_data_map = relic_data_map | wfm.get_relic_data(discard_forma=True)
 
@@ -294,7 +294,6 @@ def relic_plat_function():
             })
 
 def relic_item_function():
-    from data.relic_data import relic_data_map
 
     def name_in_relic(relic_data: dict[str, list[str]], substr: str):
         for rarity in relic_data:
@@ -320,8 +319,6 @@ def relic_item_function():
             })
 
 def relic_plat_multiple_function():
-    from data.relic_data import relic_data_map, relic_set_map
-
     all_relic_data_map = relic_data_map | wfm.get_relic_data(discard_forma=True)
 
     relic_choice = relic_set_map | {

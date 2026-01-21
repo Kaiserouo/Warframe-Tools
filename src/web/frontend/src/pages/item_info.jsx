@@ -15,7 +15,7 @@ export default function ItemInfo({setting}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  const { isPending: itemIsPending, error: itemError, data: itemData } = useQuery({
+  const { isPending: itemIsPending, isFetching: itemIsFetching, error: itemError, data: itemData } = useQuery({
     queryKey: ['function_item', setting.oracle_type, searchText],
     queryFn: () => fetchFunctionItemSearchText(setting.oracle_type, searchText),
     staleTime: 1 * 60 * 1000, // 1 minute
@@ -23,7 +23,8 @@ export default function ItemInfo({setting}) {
   })
   
   let itemTable = null;
-  if (searchText !== null && !itemIsPending && !itemError) {
+  if (searchText !== null && itemData) {
+    // we show the items when there's data, even during fetching
     itemTable = itemData;
   }
 
@@ -43,8 +44,8 @@ export default function ItemInfo({setting}) {
           searchMode="contains"
           setSearchText={setSearchText} />
         {searchText && <div className="text-white my-2">Search Text: {searchText}</div>}
+        {searchText && itemIsPending ? <Loading /> : null}
         {searchText && (
-          itemIsPending ? <Loading /> :
           itemError ? <Error /> : 
           <ItemTable itemTable={itemTable} setting={setting} />
         )}

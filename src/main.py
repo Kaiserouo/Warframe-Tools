@@ -1,2 +1,2 @@
-import interactive
+from . import interactive
 interactive.main_interactive()

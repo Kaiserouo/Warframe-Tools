@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 import json
 import re
-
+import itertools
+from lxml import etree
 import requests
 from joblib import Parallel, delayed
 import time
@@ -13,9 +14,9 @@ import statistics
 from collections import defaultdict
 from typing import *
 
-from data.syndicate_data import additional_syndicates
+from .data.syndicate_data import additional_syndicates
 
-import util
+from . import util
 from tqdm import tqdm
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
@@ -131,7 +132,6 @@ class Orders:
             if order.is_buy and order.visible and order.is_ingame and order.mod_rank in mod_rank_range 
         ], reverse=True)
         return buy_list[:k]
-
 
 class Statistic:
     """
@@ -860,8 +860,6 @@ def get_varzia_relics() -> list[str]:
     (2) if the webpage is changed then this function might break
     """
     try:
-        import itertools
-        from lxml import etree
         r = requests.get("https://wiki.warframe.com/w/Varzia")
         html = etree.HTML(r.content)
         a = html.xpath("//*[@id='mw-customcollapsible-vrelics']//td//text()")   # ['\xa0', 'Lith\xa0A1', '\n', '☒', '\n', '\xa0', 'Lith\xa0A2', '\n', '☒', '\n'], ...

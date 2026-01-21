@@ -7,7 +7,7 @@ import { Loading, Error } from '../components/loading_status.jsx';
 import { fetchMarketData, fetchFunctionItemSearchText } from '../api/fetch.jsx';
 
 
-async function makehandleSubmit(setPollStatus, fetchTaskIdCallback, fetchStatusCallback) {
+function makeHandleSubmit(setPollStatus, fetchTaskIdCallback, fetchStatusCallback) {
   /*
   setPollStatus: function to update polling status state, should be useState setter.
     pollStatus = {
@@ -17,41 +17,57 @@ async function makehandleSubmit(setPollStatus, fetchTaskIdCallback, fetchStatusC
         // "done": task is completed
         // "error": error occurred
       'taskId': str | null,   // task ID returned from server
-        // only meaningful when status is "submitting" or "in_progress"
+        // only meaningful when status is "in_progress"
       'result': any | null,
         // if status is "done", contains the result data
       'error': any | null,
         // if status is "error", contains the error information
-      'progress': { current: int, total: int }
+      'progress': { current: int, total: int } | null
         // only meaningful when status is "in_progress"
-  }
+        // if no progress info, it becomes null
+    }
+    e.g., const [pollStatus, setPollStatus] = useState({
+      'taskId': null,
+      'status': "done",
+      'result': null,
+      'progress': null
+    });
   fetchTaskIdCallback: async Callback[] => str
     initiate the task and get task ID
-  fetchStatusCallback: async Callback[str] => { status: str, data: any }
-    fetch the status of the task using task ID, should be {status, current, total, data, error}
+  fetchStatusCallback: async Callback[str] => progressData
+    fetch the status of the task using task ID, progressData should be {
+      'status': "in_progress" | "done" | "error",
+      'current': int
+      'total': int
+      'data': any | null
+      'error': any | null
+    }
     
-
   note that during "submitting" and "in_progress", if there are previous submits,
   they would be in 'result' or 'error'.
+
+
   */
   return async () => {
     setPollStatus(prev => ({ ...prev, status: "submitting" }));
     
     try {
       // Fetch initial task
-
-      setPollStatus(prev => ({ ...prev, taskId: task_id }));
+      let task_id = await fetchTaskIdCallback()
+      setPollStatus(prev => ({ ...prev, status: "in_progress", taskId: task_id, progress: null }));
   
       // Poll for progress
       let isDone = false;
       while (!isDone) {
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        const progressResponse = await fetch(`/api/progress/${task_id}`);
-        const progressData = await progressResponse.json();
+        const progressData = await fetchStatusCallback(task_id);
         
         if (progressData.status === 'done') {
-          setPollStatus(prev => ({ ...prev, result: progressData.data }));
+          setPollStatus(prev => ({ ...prev, status: "done", result: progressData.data, error: null }));
+          isDone = true;
+        } else if (progressData.status === 'error') {
+          setPollStatus(prev => ({ ...prev, status: "error", result: null, error: progressData.error }));
           isDone = true;
         } else {
           setPollStatus(prev => ({ ...prev, progress: { current: progressData.current, total: progressData.total } }));
@@ -59,8 +75,9 @@ async function makehandleSubmit(setPollStatus, fetchTaskIdCallback, fetchStatusC
       }
     } catch (error) {
       console.error('Error:', error);
+      setPollStatus(prev => ({ ...prev, status: "error", result: null, error: error }));
     } finally {
-      setPollStatus(prev => ({ ...prev, isSubmitting: false, taskId: null }));
+      setPollStatus(prev => ({ ...prev, taskId: null }) );
     }
   };
 }
@@ -68,27 +85,24 @@ async function makehandleSubmit(setPollStatus, fetchTaskIdCallback, fetchStatusC
 export default function Test({setting}) {
 
   const [input, setInput] = useState('');
-  const [taskId, setTaskId] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
-  const [progress, setProgress] = useState({ current: 0, total: 0 });
-
   const [pollStatus, setPollStatus] = useState({
     'taskId': null,
-    'isSubmitting': false,
+    'status': "done",
     'result': null,
-    'progress': { current: 0, total: 0 }
+    'progress': null
   });
 
-  const fetchTaskIdCallback =  async () => fetch('/api/data', {
+  const fetchTaskIdCallback = async () => fetch('/api/data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ "data": input })
       }).then(res => res.json()).then(data => data.task_id);
 
-  const fetchStatusCallback = async (taskId) => fetch(`/api/progress/${taskId}`)
-      .then(res => res.json());
+  const fetchStatusCallback = async (taskId) => fetch(`/api/progress/${taskId}`).then(res => res.json());
 
+  const handleSubmit = makeHandleSubmit(setPollStatus, fetchTaskIdCallback, fetchStatusCallback);
+  console.log("Poll Status:", pollStatus);
+  console.log("handleSubmit:", handleSubmit);
 
   return (<>
     <div className="mx-4 my-4">
@@ -103,24 +117,27 @@ export default function Test({setting}) {
           placeholder="Enter input..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          disabled={isSubmitting}
+          disabled={pollStatus.status === "submitting" || pollStatus.status === "in_progress"}
         />
         <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
+          onClick={() => handleSubmit()}
+          disabled={pollStatus.status === "submitting" || pollStatus.status === "in_progress"}
           className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-600"
         >
           Submit
         </button>
       </div>
       
-      {isSubmitting && taskId && (
-        <Loading message={`Progress: ${progress.current}/${progress.total}`} />
-      )}
+      {pollStatus.status === "submitting" || pollStatus.status === "in_progress" ? (
+        <Loading message={`Progress: ${pollStatus.progress ? pollStatus.progress.current : "-"}/${pollStatus.progress ? pollStatus.progress.total : "-"}`} />
+      ) : null}
+      {pollStatus.status === "error" ? (
+        <Error message={`ERROR: ${pollStatus.error}`} />
+      ) : null}
       
-      {result && (
+      {pollStatus.result && (
         <div className="p-4 bg-gray-800 text-white rounded">
-          {JSON.stringify(result)}
+          {JSON.stringify(pollStatus.result)}
         </div>
       )}
     </div>

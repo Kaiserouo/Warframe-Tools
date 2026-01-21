@@ -2,17 +2,20 @@ import operator
 import threading
 import uuid
 from flask import Flask, render_template, request, Response
-import warframe_market as wfm
-import interactive as wfi
 import datetime
 import dataclasses
 from pathlib import Path
 import os
 import time
+import uuid
+
+from ... import warframe_market as wfm
+from ... import interactive as wfi
 
 app = Flask(__name__)
 
 BUILD_DIR = Path('./web/frontend/build/')
+HOST, PORT = 'localhost', 5000
 
 market_items = None
 market_map = None
@@ -28,6 +31,8 @@ oracle_prince_fn_map = {
     'bottom_30%_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_bottom_k_avg_price_for_last_hours(48, 0.3, *args, **kwargs),
     'cur_lowest_price': lambda price_oracle, *args, **kwargs: price_oracle.get_cur_lowest_price(*args, **kwargs),
 }
+
+# --------------------
 
 def refresh():
     global market_items, market_map, market_id_map, market_data_update_date, cache
@@ -376,7 +381,9 @@ def run_tasks(task_id, data):
     TASK_STATUS[task_id] = {
         "current": 0,
         "total": 10,
-        "status": "processing"
+        "status": "in_progress",
+        "data": None,
+        "error": None
     }
     try:
         for i in range(10):
@@ -387,13 +394,12 @@ def run_tasks(task_id, data):
         TASK_STATUS[task_id]["data"] = data
         TASK_STATUS[task_id]["status"] = "done"
     except Exception as e:
-        TASK_STATUS[task_id]["status"] = "error"
         TASK_STATUS[task_id]["error"] = str(e)
+        TASK_STATUS[task_id]["status"] = "error"
 
 @app.route("/api/data", methods=["POST"])
 def start():
     data = request.json
-    import uuid
     task_id = str(uuid.uuid4())
     thread = threading.Thread(target=run_tasks, args=(task_id, data))
     thread.start()
@@ -412,4 +418,4 @@ def progress(task_id):
 
 if __name__ == '__main__':
     refresh()
-    app.run(debug=True, host='localhost', port=5000)
+    app.run(debug=True, host=HOST, port=PORT)
