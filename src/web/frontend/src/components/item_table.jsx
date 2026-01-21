@@ -107,6 +107,10 @@ export default function ItemTable({itemTable, setting}) {
   const [sortBy, setSortBy] = useState(null);  // index of header to sort by
   const [sortAsc, setSortAsc] = useState(true);  // whether to sort ascending
 
+  if (itemTable === null || itemTable.items.length === 0) {
+    return null;
+  }
+
   let sortedItems = itemTable.items.slice();
 
   if (sortBy !== null) {

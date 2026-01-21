@@ -36,7 +36,8 @@ pip install -r requirement.txt
 ## Run
 
 ```bash
-python main.py
+cd Warframe-Tool/   # at the repo directory
+python -m src.main
 ```
 
 ## Functions

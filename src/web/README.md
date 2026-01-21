@@ -2,7 +2,7 @@
 
 A web version GUI for roughly the same tasks, but with more interactability
 
-![](../asset/screenshot_web_gui.png)
+![](../../asset/screenshot_web_gui.png)
 
 ## Functionality
 
@@ -42,12 +42,12 @@ You can also use docker compose to run the app:
 To build the frontend:
 ```bash
 # in one terminal, run the API server
-cd warframe-cli
-python server.py
+cd Warframe-Tool    # at the repo folder
+python -m src.web.backend.server
 
 # in another terminal, build the frontend website
 # the built code should be in web/frontend/build
-cd warframe-cli/web/frontend
+cd Warframe-Tool/web/frontend
 npm build
 ```
 
@@ -66,7 +66,7 @@ cd web/frontend
 npm start
 
 # in another terminal, run the API server
-python server.py
+python -m src.web.backend.server
 ```
 
 The URL should be something like `http://localhost:5173` (vite default URL).

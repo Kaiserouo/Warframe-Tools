@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query'
 
 import SearchBar from '../components/search_bar.jsx';
 import RelicTable from '../components/relic_table.jsx';
-import { Loading, Error } from '../components/loading_status.jsx';
-
+import { Loading, LoadingProgress, Error } from '../components/loading_status.jsx';
+import { makeHandleSubmit } from '../api/task.jsx';
 import { fetchRelicData, fetchMarketData, fetchPriceOracle } from '../api/fetch.jsx';
 
 function getRelicTable(relicData, searchType, searchText) {
@@ -78,6 +78,12 @@ function getItemListFromRelicTable(relicTable) {
 export default function Relic({setting}) {
   const [searchText, setSearchText] = useState(null); // null = don't search
   const [searchType, setSearchType] = useState('relic');  // 'relic' or 'item'
+  const [oraclePollStatus, setOraclePollStatus] = useState({
+    'taskId': null,
+    'status': "done",
+    'data': null,
+    'progress': null
+  });
 
   const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery({
     queryKey: ['market_data'],
@@ -91,22 +97,40 @@ export default function Relic({setting}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  const relicTable = [];
-  const itemList = [];
-  if (!marketIsPending && !marketError && marketData &&
-      !relicIsPending && !relicError && relicData &&
-      searchText !== null) {
-    
-    relicTable.push(...getRelicTable(relicData, searchType, searchText));
-    itemList.push(...getItemListFromRelicTable(relicTable));
-  }
+  const relicTable = useMemo(() => {
+    if (!relicIsPending && !relicError && relicData && searchText !== null) {
+      return getRelicTable(relicData, searchType, searchText);
+    }
+    return [];
+  }, [relicData, relicIsPending, relicError, searchText, searchType]);
 
-  const { isSuccess: oracleIsSuccess, isPending: oracleIsPending, error: oracleError, data: oracleData } = useQuery({
-    queryKey: ['function_relic', setting.oracle_type, searchType, searchText],
-    queryFn: () => fetchPriceOracle(setting.oracle_type, itemList),
-    staleTime: 1 * 60 * 1000, // 1 minute
-    enabled: itemList.length > 0,
-  })
+  const itemList = useMemo(() => {
+    return getItemListFromRelicTable(relicTable);
+  }, [relicTable]);
+
+  // const { isSuccess: oracleIsSuccess, isPending: oracleIsPending, error: oracleError, data: oracleData } = useQuery({
+  //   queryKey: ['function_relic', setting.oracle_type, searchType, searchText],
+  //   queryFn: () => fetchPriceOracle(setting.oracle_type, itemList),
+  //   staleTime: 1 * 60 * 1000, // 1 minute
+  //   enabled: itemList.length > 0,
+  // })
+
+  const fetchTaskIdCallback = useCallback(
+    async () => fetchPriceOracle(setting.oracle_type, itemList).then(data => data.task_id),
+    [setting.oracle_type, itemList]
+  );
+  const handleSubmit = useCallback(
+    makeHandleSubmit(setOraclePollStatus, fetchTaskIdCallback),
+    [fetchTaskIdCallback]
+  );
+  
+  useEffect(() => {
+    const ignore_obj = { 'ignore': false };
+    if (itemList.length > 0) {
+      handleSubmit(ignore_obj);
+    }
+    return () => { ignore_obj['ignore'] = true; };
+  }, [itemList, handleSubmit]);
 
   let searchBarItems = [];
   if (searchType === 'relic') {
@@ -143,12 +167,10 @@ export default function Relic({setting}) {
           searchMode="contains"
           setSearchText={setSearchText} />
           
-        {searchText && <div className="text-white my-2">Search Text: {searchText}</div>}
-        {searchText && (
-          oracleIsPending ? <Loading /> :
-          oracleError ? <Error /> :
-          <RelicTable relicTable={relicTable} priceOracle={oracleData} setting={setting} />
-        ) }
+        {searchText && oraclePollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={oraclePollStatus.progress} /> : null}
+        {searchText && oraclePollStatus.status === "error" ? <Error message={`ERROR: ${oraclePollStatus.error}`} /> : null}
+        {oraclePollStatus.status === "done" && oraclePollStatus.data !== null ? <RelicTable relicTable={relicTable} priceOracle={oraclePollStatus.data} setting={setting} /> : null}
+        
     </div>
   </>);
 }

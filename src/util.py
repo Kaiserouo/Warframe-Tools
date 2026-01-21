@@ -2,6 +2,16 @@ import contextlib
 import joblib
 from tqdm import tqdm
 from typing import *
+import colorama
+
+RESET = colorama.Style.RESET_ALL
+YELLOW, BG_YELLOW = colorama.Fore.YELLOW, colorama.Back.YELLOW
+CYAN, BG_CYAN = colorama.Fore.CYAN, colorama.Back.CYAN
+RED, BG_RED = colorama.Fore.RED, colorama.Back.RED
+GREEN, BG_GREEN = colorama.Fore.GREEN, colorama.Back.GREEN
+MAGENTA, BG_MAGENTA = colorama.Fore.MAGENTA, colorama.Back.MAGENTA
+BLUE, BG_BLUE = colorama.Fore.BLUE, colorama.Back.BLUE
+WHITE, BG_WHITE = colorama.Fore.WHITE, colorama.Back.WHITE
 
 @contextlib.contextmanager
 def tqdm_joblib(tqdm_object):
@@ -281,3 +291,4 @@ def str_type(obj: Any, iter_limit_items: int = 10, dict_limit_items: int = 10000
         return str_type_indent(obj, iter_limit_items, dict_limit_items, array_limit_items, explicit_type, ' ' * indent, print_type, print_unknown_obj_vars)
     else:
         return str_type_indent(obj, iter_limit_items, dict_limit_items, array_limit_items, explicit_type, str(indent), print_type, print_unknown_obj_vars)
+

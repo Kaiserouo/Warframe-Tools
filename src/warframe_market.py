@@ -20,13 +20,14 @@ from . import util
 from tqdm import tqdm
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
-
+RETRY_MAX_TIME = 3
 def retry_request(*args, **kwargs):
     """
         automatically retry request until the request is done.
         this is to retry whenever too many requests happens
     """
     while True:
+        print(f'{util.GREEN}[Warframe Market] Trying request {args} {kwargs}{util.RESET}')
         r = requests.get(*args, **kwargs)
 
         if r.status_code == 200:
@@ -34,7 +35,8 @@ def retry_request(*args, **kwargs):
 
         # wait a random time because there may be multiple requests
         # at the exact same time as this
-        time.sleep(random.uniform(0, 3))
+        print(f'{util.GREEN}[Warframe Market] Request failed with status code {r.status_code}, retrying...{util.RESET}')
+        time.sleep(random.uniform(0, RETRY_MAX_TIME))
     return r
 
 class Orders:

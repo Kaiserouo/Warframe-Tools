@@ -8,15 +8,21 @@ from pathlib import Path
 import os
 import time
 import uuid
+import concurrent
 
 from ... import warframe_market as wfm
 from ... import interactive as wfi
+from ... import util as util
 
 app = Flask(__name__)
 
 BUILD_DIR = Path('./web/frontend/build/')
 HOST, PORT = 'localhost', 5000
 
+# wfm.RETRY_MAX_TIME = 3    # reduce retry time for better responsiveness
+#                           # (note that we effective use single thread here, because of Cyphon GIL and lack of `multiprocessing`)
+
+market_lock = threading.Lock()   # ok ngl i don't really know why i added this but better safe than sorry
 market_items = None
 market_map = None
 market_id_map = None
@@ -31,8 +37,6 @@ oracle_prince_fn_map = {
     'bottom_30%_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_bottom_k_avg_price_for_last_hours(48, 0.3, *args, **kwargs),
     'cur_lowest_price': lambda price_oracle, *args, **kwargs: price_oracle.get_cur_lowest_price(*args, **kwargs),
 }
-
-# --------------------
 
 def refresh():
     global market_items, market_map, market_id_map, market_data_update_date, cache
@@ -49,6 +53,115 @@ def use(name, callback):
     if name not in cache:
         cache[name] = callback()
     return cache[name]
+
+
+"""
+Task management
+"""
+
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+task_pool = {}
+stop_obj_pool = {}
+
+def register_task(task_callback):
+    """
+    Registers a task for execution and returns its ID.
+    The task callback should be:
+        def task(task_id, task_status, stop_obj):
+            ...
+    where task_id is a string of the current task, and task_status is a dict that can be updated to reflect progress,
+    and stop_obj is a dict of {'stop': bool} that indicates whether the task should stop.
+    note that you should modify task_status in-place
+    the given status would look like:
+    {
+        'status': 'in_progress' | 'done' | 'error',   // current task status
+        'total': int,       // progress bar total steps
+        'current': int,     // progress bar current steps
+        'data': any | None  // only useful when status is 'done')
+        'error': any | None // only useful when status is 'error'
+    }
+    you should guarentee that:
+    - when status is 'done', data should be set
+    - when status is 'error', error should be set
+    - when status is 'in_progress', total and current should be set properly
+
+    if, during the task, you find that stop_obj['stop'] is True, you should terminate the task ASAP and call task_stop(task_id)
+    """
+    task_id = str(uuid.uuid4())
+    task_status = {
+        'status': 'in_progress',
+        'total': 0,
+        'current': 0,
+        'data': None,
+        'error': None
+    }
+    stop_obj = {'stop': False}
+    task_pool[task_id] = task_status
+    stop_obj_pool[task_id] = stop_obj
+    def task_wrapper():
+        try:
+            task_callback(task_id, task_status, stop_obj)
+        except Exception as e:
+            task_status['error'] = str(e)
+            task_status['status'] = 'error'
+    executor.submit(task_wrapper)
+    return task_id
+
+@app.route("/api/progress/<task_id>")
+def progress(task_id):
+    status = task_pool.get(task_id)
+    if status is None:
+        return {"error": "invalid task id"}, 404
+    if status['status'] == 'done' or status['status'] == 'error':
+        # remove from pool
+        task_pool.pop(task_id)
+    return status
+
+@app.route("/api/progress_stop/<task_id>")
+def progress_stop(task_id):
+    status = task_pool.get(task_id)
+    if status is None:
+        return {"error": "invalid task id"}, 404
+    stop_obj = stop_obj_pool.get(task_id)
+    if stop_obj is not None:
+        stop_obj['stop'] = True
+    return {}
+
+def task_stop(task_id):
+    task_pool.pop(task_id, None)
+    stop_obj_pool.pop(task_id, None)
+
+def task_prepare_market_items(task_status, stop_obj, market_item_names):
+    """
+    prepares the given market items, will update task_status in-place
+    can only be called in a task
+    will only set and update total and current! other fields are not modified
+
+    Args:
+        task_status: dict to update progress status
+        market_item_names: list of item names to prepare
+    Return:
+        None
+    """
+    print(f'{util.CYAN}Preparing market items: {util.GREEN}{market_item_names}{util.RESET}')
+    total = len(market_item_names)
+    task_status['total'] = total
+    task_status['current'] = 0
+    for item_name in market_item_names:
+        print(f'{util.CYAN}{task_status["current"]}/{total} getting lock {util.RESET}')
+        with market_lock:
+            print(f'{util.CYAN}{task_status["current"]}/{total} got lock, preparing {util.RESET}')
+            item = market_map.get(item_name)
+            if item is not None and item.price is None:
+                item.prepare()
+        print(f'{util.CYAN}{task_status["current"]}/{total}{util.RESET}')
+        if stop_obj['stop']:
+            break
+        task_status['current'] += 1
+    return 
+
+
+# --------------------
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -81,6 +194,7 @@ def get_resource(path):  # pragma: no cover
 def get_market_data():
     """
     Returns market data without orders and statistics.
+    nonblocking
 
     returns:
     {
@@ -96,27 +210,29 @@ def get_market_data():
         'last_update': str (ISO format) or None
     }
     """
-    
-    return {
-        'market_data': {
-            item_name: {k: v for k, v in dataclasses.asdict(item).items() if k not in ['orders', 'statistic', 'price']}
-            for item_name, item in market_map.items()
-        },
-        'last_update': market_data_update_date.isoformat() if market_data_update_date else None
-    }
+    with market_lock:
+        return {
+            'market_data': {
+                item_name: {k: v for k, v in dataclasses.asdict(item).items() if k not in ['orders', 'statistic', 'price']}
+                for item_name, item in market_map.items()
+            },
+            'last_update': market_data_update_date.isoformat() if market_data_update_date else None
+        }
 
 @app.route('/api/refresh_all_data')
 def refresh_all_data():
     """
     Refreshes all market data.
     """
-    refresh()
+    with market_lock:
+        refresh()
     return {}
 
 @app.route('/api/price_oracle', methods=['POST'])
 def price_oracle():
     """
     Given a list of item names, returns their price oracle values.
+    Task API: nonblocking but should poll from /api/progress/${task_id} to get the result
 
     request json:
     {
@@ -129,28 +245,33 @@ def price_oracle():
         item_name: oracle_value or None,
         ...
     }
-
-    # TODO: cache oracle price?
     """
 
     data = request.json
     item_names = data.get('item_names')
 
-    wfm.PriceOracle.get_oracle_price_48hrs
+    prepare_item_names = [item_name for item_name in item_names if item_name in market_map and market_map[item_name].price is None]
 
-    # do prepare
-    prepare_items = [market_map[item_name] for item_name in item_names if item_name in market_map and market_map[item_name].price is None]
-    wfm.prepare_market_items(prepare_items)
+    def task(task_id, task_status, stop_obj):
+        task_prepare_market_items(task_status, stop_obj, prepare_item_names)
+        if stop_obj['stop']:
+            task_stop(task_id)
+            return
+        with market_lock:
+            task_status['data'] = {
+                item_name: oracle_prince_fn_map[data['oracle_type']](market_map[item_name].price) if item_name in market_map else None
+                for item_name in item_names
+            }
+        task_status['status'] = 'done'
 
-    return {
-        item_name: oracle_prince_fn_map[data['oracle_type']](market_map[item_name].price) if item_name in market_map else None
-        for item_name in item_names
-    }
+    task_id = register_task(task)
+    return {'task_id': task_id}
 
 @app.route('/api/item_infobox', methods=['POST'])
 def item_infobox():
     """
     Given an item name, returns its data that should be shown in an infobox.
+    Blocking API
 
     request json:
     {
@@ -174,10 +295,10 @@ def item_infobox():
     if item_name not in market_map:
         return {}
     
-    item = market_map[item_name]
-    
-    if item.price is None:
-        wfm.prepare_market_items([item])
+    with market_lock:
+        item = market_map[item_name]
+        if item.price is None:
+            wfm.prepare_market_items([item])
 
     return {
         'item_name': item_name,
@@ -233,11 +354,12 @@ def syndicate_data():
     }
     """
     def _get_syndicate_data():
-        syndicate_items = wfm.get_all_syndicate_items(market_map=market_map)
-        return {
-            syndicate_name: [item.item_name for item in items]
-            for syndicate_name, items in syndicate_items.items()
-        }
+        with market_lock:
+            syndicate_items = wfm.get_all_syndicate_items(market_map=market_map)
+            return {
+                syndicate_name: [item.item_name for item in items]
+                for syndicate_name, items in syndicate_items.items()
+            }
     return use('syndicate_data', _get_syndicate_data)
 
 @app.route('/api/transient_data')
@@ -253,17 +375,19 @@ def transient_reward_data():
     def _get_transient_data():
         transient_items = wfm.get_transient_mission_rewards()
         transient_rewards = {}
-        for transient_name, transient_rotations in transient_items.items():
-            rewards = []
-            for rotation, rotation_rewards in transient_rotations.items():
-                rewards.extend([r['item_name'] for r in rotation_rewards if r['item_name'] in market_map])
-            transient_rewards[transient_name] = rewards
+        with market_lock:
+            for transient_name, transient_rotations in transient_items.items():
+                rewards = []
+                for rotation, rotation_rewards in transient_rotations.items():
+                    rewards.extend([r['item_name'] for r in rotation_rewards if r['item_name'] in market_map])
+                transient_rewards[transient_name] = rewards
         return transient_rewards
     print(use('transient_data', _get_transient_data))
     return use('transient_data', _get_transient_data)
 
 def get_function_item_format(market_item_ls, oracle_type):
-    item_info = wfi.get_item_info(market_item_ls, do_prepare=False, oracle_price_fn=oracle_prince_fn_map[oracle_type])
+    with market_lock:
+        item_info = wfi.get_item_info(market_item_ls, do_prepare=False, oracle_price_fn=oracle_prince_fn_map[oracle_type])
     name_ls, type_ls, plat_ls, rmax_plat_div21_ls, rmax_plat_ls, plat_times21_ls, vol_ls, url_ls = operator.itemgetter(
         'name', 'type', 'plat', 'rmax_plat_div21', 'rmax_plat', 'plat_times21', 'vol', 'url'
     )(item_info)
@@ -300,6 +424,7 @@ def get_function_item_format(market_item_ls, oracle_type):
 def function_item():
     """
     Given a list of item names, returns their price oracle values.
+    Task API: nonblocking but should poll from /api/progress/${task_id} to get the result
 
     request json:
     {
@@ -337,6 +462,7 @@ def function_item():
         ]
     else:
         market_item_ls = []
+    print(market_item_ls)
 
     # prepare only the necessary ones
     if len(market_item_ls) > 200:
@@ -346,75 +472,17 @@ def function_item():
         print("Warning: function_item returning more than 1000 items, abort:", len(market_item_ls))
         print("data:", data)
         return {"error": "Too many items matched. Please narrow down your search."}, 400
-    wfm.prepare_market_items([item for item in market_item_ls if item.price is None])
-    return get_function_item_format(market_item_ls, data['oracle_type'])
-
-@app.route('/api/varzia_relics')
-def varzia_relics():
-    """
-    Gets all varzia relic data
-
-    returns:
-    {
-        transient_name: list[item names]
-    }
-    """
-    def _get_varzia_relics():
-        return wfm.get_varzia_relics()
-    print(use('varzia_relics', _get_varzia_relics))
-    return use('varzia_relics', _get_varzia_relics)
-
-# ---
-
-"""
-i need a functionality
-
-i have a data at "/api/data", it will get some data based on some input, it will return a task ID
-"/api/progress/${id}" can fetch the progress of the data preparation: {'status': 'preparing', 'total': 100, 'current': 30}, or when its done, {'status': 'done', 'data': data}, where data is just some plain string
-
-Make an input as a textbox, and when submit, there's a Loading component that show the progress, and when it's done, show the data content on the screen
-"""
-
-TASK_STATUS = {}
-
-def run_tasks(task_id, data):
-    TASK_STATUS[task_id] = {
-        "current": 0,
-        "total": 10,
-        "status": "in_progress",
-        "data": None,
-        "error": None
-    }
-    try:
-        for i in range(10):
-            time.sleep(1)  # simulate work
-            TASK_STATUS[task_id]["current"] += 1
-            print(f"Task {task_id} current: {TASK_STATUS[task_id]['current']}/{TASK_STATUS[task_id]['total']}")
-
-        TASK_STATUS[task_id]["data"] = data
-        TASK_STATUS[task_id]["status"] = "done"
-    except Exception as e:
-        TASK_STATUS[task_id]["error"] = str(e)
-        TASK_STATUS[task_id]["status"] = "error"
-
-@app.route("/api/data", methods=["POST"])
-def start():
-    data = request.json
-    task_id = str(uuid.uuid4())
-    thread = threading.Thread(target=run_tasks, args=(task_id, data))
-    thread.start()
-
-    return {"task_id": task_id}
-
-
-@app.route("/api/progress/<task_id>")
-def progress(task_id):
-    status = TASK_STATUS.get(task_id)
-    if status is None:
-        return {"error": "invalid task id"}, 404
-    return status
     
+    def task(task_id, task_status, stop_obj):
+        task_prepare_market_items(task_status, stop_obj, [item.item_name for item in market_item_ls if item.price is None])    
+        if stop_obj['stop']:
+            task_stop(task_id)
+            return
+        task_status['data'] = get_function_item_format(market_item_ls, data['oracle_type'])
+        task_status['status'] = 'done'
 
+    task_id = register_task(task)
+    return {'task_id': task_id}
 
 if __name__ == '__main__':
     refresh()
