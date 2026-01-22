@@ -22,6 +22,13 @@ function SettingItemRefreshMarketData({setting, setSetting}) {
     },
   })
 
+  const timeFormat = new Intl.DateTimeFormat("en-US", {
+      year: 'numeric', month: 'short', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      timeZoneName: 'shortOffset'
+  });
+  const lastUpdateTime = marketData?.last_update ? timeFormat.format(new Date(Date.parse(marketData.last_update))) : null;
+
   
   return (
     <div className="p-4 border-b border-gray-600">
@@ -30,12 +37,15 @@ function SettingItemRefreshMarketData({setting, setSetting}) {
         marketError ? <Error /> :
         <p className="text-sm text-gray-300">Last market update time: 
             <span className="font-mono ml-1">
-                {new Intl.DateTimeFormat("en-US", {timeStyle: "medium", dateStyle: "medium",}).format(new Date(Date.parse(marketData?.last_update)))}
+                {lastUpdateTime}
             </span>
         </p>
       }
-      <button className="mt-2 w-full bg-gray-600 text-white p-2 rounded hover:bg-gray-500" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-          Refresh Market Data
+      <button 
+        className={`mt-2 w-full bg-gray-600 text-white p-2 rounded ${mutation.isPending ? "" : "hover:bg-gray-500"}`} 
+        onClick={() => mutation.mutate()} 
+        disabled={mutation.isPending}>
+          {mutation.isPending ? "Refreshing..." : "Refresh Market Data"}
       </button>
     </div>
   );
@@ -61,7 +71,7 @@ function SettingItemPriceOracle({setting, setSetting}) {
 
 function NavbarSettingMenuInner({setting, setSetting}) {
   return (
-    <div className="mt-2 bg-gray-700 text-white rounded shadow-lg z-10 min-w-max">
+    <div className="mt-2 bg-gray-700 text-white rounded shadow-lg z-10 md:min-w-max">
       <SettingItemRefreshMarketData setting={setting} setSetting={setSetting} />
       <SettingItemPriceOracle setting={setting} setSetting={setSetting} />
     </div>
@@ -85,7 +95,7 @@ export default function NavbarSettingMenu({setting, setSetting}) {
   return (
     <li className="relative">
       <NavbarSettingMenuButton isOpen={isOpen} setIsOpen={setIsOpen} />
-      {isOpen && <div className="absolute right-0"><NavbarSettingMenuInner setting={setting} setSetting={setSetting} /></div>}
+      {isOpen && <div className="absolute left-0 md:left-auto md:right-0"><NavbarSettingMenuInner setting={setting} setSetting={setSetting} /></div>}
     </li>
   );
 }

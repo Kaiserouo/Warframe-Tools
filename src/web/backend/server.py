@@ -16,11 +16,15 @@ from ... import util as util
 
 app = Flask(__name__)
 
-BUILD_DIR = Path('../frontend/build/')
-HOST, PORT = 'localhost', 5000
+BUILD_DIR = Path('./src/web/frontend/build/')
 
-# wfm.RETRY_MAX_TIME = 3    # reduce retry time for better responsiveness
-#                           # (note that we effective use single thread here, because of Cyphon GIL and lack of `multiprocessing`)
+try:
+    from .config import HOST, PORT
+except ImportError:
+    HOST, PORT = 'localhost', 5000
+
+wfm.RETRY_MAX_TIME = 1    # reduce retry time for better responsiveness
+                          # (note that we effective use single thread here, because of Cyphon GIL and lack of `multiprocessing`)
 
 market_lock = threading.Lock()   # ok ngl i don't really know why i added this but better safe than sorry
 market_items = None

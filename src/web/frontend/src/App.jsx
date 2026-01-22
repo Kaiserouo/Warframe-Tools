@@ -43,10 +43,10 @@ let pageMap = {
     'name': 'Best Trade',
     'factory': (setting) => (<BestTrade setting={setting} />)
   },
-  'test': {
-    'name': 'Test',
-    'factory': (setting) => (<Test setting={setting} />)
-  }
+  // 'test': {
+  //   'name': 'Test',
+  //   'factory': (setting) => (<Test setting={setting} />)
+  // }
 };
 
 export default function App() {
@@ -77,19 +77,45 @@ function NavbarPage({name, value, setCurrentPage}) {
 }
 
 function Navbar({setCurrentPage, setting, setSetting}) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (<>
     <header className="fixed top-0 left-0 right-0 bg-[#222831] text-white p-4 z-50">
       <nav className="flex justify-between items-center space-x-8">
         <span className="text-3xl font-bold hover:cursor-pointer" onClick={() => setCurrentPage('home')}>Warframe Tools</span>
-        <ul className="flex space-x-8 items-center">
+
+        {/* Desktop Menu (note that hidden and flex are both specified by "display" so md:flex overrides hidden) */}
+        <ul className="hidden md:flex space-x-8 items-center">
           {Object.entries(pageMap).slice().map(([key, value]) => (
             <NavbarPage key={key} name={value.name} value={key} setCurrentPage={setCurrentPage} />
           ))}
         </ul>
-        <ul className="ml-auto flex items-center space-x-8">
+        
+        <ul className="hidden md:flex ml-auto items-center space-x-8">
           <NavbarSettingMenu setting={setting} setSetting={setSetting} />
         </ul>
+
+        {/* Mobile Menu Button */}
+        <button className="md:hidden ml-auto text-2xl" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          ☰
+        </button>
       </nav>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <ul className="md:hidden mt-4 space-y-2 flex flex-col">
+          {Object.entries(pageMap).slice().map(([key, value]) => (
+            <li key={key}>
+              <a href="#" className="hover:text-gray-400" onClick={() => { setCurrentPage(key); setIsMenuOpen(false); }}>
+                {value.name}
+              </a>
+            </li>
+          ))}
+          <li className="mt-4 pt-4 border-t border-gray-600">
+            <NavbarSettingMenu setting={setting} setSetting={setSetting} />
+          </li>
+        </ul>
+      )}
     </header>
   </>
   );

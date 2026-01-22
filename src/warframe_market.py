@@ -27,16 +27,13 @@ def retry_request(*args, **kwargs):
         this is to retry whenever too many requests happens
     """
     while True:
-        print(f'{util.GREEN}[Warframe Market] Trying request {args} {kwargs}{util.RESET}')
         r = requests.get(*args, **kwargs)
 
         if r.status_code == 200:
-            print(f'{util.GREEN}[Warframe Market] Success!{util.RESET}')
             break
 
         # wait a random time because there may be multiple requests
         # at the exact same time as this
-        print(f'{util.GREEN}[Warframe Market] Request failed with status code {r.status_code}, retrying...{util.RESET}')
         time.sleep(random.uniform(0, RETRY_MAX_TIME))
     return r
 
