@@ -5,7 +5,7 @@ import SearchBar from '../components/search_bar.jsx';
 import ItemTable from '../components/item_table.jsx';
 import ItemInfobox from '../components/item_infobox.jsx';
 import { Loading, Error } from '../components/loading_status.jsx';
-import { fetchMarketData, fetchFunctionItemSearchText } from '../api/fetch.jsx';
+import { fetchMarketData } from '../api/fetch.jsx';
 
 function SelectedItem({item, setSelectedItem, selectedItem, setting}) {
     const removeItem = () => {

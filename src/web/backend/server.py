@@ -31,11 +31,12 @@ market_items = None
 market_map = None
 market_id_map = None
 market_data_update_date = None
+ducat_data = None
 cache = {}
 
 # args, kwargs is passed to price oracle functions
 # for now, kwargs = stat_filter
-oracle_prince_fn_map = {
+oracle_price_fn_map = {
     'default_oracle_price_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_oracle_price_48hrs(*args, **kwargs),
     'top_30%_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_top_k_avg_price_for_last_hours(48, 0.3, *args, **kwargs),
     'bottom_30%_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_bottom_k_avg_price_for_last_hours(48, 0.3, *args, **kwargs),
@@ -43,10 +44,11 @@ oracle_prince_fn_map = {
 }
 
 def refresh():
-    global market_items, market_map, market_id_map, market_data_update_date, cache
+    global market_items, market_map, market_id_map, market_data_update_date, ducat_data, cache
     market_items = wfm.get_market_item_list()
     market_map = wfm.get_market_items_name_map(market_items)
     market_id_map = wfm.get_market_items_id_map(market_items)
+    ducat_data = wfm.get_ducat_data(market_items)
     market_data_update_date = datetime.datetime.now()
     cache = {}
 
@@ -240,7 +242,13 @@ def price_oracle():
 
     request json:
     {
+        // price oracle calculation, ref. oracle_price_fn_map
         "oracle_type": str,
+
+        // if prime item, whether to override oracle with ducantor price to speed up the process
+        // "none": no override, "day / hour": use ducantor price for day / hour
+        "ducantor_price_override": "none" | "day" | "hour",  
+
         "item_names": [str, ...],
     }
     
@@ -253,8 +261,13 @@ def price_oracle():
 
     data = request.json
     item_names = data.get('item_names')
-
+    ducantor_price_override = data.get('ducantor_price_override')
+    if ducantor_price_override not in ['none', 'day', 'hour']:
+        return {"error": "invalid ducantor_price_override"}, 400
+    ducat_data_map = {} if ducantor_price_override == 'none' else ducat_data[f'previous_{ducantor_price_override}']
+    
     prepare_item_names = [item_name for item_name in item_names if item_name in market_map and market_map[item_name].price is None]
+    prepare_item_names = [item_name for item_name in prepare_item_names if item_name not in ducat_data_map]
 
     def task(task_id, task_status, stop_obj):
         task_prepare_market_items(task_status, stop_obj, prepare_item_names)
@@ -263,7 +276,10 @@ def price_oracle():
             return
         with market_lock:
             task_status['data'] = {
-                item_name: oracle_prince_fn_map[data['oracle_type']](market_map[item_name].price) if item_name in market_map else None
+                item_name: \
+                    ducat_data_map[item_name]['wa_price'] if item_name in ducat_data_map
+                    else oracle_price_fn_map[data['oracle_type']](market_map[item_name].price) if item_name in market_map 
+                    else None
                 for item_name in item_names
             }
         task_status['status'] = 'done'
@@ -279,7 +295,13 @@ def item_infobox():
 
     request json:
     {
+        // price oracle calculation, ref. oracle_prince_fn_map
         "oracle_type": str,
+
+        // if prime item, whether to override oracle with ducantor price to speed up the process
+        // "none": no override, "day / hour": use ducantor price for day / hour
+        "ducantor_price_override": "none" | "day" | "hour",  
+
         "item_name": str
     }
     
@@ -290,6 +312,11 @@ def item_infobox():
     }
 
     if item name not found, returns error message
+
+    if use ducantor price: 
+    - will set 'cur_lowest_sell_price', 'wiki_link', '48h_volume' and '90d_volume' to None
+    - 
+    - 'last_update' would be the ducantor data update time
     """
 
     data = request.json
@@ -299,28 +326,63 @@ def item_infobox():
     if item_name not in market_map:
         return {}
     
-    with market_lock:
+    ducat_price_override = data.get('ducantor_price_override')
+    if ducat_price_override == 'none':
+        ducat_price_map = {}
+    elif ducat_price_override == 'day':
+        ducat_price_map = ducat_data[f'previous_day']
+    elif ducat_price_override == 'hour':
+        ducat_price_map = ducat_data[f'previous_hour']
+    else:
+        print("invalid ducantor_price_override:", ducat_price_override)
+        return {"error": "invalid ducantor_price_override"}, 400
+    
+    if item_name not in ducat_price_map:
+        # default
+        with market_lock:
+            item = market_map[item_name]
+            if item.price is None:
+                wfm.prepare_market_items([item])
+
+        return {
+            'item_name': item_name,
+            'thumb_url': item.get_thumbnail_url(),
+            'icon_url': item.get_icon_url(),
+            'type': wfi.resolve_item_type(item, default=None),
+
+            'oracle_price': oracle_price_fn_map[data['oracle_type']](item.price),
+            'cur_lowest_sell_price': item.orders.get_ingame_lowest_sell_price(),
+
+            '48h_volume': item.statistic.get_volume_for_last_hours(48),
+            '90d_volume': item.statistic.get_volume_for_last_days(90),
+
+            'wiki_link': item.wiki_link,
+            'market_link': item.get_wfm_url(),
+
+            'last_update': item.prepare_datetime.isoformat() if item.prepare_datetime else None,
+        }
+    else:
         item = market_map[item_name]
-        if item.price is None:
-            wfm.prepare_market_items([item])
+        item_ducat_data = ducat_price_map[item_name]
+        return {
+            'item_name': item_name,
+            'thumb_url': item.get_thumbnail_url(),
+            'icon_url': item.get_icon_url(),
+            'type': wfi.resolve_item_type(item, default=None),
 
-    return {
-        'item_name': item_name,
-        'thumb_url': item.get_thumbnail_url(),
-        'icon_url': item.get_icon_url(),
-        'type': wfi.resolve_item_type(item, default=None),
+            'oracle_price': item_ducat_data['wa_price'],
+            'cur_lowest_sell_price': None,
 
-        'oracle_price': oracle_prince_fn_map[data['oracle_type']](item.price),
-        'cur_lowest_sell_price': item.orders.get_ingame_lowest_sell_price(),
+            '48h_volume': None,
+            '90d_volume': None,
 
-        '48h_volume': item.statistic.get_volume_for_last_hours(48),
-        '90d_volume': item.statistic.get_volume_for_last_days(90),
+            'wiki_link': None,
+            'market_link': item.get_wfm_url(),
 
-        'wiki_link': item.wiki_link,
-        'market_link': item.get_wfm_url(),
+            'last_update': item_ducat_data['datetime'] if item_ducat_data['datetime'] else None,    # should already be ISO
 
-        'last_update': item.prepare_datetime.isoformat() if item.prepare_datetime else None,
-    }
+            'ducantor_price_override': ducat_price_override,
+        }
 
 @app.route('/api/relic_data')
 def relic_data():
@@ -389,12 +451,58 @@ def transient_reward_data():
     print(use('transient_data', _get_transient_data))
     return use('transient_data', _get_transient_data)
 
-def get_function_item_format(market_item_ls, oracle_type):
+def get_function_item_format(market_item_ls, oracle_type, ducantor_price_override='none'):
+    """
+    if ducantor_price_override == 'none', you need to prepare all items beforehand
+    if ducantor_price_override != 'none', will use ducantor price for prime items, but we still
+    assume that all other items are prepared
+
+    returns: ItemTable format
+    """
+    if ducantor_price_override not in ['none', 'day', 'hour']:
+        raise ValueError("invalid ducantor_price_override")
+    
+    ducat_price_map = {} if ducantor_price_override == 'none' else ducat_data[f'previous_{ducantor_price_override}']
+    hour_ducat_price_map = ducat_data['previous_hour']
+
+    def get_plat(item):
+        if ducantor_price_override == 'none' or item.item_name not in ducat_price_map:
+            return oracle_price_fn_map[oracle_type](item.price)
+        return ducat_price_map[item.item_name]['wa_price']
+    def get_rmax_plat(item):
+        if ducantor_price_override == 'none' or item.item_name not in ducat_price_map:
+            return oracle_price_fn_map[oracle_type](item.price, mod_rank_range=[item.mod_max_rank])
+        return None
+    def get_vol(item):  # 48h
+        if ducantor_price_override == 'none' or item.item_name not in ducat_price_map:
+            return oracle_price_fn_map[oracle_type](item.price, mod_rank_range=[item.mod_max_rank])
+        return None
+    
+    item_format_ls = []
     with market_lock:
-        item_info = wfi.get_item_info(market_item_ls, do_prepare=False, oracle_price_fn=oracle_prince_fn_map[oracle_type])
-    name_ls, type_ls, plat_ls, rmax_plat_div21_ls, rmax_plat_ls, plat_times21_ls, vol_ls, url_ls = operator.itemgetter(
-        'name', 'type', 'plat', 'rmax_plat_div21', 'rmax_plat', 'plat_times21', 'vol', 'url'
-    )(item_info)
+        for item in market_item_ls:
+            item_format = {
+                'name': item.item_name,
+                'type': wfi.resolve_item_type(item),
+                'plat': get_plat(item),
+                'rmax_plat_div21': None,
+                'rmax_plat': None,
+                'plat_times21': None,
+                'vol': get_vol(item),
+                'url': item.get_wfm_url(),
+                'wiki': item.wiki_link, # may be None
+            }
+
+            if 'arcane_enhancement' in item.tags:
+                rmax_plat = get_rmax_plat(item)
+                if rmax_plat is not None:
+                    item_format = {
+                        **item_format,
+                        'rmax_plat_div21': rmax_plat / 21,
+                        'rmax_plat': rmax_plat,
+                        'plat_times21': item_format['plat'] * 21,
+                    }
+            item_format_ls.append(item_format)
 
     return {
         "headers": [
@@ -410,17 +518,17 @@ def get_function_item_format(market_item_ls, oracle_type):
         ],
         "items": [
             [
-                name_ls[i],
-                type_ls[i],
-                plat_ls[i],
-                rmax_plat_div21_ls[i],
-                rmax_plat_ls[i],
-                plat_times21_ls[i],
-                vol_ls[i],
-                url_ls[i],
-                market_item_ls[i].wiki_link
+                item['name'],
+                item['type'],
+                item['plat'],
+                item['rmax_plat_div21'],
+                item['rmax_plat'],
+                item['plat_times21'],
+                item['vol'],
+                item['url'],
+                item['wiki']
             ]
-            for i in range(len(name_ls))
+            for item in item_format_ls
         ]
     }
 
@@ -432,7 +540,12 @@ def function_item():
 
     request json:
     {
+        // price oracle calculation, ref. oracle_price_fn_map
         "oracle_type": str,
+
+        // if prime item, whether to override oracle with ducantor price to speed up the process
+        // "none": no override, "day / hour": use ducantor price for day / hour
+        "ducantor_price_override": "none" | "day" | "hour",  
         
         "search_text": str | None,
         "item_list": [str, ...] | None,
@@ -448,6 +561,7 @@ def function_item():
     data = request.json
     search_text = data.get('search_text')
     item_list = data.get('item_list')
+    ducantor_price_override = data.get('ducantor_price_override')
 
     if search_text is not None and item_list is not None:
         return f"Only one of search_text and item_list should be provided. Provided {data}", 400
@@ -477,12 +591,21 @@ def function_item():
         print("data:", data)
         return {"error": "Too many items matched. Please narrow down your search."}, 400
     
+    prepare_item_names = [item.item_name for item in market_item_ls if item.price is None]
+    if ducantor_price_override in ['day', 'hour']:
+        # only prepare things that are not in ducantor price map
+        ducat_map = ducat_data[f'previous_{ducantor_price_override}']
+        prepare_item_names = [
+            item_name for item_name in prepare_item_names
+            if item_name not in ducat_map
+        ]
+    
     def task(task_id, task_status, stop_obj):
-        task_prepare_market_items(task_status, stop_obj, [item.item_name for item in market_item_ls if item.price is None])    
+        task_prepare_market_items(task_status, stop_obj, prepare_item_names)    
         if stop_obj['stop']:
             task_stop(task_id)
             return
-        task_status['data'] = get_function_item_format(market_item_ls, data['oracle_type'])
+        task_status['data'] = get_function_item_format(market_item_ls, data['oracle_type'], data['ducantor_price_override'])
         task_status['status'] = 'done'
 
     task_id = register_task(task)

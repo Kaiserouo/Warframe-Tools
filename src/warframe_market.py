@@ -869,10 +869,62 @@ def get_varzia_relics() -> list[str]:
     except:
         return []
 
+def get_ducat_data(market_items: None | list[MarketItem] = None) -> list[dict[str, Any]]:
+    """
+    for items on the ducat page (should be all prime items), return their ducat data
+    
+    Args:
+        market_items: list of MarketItem, if None then fetch from API
+
+    Returns:
+        {
+            'previous_hour': {item_name: ducat_data_dict},
+            'previous_day': {item_name: ducat_data_dict}
+        }
+    where {item_name: ducat_data_dict} is like:
+        {
+            'Kestrel Prime Blade': {
+                'datetime': '2026-01-23T05:00:00.000+00:00', // should be the same for every item in the list
+                'position_change_month': 86, 
+                'position_change_week': 5, 
+                'position_change_day': 1, 
+                'plat_worth': 517.968, 
+                'volume': 72,                           // not sure, 
+                                                        // it's NOT trade volume (from statistics) in 48 hours / 90 days
+                                                        // it MIGHT be the current online-in-game volume that's available to be traded?
+                'ducats_per_platinum': 2.14, 
+                'ducats_per_platinum_wa': 2.09, 
+                'ducats': 15, 
+                'item': '6939aaca5d9ebda239125d34',     // == MarketItem.id
+                'median': 7.0, 
+                'wa_price': 7.19,                       // the WA price (shown in Ducanator page)
+                'id': '69730f92f6ca230012cda916'
+            }, ...
+        }
+    """
+
+    if market_items is None:
+        market_items = get_market_item_list()
+    r = retry_request("https://api.warframe.market/v1/tools/ducats")
+    data = json.loads(r.content)['payload']
+    previous_hour = data['previous_hour']
+    previous_day = data['previous_day']
+    market_id_map = {i.id: i for i in market_items}
+    
+    hour_ducat_map = {market_id_map[i['item']].item_name: i for i in previous_hour}
+    day_ducat_map = {market_id_map[i['item']].item_name: i for i in previous_day}
+    
+    return {
+        'previous_hour': hour_ducat_map,
+        'previous_day': day_ducat_map
+    }
+
+
 
 if __name__ == '__main__':
     market_items = get_market_item_list()
-    print(util.str_type(market_items[0], print_unknown_obj_vars=True))
+    # print(util.str_type(market_items[0], print_unknown_obj_vars=True))
+    print(get_ducat_data())
     # rewards = get_transient_mission_rewards()
     # print(rewards.keys())
     # p = Player(user_slug='kaiserouo')

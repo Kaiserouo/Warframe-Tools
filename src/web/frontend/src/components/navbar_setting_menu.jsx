@@ -32,6 +32,7 @@ function SettingItemRefreshMarketData({setting, setSetting}) {
   
   return (
     <div className="p-4 border-b border-gray-600">
+      <p className="text-sm font-semibold mb-2">Refresh Market Data</p>
       {
         marketIsPending || marketIsFetching ? <Loading /> :
         marketError ? <Error /> :
@@ -42,7 +43,7 @@ function SettingItemRefreshMarketData({setting, setSetting}) {
         </p>
       }
       <button 
-        className={`mt-2 w-full bg-gray-600 text-white p-2 rounded ${mutation.isPending ? "" : "hover:bg-gray-500"}`} 
+        className={`mt-2 w-full bg-gray-600 text-white p-1 rounded ${mutation.isPending ? "" : "hover:bg-gray-500"}`} 
         onClick={() => mutation.mutate()} 
         disabled={mutation.isPending}>
           {mutation.isPending ? "Refreshing..." : "Refresh Market Data"}
@@ -69,11 +70,31 @@ function SettingItemPriceOracle({setting, setSetting}) {
     );
 }
 
+function SettingItemDucantorPriceOverride({setting, setSetting}) {
+    return (
+      <div className="p-4 border-b border-gray-600">
+        <p className="text-sm font-semibold mb-2">Ducantor Price Override</p>
+        <p className="text-sm text-gray-300 mb-2">Override oracle price with the price from <a href="https://warframe.market/tools/ducats" target="_blank" rel="noopener noreferrer" className='underline text-blue-400 font-bold'>ducantor page</a><br /> to speed up loading time <i>(only works for prime items)</i></p>
+        
+        <select
+          className="w-full bg-gray-600 text-white p-2 rounded"
+          value={setting.ducantor_price_override}
+          onChange={(e) => setSetting({...setting, 'ducantor_price_override': e.target.value})}
+        >
+          <option value="none">No override</option>
+          <option value="hour">Override with hourly price (WA 48h)</option>
+          <option value="day">Override with daily price (WA 90d)</option>
+        </select>
+      </div>
+    );
+}
+
 function NavbarSettingMenuInner({setting, setSetting}) {
   return (
     <div className="mt-2 bg-gray-700 text-white rounded shadow-lg z-10 md:min-w-max">
       <SettingItemRefreshMarketData setting={setting} setSetting={setSetting} />
       <SettingItemPriceOracle setting={setting} setSetting={setSetting} />
+      <SettingItemDucantorPriceOverride setting={setting} setSetting={setSetting} />
     </div>
   )
 }

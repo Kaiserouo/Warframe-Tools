@@ -50,11 +50,24 @@ let pageMap = {
 };
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-  const [setting, setSetting] = useState({
+  const defaultSetting = {
     'oracle_type': 'default_oracle_price_48h',
+    'ducantor_price_override': 'day',
     'update_count': 1,
-  });
+  }
+
+  const [currentPage, setCurrentPage] = useState('home');
+  const [setting, setSetting] = useState(
+    (() => {
+      const savedSetting = document.cookie.split('; ').find(row => row.startsWith('setting='));
+      return savedSetting ? (
+        {...defaultSetting, ...JSON.parse(decodeURIComponent(savedSetting.split('=')[1]))}
+      ) : defaultSetting;
+    })()
+  );
+
+  // save to cookie
+  document.cookie = `setting=${encodeURIComponent(JSON.stringify(setting))}; path=/; max-age=31536000`; // 1 year
 
   console.log(currentPage, setting)
   return (<>

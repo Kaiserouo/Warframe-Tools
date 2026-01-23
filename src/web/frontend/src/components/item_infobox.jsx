@@ -3,6 +3,9 @@ import { useState } from "react";
 import { useQuery } from '@tanstack/react-query';
 
 function ItemInfoboxInner({ itemData }) {
+  /* ref. /api/item_infobox response format in server.py 
+     note that 'cur_lowest_sell_price' and 'wiki_link' may be null
+  */
   const formatPrice = (price) => {
     return Number.isInteger(price) ? Math.floor(price) : price.toFixed(2);
   };
@@ -17,25 +20,57 @@ function ItemInfoboxInner({ itemData }) {
     }}>
       <h2 className="text-lg font-semibold">{itemData.item_name}</h2>
       <div className={`${itemData.type === 'Mod' ? 'flex' : ''} w-fit`}>
+        
+        {/* image */}
         {
           itemData.type === 'Mod' ?
           <img src={itemData.icon_url} alt={itemData.item_name} className={`h-64 mr-2 object-cover`} /> :
           <img src={itemData.thumb_url} alt={itemData.item_name} className={`h-16 object-cover`} />
         }
+
         <div >
+          {/* item type */}
           {itemData.type ? <><span className="text-green-500">{itemData.type}</span><br /></> : null}
           
+          {/* links (Market | Wiki) */}
           <a href={itemData.market_link} className="text-blue-400 font-bold underline decoration-dashed hover:decoration-solid " target="_blank" rel="noopener noreferrer">
             Market
-          </a> <span> | </span>
-          <a href={itemData.wiki_link} className="text-blue-400 font-bold underline decoration-dashed hover:decoration-solid " target="_blank" rel="noopener noreferrer">
-            Wiki
-          </a><br />
-          
-          <span className="text-yellow-300">Oracle</span> <span className="font-bold">{formatPrice(itemData.oracle_price)}</span>{plat},
-          <span className="text-yellow-300"> Lowest</span> <span className="font-bold">{formatPrice(itemData.cur_lowest_sell_price)}</span>{plat}<br />
+          </a> 
+          {
+            itemData.wiki_link ? (<>
+              <span> | </span>
+              <a href={itemData.wiki_link} className="text-blue-400 font-bold underline decoration-dashed hover:decoration-solid " target="_blank" rel="noopener noreferrer">
+                Wiki
+              </a>
+            </>): null
+          }
+          <br />
 
-          <span className="text-purple-400">Sold <span className="text-white">{itemData['48h_volume']}</span> in 48h, <span className="text-white">{itemData['90d_volume']}</span> in 90d</span><br />
+          {/* Price */}
+          <span className="text-yellow-300">{itemData.ducantor_price_override ? "Ducantor Price" : "Oracle"}</span> <span className="font-bold">{formatPrice(itemData.oracle_price)}</span>{plat}
+          {
+            itemData.cur_lowest_sell_price !== null ? (<>
+              <span className="text-yellow-300">, Lowest</span> <span className="font-bold">{formatPrice(itemData.cur_lowest_sell_price)}</span>{plat}
+            </>) : null
+          }
+          <br />
+          
+          {/* Volume */}
+          {
+            (itemData['48h_volume'] !== null && itemData['90d_volume'] !== null) ? (<>
+              <span className="text-purple-400">Sold <span className="text-white">{itemData['48h_volume']}</span> in 48h, <span className="text-white">{itemData['90d_volume']}</span> in 90d</span><br />
+            </>) : null
+          }
+          {
+            (itemData['48h_volume'] === null && itemData['90d_volume'] !== null) ? (<>
+              <span className="text-purple-400">Sold <span className="text-white">{itemData['90d_volume']}</span> in 90d</span><br />
+            </>) : null
+          }
+          {
+            (itemData['48h_volume'] !== null && itemData['90d_volume'] === null) ? (<>
+              <span className="text-purple-400">Sold <span className="text-white">{itemData['48h_volume']}</span> in 48h</span><br />
+            </>) : null
+          }
           <span className="text-gray-500 text-xs">(Data fetched at {new Intl.DateTimeFormat("en-US", {timeStyle: "medium", dateStyle: "medium",}).format(new Date(Date.parse(itemData['last_update'])))})</span>
         </div>
       </div>
@@ -47,8 +82,8 @@ export default function ItemInfobox({ setting, itemName }) {
   const [showInfobox, setShowInfobox] = useState(false);
   
   const { isPending: itemIsPending, isFetching: itemIsFetching, error: itemError, data: itemData } = useQuery({
-    queryKey: ['item_infobox_data', itemName, setting.oracle_type],
-    queryFn: () => fetchItemInfoboxData(itemName, setting.oracle_type),
+    queryKey: ['item_infobox_data', itemName, setting.oracle_type, setting.ducantor_price_override],
+    queryFn: () => fetchItemInfoboxData(itemName, setting.oracle_type, setting.ducantor_price_override),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
   

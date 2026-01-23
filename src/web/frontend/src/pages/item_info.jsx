@@ -23,12 +23,12 @@ export default function ItemInfo({setting}) {
   })
 
   const fetchTaskIdCallback = useCallback(
-    async () => fetchFunctionItemSearchText(setting.oracle_type, searchText).then(data => data.task_id),
-    [searchText, setting.oracle_type]
+    async () => fetchFunctionItemSearchText(setting.oracle_type, setting.ducantor_price_override, searchText).then(data => data.task_id),
+    [searchText, setting.oracle_type, setting.ducantor_price_override]
   );
   const handleSubmit = useCallback(
     makeHandleSubmit(setItemPollStatus, fetchTaskIdCallback),
-    [searchText, setting.oracle_type]
+    [searchText, setting.oracle_type, setting.ducantor_price_override]
   );
   
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function ItemInfo({setting}) {
       handleSubmit(ignore_obj);
     }
     return () => { ignore_obj['ignore'] = true; };
-  }, [searchText, handleSubmit, setting.oracle_type]);
+  }, [searchText, handleSubmit, setting.oracle_type, setting.ducantor_price_override]);
   
   let itemTable = null;
   if (searchText !== null && itemPollStatus.data) {

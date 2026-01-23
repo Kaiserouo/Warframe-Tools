@@ -25,12 +25,12 @@ export default function Syndicate({setting}) {
   let itemList = useMemo(() => syndicateData?.[searchText] ?? [], [syndicateData, searchText]);
 
   const fetchTaskIdCallback = useCallback(
-    async () => fetchFunctionItemItemList(setting.oracle_type, itemList).then(data => data.task_id),
-    [itemList, setting.oracle_type]
+    async () => fetchFunctionItemItemList(setting.oracle_type, setting.ducantor_price_override, itemList).then(data => data.task_id),
+    [itemList, setting.oracle_type, setting.ducantor_price_override]
   );
   const handleSubmit = useCallback(
     makeHandleSubmit(setItemPollStatus, fetchTaskIdCallback),
-    [itemList, setting.oracle_type]
+    [itemList, setting.oracle_type, setting.ducantor_price_override]
   );
   
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function Syndicate({setting}) {
       handleSubmit(ignore_obj);
     }
     return () => { ignore_obj['ignore'] = true; };
-  }, [searchText, handleSubmit, setting.oracle_type]);
+  }, [searchText, handleSubmit, setting.oracle_type, setting.ducantor_price_override]);
   
   let itemTable = null;
   if (searchText !== null && itemPollStatus.data) {

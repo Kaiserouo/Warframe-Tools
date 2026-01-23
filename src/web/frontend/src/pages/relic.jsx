@@ -116,8 +116,8 @@ export default function Relic({setting}) {
   // })
 
   const fetchTaskIdCallback = useCallback(
-    async () => fetchPriceOracle(setting.oracle_type, itemList).then(data => data.task_id),
-    [setting.oracle_type, itemList]
+    async () => fetchPriceOracle(setting.oracle_type, setting.ducantor_price_override, itemList).then(data => data.task_id),
+    [setting.oracle_type, setting.ducantor_price_override, itemList]
   );
   const handleSubmit = useCallback(
     makeHandleSubmit(setOraclePollStatus, fetchTaskIdCallback),
