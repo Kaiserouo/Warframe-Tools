@@ -3,11 +3,11 @@ import BackspaceSvg from '../asset/backspace.svg?react';
 import EnterSvg from '../asset/enter.svg?react';
 
 export default function SearchBar({
-    placeholder,
-    items,
-    nameKey,
-    searchMode,
-    setSearchText,
+  placeholder,
+  items,
+  nameKey,
+  searchMode,
+  setSearchText,
 }) {
   // placeholder: str, placeholder text for the search input
   // items: list[dict | str], list of items for search suggestions, each item is a dict

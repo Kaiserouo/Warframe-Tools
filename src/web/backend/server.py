@@ -1,5 +1,8 @@
+from copy import deepcopy
 import operator
+import pickle
 import threading
+from typing import *
 import uuid
 from flask import Flask, render_template, request, Response
 import datetime
@@ -27,10 +30,10 @@ wfm.RETRY_MAX_TIME = 1    # reduce retry time for better responsiveness
                           # (note that we effective use single thread here, because of Cyphon GIL and lack of `multiprocessing`)
 
 market_lock = threading.Lock()   # ok ngl i don't really know why i added this but better safe than sorry
-market_items = None
-market_map = None
-market_id_map = None
-market_data_update_date = None
+market_items: list[wfm.MarketItem] = None
+market_map: dict[str, wfm.MarketItem] = None
+market_id_map: dict[str, wfm.MarketItem] = None
+market_data_update_date: datetime.datetime = None
 ducat_data = None
 cache = {}
 
@@ -45,9 +48,11 @@ oracle_price_fn_map = {
 
 def refresh():
     global market_items, market_map, market_id_map, market_data_update_date, ducat_data, cache
+    print(f'{util.GREEN}[*] get market item...{util.RESET}')
     market_items = wfm.get_market_item_list()
     market_map = wfm.get_market_items_name_map(market_items)
     market_id_map = wfm.get_market_items_id_map(market_items)
+    print(f'{util.GREEN}[*] get ducat data...{util.RESET}')
     ducat_data = wfm.get_ducat_data(market_items)
     market_data_update_date = datetime.datetime.now()
     cache = {}
@@ -234,8 +239,26 @@ def refresh_all_data():
         refresh()
     return {}
 
+def _get_price_oracle(item_names, oracle_type, ducantor_price_override):
+    """
+    return item_name -> oracle price
+    assume all items has been prepared (or ducantor price override can deal with it)
+    
+    this function will request for market_lock! do NOT require it again in the caller
+    """
+    ducat_data_map = {} if ducantor_price_override == 'none' else ducat_data[f'previous_{ducantor_price_override}']
+    with market_lock:
+        return {
+            item_name: \
+                ducat_data_map[item_name]['wa_price'] if item_name in ducat_data_map
+                else oracle_price_fn_map[oracle_type](market_map[item_name].price) if item_name in market_map 
+                else None
+            for item_name in item_names
+        }
+
+
 @app.route('/api/price_oracle', methods=['POST'])
-def price_oracle():
+def get_price_oracle():
     """
     Given a list of item names, returns their price oracle values.
     Task API: nonblocking but should poll from /api/progress/${task_id} to get the result
@@ -264,8 +287,8 @@ def price_oracle():
     ducantor_price_override = data.get('ducantor_price_override')
     if ducantor_price_override not in ['none', 'day', 'hour']:
         return {"error": "invalid ducantor_price_override"}, 400
-    ducat_data_map = {} if ducantor_price_override == 'none' else ducat_data[f'previous_{ducantor_price_override}']
     
+    ducat_data_map = {} if ducantor_price_override == 'none' else ducat_data[f'previous_{ducantor_price_override}']
     prepare_item_names = [item_name for item_name in item_names if item_name in market_map and market_map[item_name].price is None]
     prepare_item_names = [item_name for item_name in prepare_item_names if item_name not in ducat_data_map]
 
@@ -274,14 +297,7 @@ def price_oracle():
         if stop_obj['stop']:
             task_stop(task_id)
             return
-        with market_lock:
-            task_status['data'] = {
-                item_name: \
-                    ducat_data_map[item_name]['wa_price'] if item_name in ducat_data_map
-                    else oracle_price_fn_map[data['oracle_type']](market_map[item_name].price) if item_name in market_map 
-                    else None
-                for item_name in item_names
-            }
+        task_status['data'] = _get_price_oracle(item_names, data['oracle_type'], ducantor_price_override)
         task_status['status'] = 'done'
 
     task_id = register_task(task)
@@ -475,7 +491,7 @@ def get_function_item_format(market_item_ls, oracle_type, ducantor_price_overrid
         return None
     def get_vol(item):  # 48h
         if ducantor_price_override == 'none' or item.item_name not in ducat_price_map:
-            return oracle_price_fn_map[oracle_type](item.price, mod_rank_range=[item.mod_max_rank])
+            return item.statistic.get_volume_for_last_hours(48)
         return None
     
     item_format_ls = []
@@ -610,6 +626,263 @@ def function_item():
 
     task_id = register_task(task)
     return {'task_id': task_id}
+
+@app.route('/api/item_orders', methods=['POST'])
+def item_orders():
+    """
+    get item orders
+    Task API: nonblocking but should poll from /api/progress/${task_id} to get the result
+
+    request json:
+    {
+        "item_list": [str, ...] | None,
+    }
+    
+    resturns:
+    {
+        item_name: {
+            'buy_orders': [...],
+            'sell_orders': [...],
+        },
+        ...
+    }
+    """
+    data = request.json
+
+    item_names = data.get('item_names')
+    prepare_item_names = [item_name for item_name in item_names if item_name in market_map and market_map[item_name].price is None]
+
+    def task(task_id, task_status, stop_obj):
+        task_prepare_market_items(task_status, stop_obj, prepare_item_names)
+        if stop_obj['stop']:
+            task_stop(task_id)
+            return
+        with market_lock:
+            task_status['data'] = {
+                item_name: \
+                    [dataclasses.asdict(order) for order in market_map[item_name].orders.orders] if item_name in market_map 
+                    else None
+                for item_name in item_names
+            }
+        task_status['status'] = 'done'
+
+    task_id = register_task(task)
+    return {'task_id': task_id}
+
+def _function_best_trade(spec: dict[str, int], price_oracle: dict[str, int]):
+    """
+    find best trade for the given items
+
+    Args:
+        spec: item name -> desired quantity
+
+    Returns:
+        {
+            "user_map": {
+                user_id: {
+                    "user_in_game_name": str,
+                    "user_reputation": int,
+                    "user_slug": str,
+                    "user_status": "online" | "offline" | "in_game",
+                    "url": str
+                }
+            }
+            "price_oracle": {
+                item_name: float or None,
+                ...
+            }
+            "trade_options": [
+                {
+                    "user_id": str,
+                    "items": {
+                        item_name: {
+                            "price": int,
+                            "quantity": int
+                            "rank": int | None
+                        },
+                        ...
+                    },
+                    "total_price": int,
+                    "total_variation": float,
+                }
+            ]
+        }
+
+        NOTE:
+            this function can't really deal with stuff that has rank
+            if you give an item that has rank, we assume rank 0 and the "rank" field would be set
+            to 0 if the item has rank, else None
+    """
+    with market_lock:
+        # remove all invalid items
+        spec = {item_name: qty for item_name, qty in spec.items() if item_name in market_map and qty > 0}
+
+        # first we find all users and the items they have for sale that are in spec
+        users: dict[str, dict] = {}     # the same as above
+        user_offers: dict[str, dict] = {} # user_id -> {"item_name", "price", "quantity"}
+
+        for item_name in spec:
+            item = market_map[item_name]
+            for order in item.orders.orders:
+                if not order.is_sell or not order.is_ingame:
+                    continue
+                # attempt to add user
+                if order.user_id not in users:
+                    users[order.user_id] = {
+                        "user_in_game_name": order.user_in_game_name,
+                        "user_reputation": order.user_reputation,
+                        "user_slug": order.user_slug,
+                        "user_status": order.user_status,
+                        "url": f'https://warframe.market/profile/{order.user_slug}' if order.user_slug else None
+                    }
+                    user_offers[order.user_id] = {}
+
+                # if already have an offer for this item, take the cheaper one
+                if item_name in user_offers[order.user_id]:
+                    existing_offer = user_offers[order.user_id][item_name]
+                    if (order.platinum, order.quantity) > (existing_offer['price'], existing_offer['quantity']):
+                        continue
+
+                user_offers[order.user_id][item_name] = {
+                    "price": order.platinum,
+                    "quantity": order.quantity,
+                    "rank": order.mod_rank if order.mod_rank is not None else None,
+                }
+    
+    # now we have all users and their offers, we can find the best trade options
+    trade_options = []
+
+    def submit_trade_option(user_id: str, taken_item: dict[str, dict[str, Any]], variation: dict[str, float]):
+        if len(taken_item) == 0:
+            return
+        total_price = sum([item['price'] * item['quantity'] for item in taken_item.values()])
+        total_variation = sum([variation[item_name] * item['quantity'] for item_name, item in taken_item.items()])
+        trade_options.append({
+            "user_id": user_id,
+            "items": deepcopy(taken_item),  # note that taken_item would be modified later
+            "total_price": total_price,
+            "total_variation": total_variation,
+        })
+    
+    for user_id, offers in user_offers.items():
+        # calculate variation: offer price - price oracle, the lower the better
+        variation = {
+            item_name: (offers[item_name]['price'] - price_oracle[item_name])
+            for item_name in offers
+        }
+        print(user_id, variation)
+        print(f'    {offers}')
+        neg_variation = {item_name: var for item_name, var in variation.items() if var <= 0}
+        pos_variation = {item_name: var for item_name, var in variation.items() if var > 0}
+        
+        taken_item = {}
+        # we first take all negative variation items
+        for item_name in neg_variation:
+            take_qty = min([spec[item_name], offers[item_name]['quantity']])
+            taken_item[item_name] = {
+                "price": offers[item_name]['price'],
+                "quantity": take_qty,
+                "rank": offers[item_name]['rank'],
+            }
+        submit_trade_option(user_id, taken_item, variation)
+
+        # and then we try to take positive variation items one by one, from lowest to highest
+        for item_name, _ in sorted(pos_variation.items(), key=operator.itemgetter(1)):
+            max_take_qty = min([spec[item_name], offers[item_name]['quantity']])
+            for take_qty in range(1, max_take_qty + 1):
+                taken_item[item_name] = {
+                    "price": offers[item_name]['price'],
+                    "quantity": take_qty,
+                    "rank": offers[item_name]['rank'],
+                }
+                submit_trade_option(user_id, taken_item, variation)
+    
+    return {
+        "user_map": users,
+        "price_oracle": price_oracle,
+        "trade_options": trade_options
+    }
+
+@app.route('/api/function_best_trade', methods=['POST'])
+def function_best_trade():
+    """
+    find best trade for the given items
+    Task API: nonblocking but should poll from /api/progress/${task_id} to get the result
+
+    request json:
+    {
+        // price oracle calculation, ref. oracle_price_fn_map
+        "oracle_type": str,
+        
+        "spec": {item_name: quantity, ...}
+    }
+
+    task response:
+    ref. _function_best_trade return value
+
+    """
+
+    data = request.json
+    print(f'{util.BLUE}function_best_trade called with data: {data}{util.RESET}')
+
+    # will actually have to prepare each and everyone of them
+    spec = data.get('spec', {})
+    prepare_item_names = [item_name for item_name in spec if item_name in market_map and market_map[item_name].orders is None]
+    item_names = list(spec.keys())
+
+    def task(task_id, task_status, stop_obj):
+        task_prepare_market_items(task_status, stop_obj, prepare_item_names)
+        if stop_obj['stop']:
+            task_stop(task_id)
+            return
+        task_status['data'] = _function_best_trade(spec, _get_price_oracle(item_names, data['oracle_type'], 'none'))
+        task_status['status'] = 'done'
+
+    task_id = register_task(task)
+    return {'task_id': task_id}
+
+def _test_best_trade():
+    USE_CACHE = True
+    CACHE_FILE = Path('server_market_cache.pkl')
+
+    spec = {
+        'Momentous Bond': 1,
+        'Manifold Bond': 2,
+        'Loyal Companion': 10,
+        'Forma Blueprint': 5,   # doesn't exist
+    }
+
+    # load data
+    if USE_CACHE:
+        if CACHE_FILE.exists():
+            print(f'{util.CYAN} loading cache from {CACHE_FILE} {util.RESET}')
+            with open(CACHE_FILE, 'rb') as f:
+                market_items, market_map, market_id_map, market_data_update_date, ducat_data, cache = pickle.load(f)
+        else:
+            print(f'{util.CYAN} cache file {CACHE_FILE} not found{util.RESET}')
+            exit()
+    else:
+        refresh()
+        for item_name in spec:
+            with market_lock:
+                print(f'{util.CYAN} preparing {item_name} {util.RESET}')
+                item = market_map.get(item_name)
+                if item is not None and item.price is None:
+                    item.prepare()
+        with open(CACHE_FILE, 'wb') as f:
+                pickle.dump((market_items, market_map, market_id_map, market_data_update_date, ducat_data, cache), f)
+    
+
+    price_oracle = {
+        item_name: \
+            oracle_price_fn_map['default_oracle_price_48h'](market_map[item_name].price) if item_name in market_map 
+            else None
+        for item_name in spec
+    }
+    result = _function_best_trade(spec, price_oracle)
+    for i in result['trade_options']:
+        print(i)
+    
 
 if __name__ == '__main__':
     refresh()

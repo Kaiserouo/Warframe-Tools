@@ -1,27 +1,60 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query'
 
 import SearchBar from '../components/search_bar.jsx';
-import ItemTable from '../components/item_table.jsx';
 import ItemInfobox from '../components/item_infobox.jsx';
-import { Loading, Error } from '../components/loading_status.jsx';
-import { fetchMarketData } from '../api/fetch.jsx';
+import { Loading, LoadingProgress, Error } from '../components/loading_status.jsx';
+import { fetchMarketData, fetchBestTrade } from '../api/fetch.jsx';
+import { makeHandleSubmit } from '../api/task.jsx';
+import UserBestTradeTable from '../components/user_best_trade_table.jsx';
 
-function SelectedItem({item, setSelectedItem, selectedItem, setting}) {
-    const removeItem = () => {
-        const newList = selectedItem.filter(i => i !== item);
-        setSelectedItem(newList);
-    };
-    return (
-        <span className="inline-block bg-gray-700 border border-gray-500 text-white rounded-full px-3 py-1 font-semibold m-1">
-            <ItemInfobox itemName={item} setting={setting} />
-            <button className="ml-2 text-red-400 hover:text-red-600" onClick={removeItem}>&times;</button>
-        </span>
-    );
+function SelectedItem({item, qty, setSelectedItems, setting}) {
+  const removeAllItem = () => {
+    setSelectedItems((prevSelectedItems) => {
+      const newSelectedItems = {...prevSelectedItems};
+      if (item in newSelectedItems) {
+        delete newSelectedItems[item];
+      }
+      return newSelectedItems;
+    });
+  };
+  const addItem = (qty) => {
+    setSelectedItems((prevSelectedItems) => {
+      const newSelectedItems = {...prevSelectedItems};
+      if (!(item in newSelectedItems)) {
+        newSelectedItems[item] = 0;
+      }
+      newSelectedItems[item] += qty;
+      if (newSelectedItems[item] <= 0) {
+        delete newSelectedItems[item];
+      }
+      return newSelectedItems;
+    });
+  }
+  return (
+    <span className="inline-block bg-gray-700 border border-gray-500 text-white rounded-full px-3 py-1 font-semibold m-1">
+      <ItemInfobox itemName={item} setting={setting} />
+      <button className="border rounded border-gray-500 ml-2 px-1 text-white text-sm hover:bg-gray-300" onClick={() => addItem(-1)}>▼</button>
+      <span className="px-1">{qty}</span>
+      <button className="border rounded border-gray-500 px-1 text-white text-sm hover:bg-gray-300" onClick={() => addItem(1)}>▲</button>
+      <button className="ml-2 text-red-400 hover:text-red-600" onClick={removeAllItem}>&times;</button>
+    </span>
+  );
 }
 
 export default function BestTrade({setting}) {
-  const [selectedItemList, setSelectedItemList] = useState(['Serration', 'Hornet Strike']);
+  const [selectedItems, setSelectedItems] = useState({
+    // 'Serration': 1, 
+    // 'Hornet Strike': 1,
+  });
+  const [submittedItems, setSubmittedItems] = useState({});
+
+  const [bestTradePollStatus, setBestTradePollStatus] = useState({
+    'taskId': null,
+    'status': "done",
+    'data': null,
+    'progress': null
+  });
 
   const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery({
     queryKey: ['market_data'],
@@ -29,48 +62,90 @@ export default function BestTrade({setting}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
+  // search bar
   const handleSearchBarText = (itemName) => {
     // handle search input: expect whole names, separated by +
-    const items = itemName.split('+').map(i => i.trim()).filter(i => i.length > 0);
-    const newList = [...selectedItemList];
+    const addedItems = itemName.split('+').map(i => i.trim()).filter(i => i.length > 0);
+    const newSelectedItems = {...selectedItems};
 
-    for (const item of items) {
-        if (!newList.includes(item) && Object.keys(marketData.market_data).includes(item)) {
-            newList.push(item);
-        }
+    for (const itemName of addedItems) {
+      if (!Object.keys(marketData.market_data).includes(itemName)) {
+        return;
+      }
+
+      if (itemName in newSelectedItems) {
+        newSelectedItems[itemName] += 1;
+      } else {
+        newSelectedItems[itemName] = 1;
+      }
     }
-    setSelectedItemList(newList);
+    setSelectedItems(newSelectedItems);
   };
   const handleClearAll = () => {
-    setSelectedItemList([]);
+    setSelectedItems({});
+  };
+  const handleSubmitSelectedItems = () => {
+    setSubmittedItems({...selectedItems});
   };
 
+  const bestTradeFetchTaskIdCallback = useCallback(
+    async () => fetchBestTrade(setting.oracle_type, submittedItems).then(data => data.task_id),
+    [setting.oracle_type, submittedItems]
+  );
+  const bestTradeHandleSubmit = useCallback(
+      makeHandleSubmit(setBestTradePollStatus, bestTradeFetchTaskIdCallback),
+      [bestTradeFetchTaskIdCallback]
+  );
+
+  useEffect(() => {
+    const ignore_obj = { 'ignore': false };
+    if (Object.keys(submittedItems).length > 0) {
+      bestTradeHandleSubmit(ignore_obj);
+    }
+    return () => { ignore_obj['ignore'] = true; };
+  }, [submittedItems, bestTradeHandleSubmit]);
+  
   return (<>
     <div className="mx-4 my-4">
-        <div className="text-2xl font-bold text-white my-2">
-            <p>Best Trade</p>
-            <p className='text-red-400 font-extrabold'>NOT FINISHED YET!</p>
-        </div>
-        <div className="text-white font-mono my-2">
-            <p>Type whole name (e.g., "Serration"), or separate by "+" (e.g., "Serration + Hornet Strike")</p>
-        </div>
-        <SearchBar 
-          placeholder="Add items..."
-          items={marketIsPending || marketError ? [] : Object.keys(marketData.market_data)}
-          nameKey={null}
-          searchMode="contains"
-          setSearchText={handleSearchBarText} />
-        <div className='flex my-2'>
-            <p className="mr-2 py-1 text-white text-lg font-mono font-semibold">Current Item List: </p>
-            <button className="px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300" onClick={handleClearAll}>Clear All</button>
-            
-        </div>
-        <div className='flex'>
-            {selectedItemList.map((item, index) => (
-                <SelectedItem key={index} item={item} setSelectedItem={setSelectedItemList} selectedItem={selectedItemList} setting={setting} />
-            ))}
-        </div>
+      <div className="text-2xl font-bold text-white my-2">
+        <p>Best Trade</p>
+      </div>
+
+      <div className="text-white font-mono my-2">
+        <p>Find the best person to trade with from the items you need. Do bulk trading with one person if possible.</p>
+        <p>Type whole name (e.g., "Serration"), or separate by "+" (e.g., "Volt Prime Chassis Blueprint + Volt Prime System Blueprint") to add items.</p>
+        <p>After inputting all your items, click "Calculate Best Trade" to see the results.</p>
+        <p>We show variation from oracle price to sell price, the lower (green) the better.</p>
+      </div>
+
+      <SearchBar 
+        placeholder="Add items..."
+        items={marketIsPending || marketError ? [] : Object.keys(marketData.market_data)}
+        nameKey={null}
+        searchMode="contains"
+        setSearchText={handleSearchBarText} />
+
+      <div className='flex my-2'>
+        <p className="mr-2 py-1 text-white text-lg font-mono font-semibold">Current Item List: </p>
+        <button className="mr-2 px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300" onClick={handleClearAll}>Clear All</button>
+        <button className="px-2 py-1 bg-blue-900 hover:bg-blue-700 text-white rounded border border-blue-300" onClick={handleSubmitSelectedItems}>Calculate Best Trade</button>
+      </div>
+
+      <div className='flex flex-wrap'>
+        {Object.keys(selectedItems).map((item, index) => (
+          <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+        ))}
+      </div>
+      <br />
+
+      {bestTradePollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={bestTradePollStatus.progress} /> : null}
+      {bestTradePollStatus.status === "error" ? <Error message={`ERROR: ${bestTradePollStatus.error}`} /> : null}
+      {bestTradePollStatus.status === "done" ? <UserBestTradeTable 
+          userMap={bestTradePollStatus.data?.user_map} 
+          tradeOptions={bestTradePollStatus.data?.trade_options} 
+          priceOracle={bestTradePollStatus.data?.price_oracle} 
+        /> : null}
+      
     </div>
   </>);
 }
-

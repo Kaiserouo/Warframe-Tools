@@ -48,18 +48,18 @@ export default function Syndicate({setting}) {
 
   return (<>
     <div className="mx-4 my-4">
-        <div className="text-2xl font-bold text-white my-2">
-            <p>Syndicate</p>
-        </div>
-        <SearchBar 
-          placeholder="Search syndicates..."
-          items={syndicateIsPending || syndicateError ? [] : Object.keys(syndicateData)}
-          nameKey={null}
-          searchMode="contains"
-          setSearchText={setSearchText} />
-        {searchText && itemPollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={itemPollStatus.progress} /> : null}
-        {searchText && itemPollStatus.status === "error" ? <Error message={`ERROR: ${itemPollStatus.error}`} /> : null}
-        {itemPollStatus.status === "done" && itemTable ? <ItemTable itemTable={itemTable} setting={setting} /> : null}
+      <div className="text-2xl font-bold text-white my-2">
+        <p>Syndicate</p>
+      </div>
+      <SearchBar 
+        placeholder="Search syndicates..."
+        items={syndicateIsPending || syndicateError ? [] : Object.keys(syndicateData)}
+        nameKey={null}
+        searchMode="contains"
+        setSearchText={setSearchText} />
+      {searchText && itemPollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={itemPollStatus.progress} /> : null}
+      {searchText && itemPollStatus.status === "error" ? <Error message={`ERROR: ${itemPollStatus.error}`} /> : null}
+      {itemPollStatus.status === "done" && itemTable ? <ItemTable itemTable={itemTable} setting={setting} /> : null}
     </div>
   </>);
 }

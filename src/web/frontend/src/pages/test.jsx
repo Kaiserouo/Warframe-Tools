@@ -31,39 +31,39 @@ export default function Test({setting}) {
 
   return (<>
     <div className="mx-4 my-4">
-        <div className="text-2xl font-bold text-white my-2">
-            <p>Test</p>
-        </div>
+      <div className="text-2xl font-bold text-white my-2">
+        <p>Test</p>
+      </div>
     <div className="space-y-4">
       <div className="flex gap-2">
-        <input
-          type="text"
-          className="flex-1 px-4 py-2 bg-gray-800 text-white rounded border border-gray-700"
-          placeholder="Enter input..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          disabled={pollStatus.status === "submitting" || pollStatus.status === "in_progress"}
-        />
-        <button
-          onClick={() => handleSubmit()}
-          disabled={pollStatus.status === "submitting" || pollStatus.status === "in_progress"}
-          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-600"
-        >
-          Submit
-        </button>
+      <input
+        type="text"
+        className="flex-1 px-4 py-2 bg-gray-800 text-white rounded border border-gray-700"
+        placeholder="Enter input..."
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        disabled={pollStatus.status === "submitting" || pollStatus.status === "in_progress"}
+      />
+      <button
+        onClick={() => handleSubmit()}
+        disabled={pollStatus.status === "submitting" || pollStatus.status === "in_progress"}
+        className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-600"
+      >
+        Submit
+      </button>
       </div>
       
       {pollStatus.status === "submitting" || pollStatus.status === "in_progress" ? (
-        <Loading message={`Progress: ${pollStatus.progress ? pollStatus.progress.current : "-"}/${pollStatus.progress ? pollStatus.progress.total : "-"}`} />
+      <Loading message={`Progress: ${pollStatus.progress ? pollStatus.progress.current : "-"}/${pollStatus.progress ? pollStatus.progress.total : "-"}`} />
       ) : null}
       {pollStatus.status === "error" ? (
-        <Error message={`ERROR: ${pollStatus.error}`} />
+      <Error message={`ERROR: ${pollStatus.error}`} />
       ) : null}
       
       {pollStatus.result && (
-        <div className="p-4 bg-gray-800 text-white rounded">
-          {JSON.stringify(pollStatus.result)}
-        </div>
+      <div className="p-4 bg-gray-800 text-white rounded">
+        {JSON.stringify(pollStatus.result)}
+      </div>
       )}
     </div>
     </div>

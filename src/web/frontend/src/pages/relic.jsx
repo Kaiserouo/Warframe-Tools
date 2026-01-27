@@ -146,31 +146,33 @@ export default function Relic({setting}) {
 
   return (<>
     <div className="mx-4 my-4">
-        <div className="text-2xl font-bold text-white my-2">
-            <p>Relic Info</p>
-        </div>
-        <SearchTypeChoice choices={['relic', 'item']} searchType={searchType} setSearchType={setSearchType} setSearchText={setSearchText} />
-        {
-          searchType === 'item' ? <div className="text-white font-mono my-2">
-            <p>Type item name (e.g., "Volt Prime Blueprint") to see which relics contain the item.</p>
-            <p>Will match all substring (e.g., "Volt Prime" matches everything about Volt Prime)</p>
-          </div> : 
-          searchType === 'relic' ? <div className="text-white font-mono my-2">
-            <p>Type whole relic name (e.g., "Axi A14"), or separate by "+" (e.g., "Axi A14 + Meso S14")</p>
-            <p>You can search "Varzia" to see all currently available relics Varzia sells (may take a minute to fetch all items)</p>
-          </div> : null
-        }
-        <SearchBar 
-          placeholder={searchType === 'relic' ? "Search relics..." : "Search items..."}
-          items={searchBarItems}
-          nameKey={null}
-          searchMode="contains"
-          setSearchText={setSearchText} />
-          
-        {searchText && oraclePollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={oraclePollStatus.progress} /> : null}
-        {searchText && oraclePollStatus.status === "error" ? <Error message={`ERROR: ${oraclePollStatus.error}`} /> : null}
-        {oraclePollStatus.status === "done" && oraclePollStatus.data !== null ? <RelicTable relicTable={relicTable} priceOracle={oraclePollStatus.data} setting={setting} /> : null}
+      <div className="text-2xl font-bold text-white my-2">
+        <p>Relic Info</p>
+      </div>
+
+      <SearchTypeChoice choices={['relic', 'item']} searchType={searchType} setSearchType={setSearchType} setSearchText={setSearchText} />
+      
+      {
+        searchType === 'item' ? <div className="text-white font-mono my-2">
+        <p>Type item name (e.g., "Volt Prime Blueprint") to see which relics contain the item.</p>
+        <p>Will match all substring (e.g., "Volt Prime" matches everything about Volt Prime)</p>
+        </div> : 
+        searchType === 'relic' ? <div className="text-white font-mono my-2">
+        <p>Type whole relic name (e.g., "Axi A14"), or separate by "+" (e.g., "Axi A14 + Meso S14")</p>
+        <p>You can search "Varzia" to see all currently available relics Varzia sells (may take a minute to fetch all items)</p>
+        </div> : null
+      }
+
+      <SearchBar 
+        placeholder={searchType === 'relic' ? "Search relics..." : "Search items..."}
+        items={searchBarItems}
+        nameKey={null}
+        searchMode="contains"
+        setSearchText={setSearchText} />
         
+      {searchText && oraclePollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={oraclePollStatus.progress} /> : null}
+      {searchText && oraclePollStatus.status === "error" ? <Error message={`ERROR: ${oraclePollStatus.error}`} /> : null}
+      {oraclePollStatus.status === "done" && oraclePollStatus.data !== null ? <RelicTable relicTable={relicTable} priceOracle={oraclePollStatus.data} setting={setting} /> : null}
     </div>
   </>);
 }

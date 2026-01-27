@@ -46,26 +46,26 @@ export default function ItemInfo({setting}) {
   }
 
   return (<>
-    <div className="mx-4 my-4">
-        <div className="text-2xl font-bold text-white my-2">
-            <p>Item Info</p>
-        </div>
-        <div className="text-white font-mono my-2">
-          <p>Type item name (e.g., "Volt Prime Blueprint") to see its market information.</p>
-          <p>Will match all substring (e.g., "Volt Prime" matches everything about Volt Prime)</p>
-        </div>
-        <SearchBar 
-          placeholder="Search items..."
-          items={marketIsPending || marketError ? [] : Object.keys(marketData.market_data)}
-          nameKey={null}
-          searchMode="contains"
-          setSearchText={setSearchText} />
-        {searchText && <div className="text-white my-2">Search Text: {searchText}</div>}
+  <div className="mx-4 my-4">
+    <div className="text-2xl font-bold text-white my-2">
+      <p>Item Info</p>
+    </div>
+    <div className="text-white font-mono my-2">
+      <p>Type item name (e.g., "Volt Prime Blueprint") to see its market information.</p>
+      <p>Will match all substring (e.g., "Volt Prime" matches everything about Volt Prime)</p>
+    </div>
+    <SearchBar 
+      placeholder="Search items..."
+      items={marketIsPending || marketError ? [] : Object.keys(marketData.market_data)}
+      nameKey={null}
+      searchMode="contains"
+      setSearchText={setSearchText} />
+    {searchText && <div className="text-white my-2">Search Text: {searchText}</div>}
 
-        {/* we separate the loading progress and error display because if there is still data from last time, we still wanna display that */}
-        {searchText && itemPollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={itemPollStatus.progress} /> : null}
-        {searchText && itemPollStatus.status === "error" ? <Error message={`ERROR: ${itemPollStatus.error}`} /> : null}
-        {itemPollStatus.status === "done" && itemTable ? <ItemTable itemTable={itemTable} setting={setting} /> : null}
+    {/* we separate the loading progress and error display because if there is still data from last time, we still wanna display that */}
+    {searchText && itemPollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={itemPollStatus.progress} /> : null}
+    {searchText && itemPollStatus.status === "error" ? <Error message={`ERROR: ${itemPollStatus.error}`} /> : null}
+    {itemPollStatus.status === "done" && itemTable ? <ItemTable itemTable={itemTable} setting={setting} /> : null}
     </div>
   </>);
 }

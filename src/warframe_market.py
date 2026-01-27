@@ -74,7 +74,7 @@ class Orders:
             order_json: is a list of dict that has keys like [visible, user, quantity, ...] 
         """
 
-        self.orders: list[self.Order] = []
+        self.orders: list['Orders.Order'] = []
         if version == 'v1':
             for order in order_json:
                 cur_order = self.Order(**{
@@ -104,7 +104,7 @@ class Orders:
                     'user_in_game_name': order['user']['ingameName'],
                     'user_slug': order['user']['slug'],
                     'user_id': order['user']['id'],
-                    'mod_rank': order.get('mod_rank', 0)
+                    'mod_rank': order.get('rank', None)
                 })
                 self.orders.append(cur_order)
         else:
@@ -609,7 +609,6 @@ class MarketItem:
         return f'<MarketItem "{self.item_name}">'
     def __repr__(self):
         return f'<MarketItem "{self.item_name}">'
-
 class User:
     """
     a user on the market
