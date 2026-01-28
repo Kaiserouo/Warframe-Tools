@@ -463,12 +463,11 @@ def transient_reward_data():
         transient_rewards = {}
         with market_lock:
             for transient_name, transient_rotations in transient_items.items():
-                rewards = []
+                rewards = set()
                 for rotation, rotation_rewards in transient_rotations.items():
-                    rewards.extend([r['item_name'] for r in rotation_rewards if r['item_name'] in market_map])
-                transient_rewards[transient_name] = rewards
+                    rewards.update([r['item_name'] for r in rotation_rewards if r['item_name'] in market_map])
+                transient_rewards[transient_name] = list(rewards)
         return transient_rewards
-    print(use('transient_data', _get_transient_data))
     return use('transient_data', _get_transient_data)
 
 def get_function_item_format(market_item_ls, oracle_type, ducantor_price_override='none'):

@@ -49,9 +49,10 @@ function BestTradeTableHeader() {
   );
 }
 
-function BestTradeTableOptionRow({ user, tradeOption, priceOracle, setting }) {
+function BestTradeTableOptionRow({ user, tradeOption, priceOracle, setting, setSelectedItems }) {
   const [showCopyCommand, setShowCopyCommand] = useState(false);
   const inputRef = useRef(null);
+  const removedRef = useRef(null);
 
   // technically a hack? this works, but idk why tbh
   const handleCopyClick = () => {
@@ -63,6 +64,26 @@ function BestTradeTableOptionRow({ user, tradeOption, priceOracle, setting }) {
       }
     }, 0);
   };
+
+  const handleRemoveItem = () => {
+    setSelectedItems((prevSelectedItems) => {
+      const newSelectedItems = {...prevSelectedItems};
+      for (const itemName of Object.keys(tradeOption.items)) {
+        if (itemName in newSelectedItems) {
+          newSelectedItems[itemName] -= tradeOption.items[itemName].quantity;
+          if (newSelectedItems[itemName] <= 0) {
+            delete newSelectedItems[itemName];
+          }
+        }
+      }
+      return newSelectedItems;
+    });
+
+    removedRef.current.classList.remove('hidden');
+    setTimeout(() => {
+      removedRef.current.classList.add('hidden');
+    }, 2000);
+  }
 
   const rankText = (item_name) => (tradeOption.items[item_name].rank !== null ? (<span className="text-gray-400"> (rank {tradeOption.items[item_name].rank})</span>) : null);
 
@@ -80,9 +101,6 @@ function BestTradeTableOptionRow({ user, tradeOption, priceOracle, setting }) {
             <ItemInfobox setting={setting} itemName={item_name} />{rankText(item_name)}: {tradeOption.items[item_name].price}p <VarText v={tradeOption.items[item_name].price - priceOracle[item_name]} /> x {tradeOption.items[item_name].quantity}
             </div>
             ))}
-            </td>
-          <td>
-            <button className="w-20 px-2 py-1 bg-blue-900 hover:bg-blue-700 text-white rounded border border-blue-300" onClick={handleCopyClick}>Copy</button>
           </td>
         </>) : null
       }
@@ -94,11 +112,29 @@ function BestTradeTableOptionRow({ user, tradeOption, priceOracle, setting }) {
               <input ref={inputRef} readOnly className="border rounded border-black px-1 bg-gray-900 w-full font-sans" type="text" value={makeTradeText(user, tradeOption)} />
             </div>
           </td>
-          <td>
-            <button className="w-20 px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300" onClick={() => setShowCopyCommand(false)}>Close</button>
-          </td>
         </>) : null
       }
+
+      <td>
+        {
+          showCopyCommand ? 
+          <button className="w-20 px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300" onClick={() => setShowCopyCommand(false)}>
+            Close
+          </button> :
+          <button className="w-20 px-2 py-1 bg-blue-900 hover:bg-blue-700 text-white rounded border border-blue-300" onClick={handleCopyClick}>
+            Copy
+          </button>
+        }
+
+        <div className='relative inline-block'>
+          <button className="w-30 px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300" onClick={handleRemoveItem}>Remove Item</button>
+          <div ref={removedRef} className="hidden absolute inset-0 bottom-full -translate-y-4 flex items-center justify-center">
+            <div className="bg-black/70 text-white font-sans px-3 py-1 rounded">
+              Removed!
+            </div>
+          </div>
+        </div>
+      </td>
     </tr>
   );
 }
@@ -224,7 +260,7 @@ function sortTradeOptions(tradeOptions, sortOption, isAsc) {
   return tradeOptions.sort(sortFn[sortOption] || (() => 0));
 }
 
-export default function UserBestTradeTable({ userMap, tradeOptions, priceOracle, setting }) {
+export default function UserBestTradeTable({ userMap, tradeOptions, priceOracle, setting, setSelectedItems }) {
   /*
       orderData: {item_name: list[Order]}, Order is wfm.Orders.Order turned into json object
       priceOracle: {item_name: int}
@@ -236,10 +272,6 @@ export default function UserBestTradeTable({ userMap, tradeOptions, priceOracle,
     onlyNegativeVariation: false,
   });
 
-  // userMap = DATA['user_map'];
-  // tradeOptions = DATA['trade_options'];
-  // priceOracle = DATA['price_oracle'];
-
   if (userMap === null || tradeOptions === null || priceOracle === null || 
       userMap === undefined || tradeOptions === undefined || priceOracle === undefined) {
     return null;
@@ -247,7 +279,6 @@ export default function UserBestTradeTable({ userMap, tradeOptions, priceOracle,
 
   const sortedTradeOptions = sortTradeOptions(filterTradeOptions([...tradeOptions], filterOption), sortOption, isAsc);
 
-  // simply display data
   return (<>
     <div className="py-1">
       <FilterOptionSelection filterOption={filterOption} setFilterOption={setFilterOption} />
@@ -259,10 +290,15 @@ export default function UserBestTradeTable({ userMap, tradeOptions, priceOracle,
         <tbody>
           {
             sortedTradeOptions.map((tradeOption, index) => (
-              <BestTradeTableOptionRow key={index} user={userMap[tradeOption.user_id]} tradeOption={tradeOption} priceOracle={priceOracle} setting={setting} />
+              <BestTradeTableOptionRow 
+                key={index} 
+                user={userMap[tradeOption.user_id]} 
+                tradeOption={tradeOption} 
+                priceOracle={priceOracle} 
+                setting={setting} 
+                setSelectedItems={setSelectedItems} />
             ))
           }
-          {/* <BestTradeTableOptionRow user={userMap[tradeOptions[0].user_id]} tradeOption={tradeOptions[0]} priceOracle={priceOracle} /> */}
         </tbody>
       </table>
     </div>

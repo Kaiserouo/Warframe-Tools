@@ -153,13 +153,13 @@ export default function Relic({setting}) {
       <SearchTypeChoice choices={['relic', 'item']} searchType={searchType} setSearchType={setSearchType} setSearchText={setSearchText} />
       
       {
-        searchType === 'item' ? <div className="text-white font-mono my-2">
-        <p>Type item name (e.g., "Volt Prime Blueprint") to see which relics contain the item.</p>
-        <p>Will match all substring (e.g., "Volt Prime" matches everything about Volt Prime)</p>
+        searchType === 'item' ? <div className="text-white font-sans my-2">
+        <p>Type item name <span className='text-gray-400'>(e.g., "Volt Prime Blueprint")</span> to see which relics contain the item.</p>
+        <p>Will match all substring <span className='text-gray-400'>(e.g., "Volt Prime" matches everything about Volt Prime)</span></p>
         </div> : 
-        searchType === 'relic' ? <div className="text-white font-mono my-2">
-        <p>Type whole relic name (e.g., "Axi A14"), or separate by "+" (e.g., "Axi A14 + Meso S14")</p>
-        <p>You can search "Varzia" to see all currently available relics Varzia sells (may take a minute to fetch all items)</p>
+        searchType === 'relic' ? <div className="text-white font-sans my-2">
+        <p>Type whole relic name <span className='text-gray-400'>(e.g., "Axi A14")</span>, or separate by "+" <span className='text-gray-400'>(e.g., "Axi A14 + Meso S14")</span></p>
+        <p>You can search "Varzia" to see all currently available relics Varzia sells <span className='text-gray-400'>(may take a minute to fetch all items if not using ducantor price override)</span></p>
         </div> : null
       }
 

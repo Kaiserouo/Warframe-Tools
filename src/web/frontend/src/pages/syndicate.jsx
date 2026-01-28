@@ -51,6 +51,9 @@ export default function Syndicate({setting}) {
       <div className="text-2xl font-bold text-white my-2">
         <p>Syndicate</p>
       </div>
+      <div className="text-white font-sans my-2">
+        <p>Search items in a syndicate.</p>
+      </div>
       <SearchBar 
         placeholder="Search syndicates..."
         items={syndicateIsPending || syndicateError ? [] : Object.keys(syndicateData)}

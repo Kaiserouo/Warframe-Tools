@@ -26,7 +26,7 @@ export default function SearchBar({
     <div className="max-w-md flex border border-gray-600 rounded">
       <input
         type="text"
-        className="w-full px-4 py-2  bg-[#393E46] text-white"
+        className="w-full px-4 py-2 bg-[#393E46] text-white"
         placeholder={placeholder}
         list="search-suggestions"
         onKeyDown={(e) => {
