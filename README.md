@@ -1,6 +1,6 @@
 # Warframe CLI Tool
 
-> For Web GUI, refer to [Web GUI Readme](./web/README.md).
+> **For Web GUI, refer to [Web GUI Readme](./src/web/README.md).**
 
 ![](./asset/screenshot.png)
 

@@ -144,6 +144,7 @@ export default function BestTrade({setting}) {
           userMap={bestTradePollStatus.data?.user_map} 
           tradeOptions={bestTradePollStatus.data?.trade_options} 
           priceOracle={bestTradePollStatus.data?.price_oracle} 
+          setting={setting}
         /> : null}
       
     </div>

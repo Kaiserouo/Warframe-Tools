@@ -113,7 +113,7 @@ class Orders:
     def get_ingame_lowest_sell_price(self, mod_rank_range: list | range = [0]):
         return min([
             order.platinum for order in self.orders
-            if order.is_sell and order.visible and order.is_ingame and order.mod_rank in mod_rank_range 
+            if order.is_sell and order.visible and order.is_ingame and (order.mod_rank is None or order.mod_rank in mod_rank_range) 
         ] + [1000000])
     def get_ingame_highest_buy_price(self, mod_rank_range: list | range = [0]):
         return max([
@@ -378,6 +378,42 @@ class PriceOracle:
             ratio: pick the top `ratio` prices to calculate average
         """
         stats = self.statistic.get_stat_for_last_hours(hours, **stat_filter)
+        if len(stats) == 0:
+            return 0
+        
+        prices = [[stat['median']] * stat['volume'] for stat in stats]
+        prices = list(itertools.chain.from_iterable(prices))
+        prices = sorted(prices, reverse=False)
+
+        top_K = prices[:int(len(prices) * ratio)]
+        if len(top_K) == 0:
+            return statistics.mean(prices)
+        return statistics.mean(top_K)
+    
+    def get_top_k_avg_price_for_last_days(self, days: int, ratio: float = 1, **stat_filter):
+        """
+            actually take the volume into account
+            ratio: pick the top `ratio` prices to calculate average
+        """
+        stats = self.statistic.get_stat_for_last_days(days, **stat_filter)
+        if len(stats) == 0:
+            return 0
+        
+        prices = [[stat['median']] * stat['volume'] for stat in stats]
+        prices = list(itertools.chain.from_iterable(prices))
+        prices = sorted(prices, reverse=True)
+
+        top_K = prices[:int(len(prices) * ratio)]
+        if len(top_K) == 0:
+            return statistics.mean(prices)
+        return statistics.mean(top_K)
+    
+    def get_bottom_k_avg_price_for_last_days(self, days: int, ratio: float = 1, **stat_filter):
+        """
+            actually take the volume into account
+            ratio: pick the top `ratio` prices to calculate average
+        """
+        stats = self.statistic.get_stat_for_last_days(days, **stat_filter)
         if len(stats) == 0:
             return 0
         

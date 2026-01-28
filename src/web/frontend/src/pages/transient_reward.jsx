@@ -6,7 +6,6 @@ import ItemTable from '../components/item_table.jsx';
 import { Loading, LoadingProgress, Error } from '../components/loading_status.jsx';
 import { fetchFunctionItemItemList, fetchTransientData } from '../api/fetch.jsx';
 import { makeHandleSubmit } from '../api/task.jsx';
-import UserBestTradeTable from '../components/user_best_trade_table.jsx';
 
 export default function TransientReward({setting}) {
   const [searchText, setSearchText] = useState(null);

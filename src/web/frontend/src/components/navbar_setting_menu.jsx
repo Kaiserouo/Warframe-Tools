@@ -64,6 +64,10 @@ function SettingItemPriceOracle({setting, setSetting}) {
           <option value="default_oracle_price_48h">Default Oracle Price (48h)</option>
           <option value="top_30%_avg_in_48h">Top 30% Avg (48h)</option>
           <option value="bottom_30%_avg_in_48h">Bottom 30% Avg (48h)</option>
+          <option value="all_avg_in_48h">All Avg (48h)</option>
+          <option value="top_30%_avg_in_90d">Top 30% Avg (90d)</option>
+          <option value="bottom_30%_avg_in_90d">Bottom 30% Avg (90d)</option>
+          <option value="all_avg_in_90d">All Avg (90d)</option>
           <option value="cur_lowest_price">Current Lowest Price</option>
         </select>
       </div>

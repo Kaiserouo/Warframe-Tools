@@ -43,6 +43,10 @@ oracle_price_fn_map = {
     'default_oracle_price_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_oracle_price_48hrs(*args, **kwargs),
     'top_30%_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_top_k_avg_price_for_last_hours(48, 0.3, *args, **kwargs),
     'bottom_30%_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_bottom_k_avg_price_for_last_hours(48, 0.3, *args, **kwargs),
+    'all_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_top_k_avg_price_for_last_hours(48, 1, *args, **kwargs),
+    'top_30%_avg_in_90d': lambda price_oracle, *args, **kwargs: price_oracle.get_top_k_avg_price_for_last_days(90, 0.3, *args, **kwargs),
+    'bottom_30%_avg_in_90d': lambda price_oracle, *args, **kwargs: price_oracle.get_bottom_k_avg_price_for_last_days(90, 0.3, *args, **kwargs),
+    'all_avg_in_90d': lambda price_oracle, *args, **kwargs: price_oracle.get_top_k_avg_price_for_last_days(90, 1, *args, **kwargs),
     'cur_lowest_price': lambda price_oracle, *args, **kwargs: price_oracle.get_cur_lowest_price(*args, **kwargs),
 }
 
@@ -770,8 +774,6 @@ def _function_best_trade(spec: dict[str, int], price_oracle: dict[str, int]):
             item_name: (offers[item_name]['price'] - price_oracle[item_name])
             for item_name in offers
         }
-        print(user_id, variation)
-        print(f'    {offers}')
         neg_variation = {item_name: var for item_name, var in variation.items() if var <= 0}
         pos_variation = {item_name: var for item_name, var in variation.items() if var > 0}
         
@@ -823,7 +825,6 @@ def function_best_trade():
     """
 
     data = request.json
-    print(f'{util.BLUE}function_best_trade called with data: {data}{util.RESET}')
 
     # will actually have to prepare each and everyone of them
     spec = data.get('spec', {})
