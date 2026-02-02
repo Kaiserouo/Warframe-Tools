@@ -28,7 +28,7 @@ pip install -r requirement.txt
 
 # we use node.js, ref. https://nodejs.org/en/download
 # note that we use the newest version, versions too old wouldn't be able to run
-cd web/frontend
+cd Warframe-Tool/src/web/frontend
 npm install
 ```
 
@@ -43,6 +43,7 @@ To build the frontend:
 ```bash
 # in one terminal, run the API server
 cd Warframe-Tool    # at the repo folder
+conda activate warframe
 python -m src.web.backend.server
 
 # in another terminal, build the frontend website
@@ -51,9 +52,9 @@ cd Warframe-Tool/web/frontend
 npm build
 ```
 
-The flask server also hosts the files in `web/frontend/build`, the URL should be something like `http://localhost:5000` (flask default URL).
+The flask server also hosts the files in `src/web/frontend/build`, the URL should be something like `http://localhost:5000` (flask default URL).
 
-Note that the server should be hosted on `localhost`, since this is a development flask server, with service that's very easily DoS-ed, and generally shouldn't be exposed. Even without these issues, warframe market API request-per-second limitation also limits the potential of this server being used by multiple people. **Please host your own server (`python server.py`) if you wanna use this, and DON'T EXPOSE THIS SERVER TO PUBLIC.**
+Note that the server should be hosted on `localhost`, since this is a development flask server, with service that's very easily DoS-ed, and generally shouldn't be exposed. Even without these issues, warframe market API request-per-second limitation also limits the potential of this server being used by multiple people. **Please host your own server (`python -m src.web.backend.server`) if you wanna use this, and DON'T EXPOSE THIS SERVER TO PUBLIC.**
 
 > If you do wanna host it on a different computer, please put your server under VPN or use other tactics to access the server without exposing the server to public. Remember to manually change the IP of the flask server in `server.py` to your VPN IP instead, OR, write the setting to `config.py` and the server will use that instead:
 > ```python
@@ -64,11 +65,17 @@ Note that the server should be hosted on `localhost`, since this is a developmen
 To run the server, you need node.js and related packages:
 ```bash
 # start developer frontend server
-cd web/frontend
+cd Warframe-Tool/src/web/frontend
 npm start
 
 # in another terminal, run the API server
+cd Warframe-Tool
 python -m src.web.backend.server
+
+# alternatively, there's a script that sets up tmux
+# to run the above 2 commands in a window
+cd Warframe-Tool
+bash dev_tmux.sh
 ```
 
 The URL should be something like `http://localhost:5173` (vite default URL).

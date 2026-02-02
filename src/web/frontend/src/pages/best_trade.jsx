@@ -48,11 +48,12 @@ function stringifySelectedItems(selectedItems) {
 
 export default function BestTrade({setting}) {
   const [selectedItems, setSelectedItems] = useState({
-    // 'Serration': 1, 
-    // 'Hornet Strike': 1,
+    'Serration': 1, 
+    'Hornet Strike': 1,
   });
   const [submittedItems, setSubmittedItems] = useState({});
   const copiedRef = useRef();
+  const copySelectionRef = useRef();
 
   const [bestTradePollStatus, setBestTradePollStatus] = useState({
     'taskId': null,
@@ -93,10 +94,28 @@ export default function BestTrade({setting}) {
     setSubmittedItems({...selectedItems});
   };
 
-  const handleCopySelectionToClipboard = () => {
-    const textToCopy = stringifySelectedItems(selectedItems);
-    navigator.clipboard.writeText(textToCopy);
+  // const handleCopySelectionToClipboard = () => {
+  //   const textToCopy = stringifySelectedItems(selectedItems);
+  //   navigator.clipboard.writeText(textToCopy);
     
+  //   copiedRef.current.classList.remove('hidden');
+  //   setTimeout(() => {
+  //     copiedRef.current.classList.add('hidden');
+  //   }, 2000);
+  // };
+  // technically a hack? this works, but idk why tbh
+  const handleCopySelection = () => {
+    const textToCopy = stringifySelectedItems(selectedItems);
+
+    setTimeout(() => {
+      if (copySelectionRef.current) {
+        copySelectionRef.current.classList.remove('hidden');
+        copySelectionRef.current.value = textToCopy;
+        copySelectionRef.current.focus();
+        copySelectionRef.current.select();
+      }
+    }, 0);
+
     copiedRef.current.classList.remove('hidden');
     setTimeout(() => {
       copiedRef.current.classList.add('hidden');
@@ -142,23 +161,24 @@ export default function BestTrade({setting}) {
         setSearchText={handleSearchBarText} />
 
       <div className='flex my-2'>
-        <p className="mr-2 py-1 text-white text-lg font-mono font-semibold">Current Item List: </p>
-        <button className="mr-2 px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300" onClick={handleClearAll}>
+        <p className="mr-2 py-1 text-white text-lg font-mono font-semibold whitespace-nowrap">Current Item List: </p>
+        <button className="mr-2 px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300 whitespace-nowrap" onClick={handleClearAll}>
           Clear All
         </button>
         <div className='mr-2 relative inline-block'>
-          <button className="px-2 py-1 bg-green-900 hover:bg-green-700 text-white rounded border border-green-300" onClick={handleCopySelectionToClipboard}>
-            Copy Selection to Clipboard
+          <button className="px-2 py-1 bg-green-900 hover:bg-green-700 text-white rounded border border-green-300 whitespace-nowrap" onClick={handleCopySelection}>
+            Copy Selection
           </button>
           <div ref={copiedRef} className="hidden absolute inset-0 bottom-full -translate-y-4 flex items-center justify-center">
-            <div className="bg-black/70 text-white px-3 py-1 rounded">
-              Copied!
+            <div className="bg-black/70 text-white px-3 py-1 rounded whitespace-nowrap">
+              Text refreshed!
             </div>
           </div>
         </div>
-        <button className="px-2 py-1 bg-blue-900 hover:bg-blue-700 text-white rounded border border-blue-300" onClick={handleSubmitSelectedItems}>
+        <button className="mr-2 px-2 py-1 bg-blue-900 hover:bg-blue-700 text-white rounded border border-blue-300 whitespace-nowrap" onClick={handleSubmitSelectedItems}>
           <b>Calculate Best Trade</b>
         </button>
+        <input ref={copySelectionRef} readOnly className="hidden border rounded border-gray-500 focus:border-gray-300 border-black px-1 bg-gray-900 w-full font-sans text-white" type="text" value="" />
       </div>
 
       <div className='flex flex-wrap'>
