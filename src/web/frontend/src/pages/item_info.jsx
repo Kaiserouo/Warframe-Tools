@@ -53,6 +53,7 @@ export default function ItemInfo({setting}) {
     <div className="text-white font-sans my-2">
       <p>Type item name <span className='text-gray-400'>(e.g., "Volt Prime Blueprint")</span> to see its market information.</p>
       <p>Will match all substring <span className='text-gray-400'>(e.g., "Volt Prime" matches everything about Volt Prime)</span></p>
+      <p>You can also separate multiple items with a "+" <span className='text-gray-400'>(e.g., "Volt Prime + Specter Prime" will search both of them at once)</span></p>
     </div>
     <SearchBar 
       placeholder="Search items..."

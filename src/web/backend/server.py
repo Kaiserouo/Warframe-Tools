@@ -571,6 +571,9 @@ def function_item():
     }
 
     only one of search_text and item_list is required
+    - search_text: search for items that contain the text, case-insensitive
+        if the search text has "+", will do OR search, e.g., "volt + voruna" will search for items that contain "volt" or "voruna"
+    - item_list: directly specify the item names, if an item name is not found
     
     returns: ItemTable format
 
@@ -592,11 +595,15 @@ def function_item():
             if item_name in market_map
         ]
     elif search_text is not None:
-        market_item_ls = [
-            market_map[item_name]
-            for item_name in market_map
-            if search_text.lower().strip() in item_name.lower()
-        ]
+        item_name_ls = set()
+        for st in search_text.split('+'):
+            st = st.strip()
+            item_name_ls.update([
+                item_name
+                for item_name in market_map
+                if st.lower() in item_name.lower()
+            ])
+        market_item_ls = [market_map[item_name] for item_name in item_name_ls]   # deduplicate
     else:
         market_item_ls = []
     print(market_item_ls)
