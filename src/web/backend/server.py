@@ -58,7 +58,7 @@ def refresh():
     market_id_map = wfm.get_market_items_id_map(market_items)
     print(f'{util.GREEN}[*] get ducat data...{util.RESET}')
     ducat_data = wfm.get_ducat_data(market_items)
-    market_data_update_date = datetime.datetime.now()
+    market_data_update_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     cache = {}
 
 def use(name, callback):

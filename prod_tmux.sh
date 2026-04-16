@@ -6,6 +6,6 @@
 # please make sure that you use LF instead of CRLF in VSCode setting
 
 tmux new-session -d -s wf;
-tmux send-keys -t wf 'git pull; cd src/web/frontend; npm build; cd ../../..; python -m src.web.backend.server' C-m;
+tmux send-keys -t wf 'git pull; cd src/web/frontend; npm run build; cd ../../..; python -m src.web.backend.server' C-m;
 
 tmux attach -t wf;
