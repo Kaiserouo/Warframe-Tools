@@ -12,6 +12,7 @@ import os
 import time
 import uuid
 import concurrent
+from joblib import Parallel, delayed
 
 from ... import warframe_market as wfm
 from ... import interactive as wfi
@@ -152,6 +153,8 @@ def task_prepare_market_items(task_status, stop_obj, market_item_names):
     can only be called in a task
     will only set and update total and current! other fields are not modified
 
+    if the item already has price etc. data inside, we skip that item.
+
     Args:
         task_status: dict to update progress status
         market_item_names: list of item names to prepare
@@ -162,17 +165,58 @@ def task_prepare_market_items(task_status, stop_obj, market_item_names):
     total = len(market_item_names)
     task_status['total'] = total
     task_status['current'] = 0
-    for item_name in market_item_names:
-        print(f'{util.CYAN}{task_status["current"]}/{total} getting lock {util.RESET}')
-        with market_lock:
-            print(f'{util.CYAN}{task_status["current"]}/{total} got lock, preparing {util.RESET}')
-            item = market_map.get(item_name)
+
+    # THIS WHOLE THING IS SEQUENTIAL!!!!!!!!!!!!!!!!
+    def sequential():
+        for item_name in market_item_names:
+            print(f'{util.CYAN}{task_status["current"]}/{total} getting lock {util.RESET}')
+            with market_lock:
+                print(f'{util.CYAN}{task_status["current"]}/{total} got lock, getting item {util.RESET}')
+                item = market_map.get(item_name)
+            
+            print(f'{util.CYAN}{task_status["current"]}/{total} released lock, preparing item{util.RESET}')
             if item is not None and item.price is None:
-                item.prepare()
-        print(f'{util.CYAN}{task_status["current"]}/{total}{util.RESET}')
-        if stop_obj['stop']:
-            break
-        task_status['current'] += 1
+                data = item.fetch_prepare_data()
+            
+            with market_lock:
+                print(f'{util.CYAN}{task_status["current"]}/{total} got lock, preparing {util.RESET}')
+                item = market_map.get(item_name)
+                if item is not None and item.price is None:
+                    item.prepare(data)
+            print(f'{util.CYAN}{task_status["current"]}/{total}{util.RESET}')
+            if stop_obj['stop']:
+                break
+            task_status['current'] += 1
+
+    def parallel():
+        def task(item_name):
+            if stop_obj['stop']:
+                return
+            print(f'{util.CYAN}{task_status["current"]}/{total} [{item_name}] getting lock {util.RESET}')
+            with market_lock:
+                print(f'{util.CYAN}{task_status["current"]}/{total} [{item_name}] got lock, getting item {util.RESET}')
+                item = market_map.get(item_name)
+            
+            print(f'{util.CYAN}{task_status["current"]}/{total} [{item_name}] released lock, preparing item{util.RESET}')
+            if item is not None and item.price is None:
+                data = item.fetch_prepare_data()
+            
+            with market_lock:
+                print(f'{util.CYAN}{task_status["current"]}/{total} [{item_name}] got lock, preparing {util.RESET}')
+                item = market_map.get(item_name)
+                # TODO: check if prev item == cur item...?
+                if item is not None and item.price is None:
+                    item.prepare(data)
+                    
+            print(f'{util.CYAN}{task_status["current"]}/{total} [{item_name}]{util.RESET}')
+            
+            task_status['current'] += 1
+            return item
+    
+        results = Parallel(n_jobs=5, require='sharedmem')(delayed(task)(item_name) for item_name in market_item_names)
+    
+    # sequential()
+    parallel()
     return 
 
 

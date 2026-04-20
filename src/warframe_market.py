@@ -607,21 +607,50 @@ class MarketItem:
         # get wiki link from drops.warframestat.us
         r = retry_request(f'https://api.warframe.market/v2/item/{self.url_name}')
         items_data = json.loads(r.content)['data']
-        self.wiki_link = items_data['i18n']['en'].get('wikiLink', None)
-        self.description = items_data['i18n']['en'].get('description', None)
+        return {
+            'wiki_link': items_data['i18n']['en'].get('wikiLink', None),
+            'description': items_data['i18n']['en'].get('description', None),
+        }
 
-    def prepare(self):
+    def fetch_prepare_data(self):
+        """
+            fetch the prepared data, takes time with API calls to warframe market
+
+            note that it only fetches the data, nothing else
+            if you wanna update this item's order etc, please use prepare(pre_prepared_data)
+        """
+        orders = self._get_orders()
+        statistic = self._get_statistic()
+        
+        return {
+            'orders': orders,
+            'statistic': statistic,
+            'price': PriceOracle(self, orders, statistic),
+            **self._get_other_item_info(),
+            'prepare_datetime': datetime.datetime.now(),
+        }
+        
+    def prepare(self, pre_prepared_data=None):
         """
             fetch anything it can first and store inside itself
             please don't get_order or get_statistics yourself
-        """
-        self.orders = self._get_orders()
-        self.statistic = self._get_statistic()
-        self.price = PriceOracle(self, self.orders, self.statistic)
-        self._get_other_item_info()
-        self.prepare_datetime = datetime.datetime.now()
+            
+            if you already fetch_prepare_data()'d,
+            please provide it in pre_prepared_data argument,
+            the function will immediately update the object with the given data
 
-        return self.orders, self.statistic, self.price
+            note that we fully trust every single key-value pair of pre_prepared_data,
+            without checking the keys etc.
+        """
+        if pre_prepared_data is None:
+            pre_prepared_data = self.fetch_prepare_data()
+        
+        for k, v in pre_prepared_data.items():
+            setattr(self, k, v)
+
+        print(f'[prepare] {self.orders = }, {self.price = }')
+
+        return pre_prepared_data
 
     def get_wfm_url(self):
         """
