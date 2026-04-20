@@ -642,7 +642,7 @@ class MarketItem:
         if pre_prepared_data is not None:
             pre_prepared_data = self.fetch_prepare_data()
         
-        for k, v in pre_prepared_data:
+        for k, v in pre_prepared_data.items():
             setattr(self, k, v)
 
         return pre_prepared_data
