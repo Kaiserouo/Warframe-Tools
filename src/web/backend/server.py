@@ -152,6 +152,8 @@ def task_prepare_market_items(task_status, stop_obj, market_item_names):
     can only be called in a task
     will only set and update total and current! other fields are not modified
 
+    if the item already has price etc. data inside, we skip that item.
+
     Args:
         task_status: dict to update progress status
         market_item_names: list of item names to prepare
@@ -165,10 +167,18 @@ def task_prepare_market_items(task_status, stop_obj, market_item_names):
     for item_name in market_item_names:
         print(f'{util.CYAN}{task_status["current"]}/{total} getting lock {util.RESET}')
         with market_lock:
+            print(f'{util.CYAN}{task_status["current"]}/{total} got lock, getting item {util.RESET}')
+            item = market_map.get(item_name)
+        
+        print(f'{util.CYAN}{task_status["current"]}/{total} preparing...{util.RESET}')
+        if item is not None and item.price is None:
+            data = item.fetch_prepare_data()
+        
+        with market_lock:
             print(f'{util.CYAN}{task_status["current"]}/{total} got lock, preparing {util.RESET}')
             item = market_map.get(item_name)
             if item is not None and item.price is None:
-                item.prepare()
+                item.prepare(data)
         print(f'{util.CYAN}{task_status["current"]}/{total}{util.RESET}')
         if stop_obj['stop']:
             break
