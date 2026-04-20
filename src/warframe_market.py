@@ -620,11 +620,11 @@ class MarketItem:
             if you wanna update this item's order etc, please use prepare(pre_prepared_data)
         """
         return {
-            'orders': self._get_orders()
-            'statistic': self._get_statistic()
-            'price': PriceOracle(self, self.orders, self.statistic)
+            'orders': self._get_orders(),
+            'statistic': self._get_statistic(),
+            'price': PriceOracle(self, self.orders, self.statistic),
             **self._get_other_item_info(),
-            'prepare_datetime': datetime.datetime.now()
+            'prepare_datetime': datetime.datetime.now(),
         }
         
     def prepare(self, pre_prepared_data=None):
