@@ -777,37 +777,59 @@ def get_syndicate_names() -> list[str]:
 
     return syndicate_names + additional_syndicates.keys()
 
-def get_syndicate_items(syndicate_name: str, market_map: None | list[MarketItem] = None) -> list[MarketItem]:
+def get_syndicate_items(syndicate_name: str, market_map: None | list[MarketItem] = None, return_standing = False, _r = None) -> list[MarketItem]:
     """
     get syndicate items from drops.warframestat.us
     ref. https://github.com/WFCD/warframe-drop-data
 
-    return list of MarketItem
+    return:
+    - list[MarketItem], if return_standing is False
+    - list[dict[str, MarketItem | int | None]], if return_standing is True
+        the dict has 2 keys: 'item' -> MarketItem and 'standing' -> int | None (if we don't have standing data)
+    
+    - _r is reserved for get_all_syndicate_items to prevent constantly fetching json from the api
     """
 
     if market_map is None:
         market_map = get_market_items_name_map()
 
-    syndicate_item_names: list[str] = None
+    syndicate_items: list[dict[int, str | int]] = None
+
     if syndicate_name in additional_syndicates:
-        syndicate_item_names = additional_syndicates[syndicate_name]['names']
+        syndicate_items = additional_syndicates[syndicate_name]
+        
     else:
-        r = requests.get('https://drops.warframestat.us/data/syndicates.json')
-        syndicate_item_names = json.loads(r.content)['syndicates'][syndicate_name]
-        syndicate_item_names = [i['item'] for i in syndicate_item_names]
+        if _r is None:
+            r = requests.get('https://drops.warframestat.us/data/syndicates.json')
+        else:
+            r = _r
+        syndicate_items = json.loads(r.content)['syndicates'][syndicate_name]
+        syndicate_items = [
+            {'name': i['item'], 'standing': i.get('standing', None)} for i in syndicate_items
+        ]
     
     # deal with warframe mods that has trailing names and parenthesis in them
-    parenthesis_item_names = [
-        name[:name.index('(') - 1]
-        for name in syndicate_item_names if '(' in name
+    parenthesis_items = [
+        {'name': item['name'][:item['name'].index('(') - 1], 'standing': item['standing']}
+        for item in syndicate_items if '(' in item['name']
     ]
-    syndicate_item_names = set(syndicate_item_names) | set(parenthesis_item_names)
+    syndicate_items = syndicate_items + parenthesis_items
 
-    syndicate_item_names = syndicate_item_names & set(market_map.keys())
+    # get all items
+    market_map_names = set(market_map.keys())
+    syndicate_items = [i for i in syndicate_items if i['name'] in market_map_names]
 
-    return [market_map[name] for name in syndicate_item_names]
+    if not return_standing:
+        return [market_map[i['name']] for i in syndicate_items]
+    else:
+        return [
+            {
+                'item': market_map[i['name']],
+                'standing': i['standing']
+            } 
+        for i in syndicate_items]
 
-def get_all_syndicate_items(market_map: None | list[MarketItem] = None) -> dict[str, list[MarketItem]]:
+def get_all_syndicate_items(market_map: None | list[MarketItem] = None, return_standing = False) -> dict[str, list[MarketItem]]:
     """
     return item list for all syndicate
 
@@ -823,23 +845,8 @@ def get_all_syndicate_items(market_map: None | list[MarketItem] = None) -> dict[
     syndicates = json.loads(r.content)['syndicates']
 
     for syndicate_name in list(syndicates.keys()) + list(additional_syndicates.keys()):
-        syndicate_item_names: list[str] = None
-        if syndicate_name in additional_syndicates:
-            syndicate_item_names = additional_syndicates[syndicate_name]['names']
-        else:
-            syndicate_item_names = syndicates[syndicate_name]
-            syndicate_item_names = [i['item'] for i in syndicate_item_names]
-        
-        # deal with warframe mods that has trailing names and parenthesis in them
-        parenthesis_item_names = [
-            name[:name.index('(') - 1]
-            for name in syndicate_item_names if '(' in name
-        ]
-        syndicate_item_names = set(syndicate_item_names) | set(parenthesis_item_names)
-
-        syndicate_item_names = syndicate_item_names & set(market_map.keys())
-
-        syndicate_map[syndicate_name] = [market_map[name] for name in syndicate_item_names]
+        print(syndicate_name)
+        syndicate_map[syndicate_name] = get_syndicate_items(syndicate_name, market_map, return_standing=return_standing, _r=r)
 
     return syndicate_map
 
@@ -988,8 +995,13 @@ def get_ducat_data(market_items: None | list[MarketItem] = None) -> list[dict[st
 if __name__ == '__main__':
     market_items = get_market_item_list()
     # print(util.str_type(market_items[0], print_unknown_obj_vars=True))
-    print(get_ducat_data())
+    # print(get_ducat_data())
     # rewards = get_transient_mission_rewards()
     # print(rewards.keys())
     # p = Player(user_slug='kaiserouo')
     # p.fetch_data()
+    # print(f"{get_syndicate_items('Arbiters of Hexis', return_standing=True) = }")
+    # print(f"{get_syndicate_items('Arbiters of Hexis', return_standing=False) = }")
+    print(f"{get_syndicate_items('New Loka', return_standing=True) = }")
+    # print(f"{get_syndicate_items('The Hex', return_standing=False) = }")
+    # print(f"{get_all_syndicate_items(return_standing=True)['New Loka'] = }")

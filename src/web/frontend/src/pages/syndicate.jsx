@@ -22,7 +22,22 @@ export default function Syndicate({setting}) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  let itemList = useMemo(() => syndicateData?.[searchText] ?? [], [syndicateData, searchText]);
+  let itemList = useMemo(() => {
+    const syndicateItems = syndicateData?.[searchText] ?? [];
+    const itemList = syndicateItems.map(item => item.name);
+    console.log(`itemList: ${JSON.stringify(itemList)}`)
+    return itemList;
+  }, [syndicateData, searchText]);
+
+  let standingMap = useMemo(() => {
+    const syndicateItems = syndicateData?.[searchText] ?? [];
+    const standingMap = {};
+    syndicateItems.forEach(item => {
+      standingMap[item.name] = item.standing;
+    });
+    console.log(`standingMap: ${JSON.stringify(standingMap)}`)
+    return standingMap;
+  }, [syndicateData, searchText]);
 
   const fetchTaskIdCallback = useCallback(
     async () => fetchFunctionItemItemList(setting.oracle_type, setting.ducantor_price_override, itemList).then(data => data.task_id),
@@ -41,10 +56,21 @@ export default function Syndicate({setting}) {
     return () => { ignore_obj['ignore'] = true; };
   }, [searchText, handleSubmit, setting.oracle_type, setting.ducantor_price_override]);
   
-  let itemTable = null;
-  if (searchText !== null && itemPollStatus.data) {
-    itemTable = itemPollStatus.data;
-  }
+  let itemTable = useMemo(() => {
+    // assume the item table is "Name, *, Price, ..."
+    let itemTable = null;
+    if (searchText !== null && itemPollStatus.data) {
+      itemTable = {
+        "headers": [...itemPollStatus.data.headers, {"name": 'Standing', "type": "integer"}, {"name": 'Plat / 10k Standing', "type": "float"}],
+        "items": itemPollStatus.data.items.map(item => {
+          const standing = standingMap[item[0]];
+          return [...item, standing, standing ? item[2] / standing * 10000 : null];
+        })
+      };
+    }
+    return itemTable;
+  }, [searchText, itemPollStatus.data]);
+
 
   return (<>
     <div className="mx-4 my-4">

@@ -480,15 +480,23 @@ def syndicate_data():
 
     returns:
     {
-        syndicate_name: list[item names]
+        syndicate_name: list[
+            {'name': str, 'standing': int | None}
+        ]
     }
     """
     def _get_syndicate_data():
         with market_lock:
-            syndicate_items = wfm.get_all_syndicate_items(market_map=market_map)
+            syndicate_data = wfm.get_all_syndicate_items(market_map=market_map, return_standing=True)
             return {
-                syndicate_name: [item.item_name for item in items]
-                for syndicate_name, items in syndicate_items.items()
+                syndicate_name: [
+                    {
+                        'name': item['item'].item_name,
+                        'standing': item['standing']
+                    }
+                    for item in syndicate_items
+                ]
+                for syndicate_name, syndicate_items in syndicate_data.items()
             }
     return use('syndicate_data', _get_syndicate_data)
 

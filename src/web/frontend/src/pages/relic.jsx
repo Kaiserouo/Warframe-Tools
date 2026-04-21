@@ -108,13 +108,6 @@ export default function Relic({setting}) {
     return getItemListFromRelicTable(relicTable);
   }, [relicTable]);
 
-  // const { isSuccess: oracleIsSuccess, isPending: oracleIsPending, error: oracleError, data: oracleData } = useQuery({
-  //   queryKey: ['function_relic', setting.oracle_type, searchType, searchText],
-  //   queryFn: () => fetchPriceOracle(setting.oracle_type, itemList),
-  //   staleTime: 1 * 60 * 1000, // 1 minute
-  //   enabled: itemList.length > 0,
-  // })
-
   const fetchTaskIdCallback = useCallback(
     async () => fetchPriceOracle(setting.oracle_type, setting.ducantor_price_override, itemList).then(data => data.task_id),
     [setting.oracle_type, setting.ducantor_price_override, itemList]
