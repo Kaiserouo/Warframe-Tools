@@ -33,7 +33,7 @@ function getRelicTable(relicData, searchType, searchText) {
   }
 
   else if (searchType === 'relic') {
-    if (searchText.trim().toLowerCase() === 'varzia') {
+    if (searchText.trim().toLowerCase().split(' ').includes('varzia')) {
       // special case: Varzia sells all currently available relics
       for (let relicName of relicData.varzia_relics) {
         relicTable.push({
@@ -136,7 +136,7 @@ export default function Relic({setting}) {
   if (searchType === 'relic') {
     if (!relicIsPending && !relicError && relicData) {
       searchBarItems = Object.keys(relicData.relics);
-      searchBarItems.push('Varzia');  // add Varzia as a special search term
+      searchBarItems.push(`Varzia (${relicData.varzia_relics ? relicData.varzia_relics.length : 0} relics)`);  // add Varzia as a special search term
     }
   } else {
     if (!marketIsPending && !marketError && marketData) {
