@@ -23,9 +23,9 @@ app = Flask(__name__)
 BUILD_DIR = Path('./src/web/frontend/build/')
 
 try:
-    from .config import HOST, PORT
+    from .config import DEBUG, HOST, PORT
 except ImportError:
-    HOST, PORT = 'localhost', 5000
+    DEBUG, HOST, PORT = True, 'localhost', 5000
 
 wfm.RETRY_MAX_TIME = 1    # reduce retry time for better responsiveness
 
@@ -938,4 +938,4 @@ def _test_best_trade():
 
 if __name__ == '__main__':
     refresh()
-    app.run(debug=True, host=HOST, port=PORT)
+    app.run(debug=DEBUG, host=HOST, port=PORT)
