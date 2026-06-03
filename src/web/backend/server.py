@@ -219,7 +219,6 @@ def task_prepare_market_items(task_status, stop_obj, market_item_names):
     parallel()
     return 
 
-
 # --------------------
 
 @app.route('/', defaults={'path': ''})
@@ -303,7 +302,6 @@ def _get_price_oracle(item_names, oracle_type, ducantor_price_override):
                 else None
             for item_name in item_names
         }
-
 
 @app.route('/api/price_oracle', methods=['POST'])
 def get_price_oracle():
@@ -941,7 +939,6 @@ def _test_best_trade():
     result = _function_best_trade(spec, price_oracle)
     for i in result['trade_options']:
         print(i)
-    
 
 if __name__ == '__main__':
     refresh()
