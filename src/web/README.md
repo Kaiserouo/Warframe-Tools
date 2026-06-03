@@ -30,6 +30,9 @@ pip install -r requirement.txt
 # note that we use the newest version, versions too old wouldn't be able to run
 cd Warframe-Tool/src/web/frontend
 npm install
+
+# if it complains that it doesn't have vite:
+npm install vite @vitejs/plugin-react --save-dev
 ```
 
 

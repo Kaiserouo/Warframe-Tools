@@ -61,10 +61,11 @@ export default function Syndicate({setting}) {
     let itemTable = null;
     if (searchText !== null && itemPollStatus.data) {
       itemTable = {
-        "headers": [...itemPollStatus.data.headers, {"name": 'Standing', "type": "integer"}, {"name": 'Plat / 10k Standing', "type": "float"}],
+        "headers": [...itemPollStatus.data.headers, {"id": "standing", "name": 'Standing', "type": "integer"}, {"id": "plat_per_standing", "name": 'Plat / 10k Standing', "type": "float"}],
         "items": itemPollStatus.data.items.map(item => {
-          const standing = standingMap[item[0]];
-          return [...item, standing, standing ? item[2] / standing * 10000 : null];
+          // we assume there is always a header with id 'name' and 'plat'
+          const standing = standingMap[item['name']];
+          return {...item, "standing": standing, "plat_per_standing": standing ? item['plat'] / standing * 10000 : null};
         })
       };
     }

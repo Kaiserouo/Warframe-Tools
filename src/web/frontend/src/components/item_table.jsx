@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import ItemInfobox from './item_infobox';
 
-function TableHeader({header, index, sortBy, sortAsc, setSortBy, setSortAsc, filterBy, setFilterBy}) {
-  // header: dict[str, str], index: int
+function TableHeader({header, sortBy, sortAsc, setSortBy, setSortAsc, filterBy, setFilterBy}) {
+  // header: dict[str, str]
   function onClickHeader() {
-    if (filterBy.name === header.name) {
-      setFilterBy({ name: null, value: '' });
+    if (filterBy.header?.id === header.id) {
+      setFilterBy({ header: null, value: '' });
     }
-    if (sortBy === index) {
+    if (sortBy?.id === header.id) {
       if (sortAsc === false) {
         // back to default
         setSortBy(null); setSortAsc(true);
@@ -16,13 +16,13 @@ function TableHeader({header, index, sortBy, sortAsc, setSortBy, setSortAsc, fil
         setSortAsc(false);
       }
     } else {
-      setSortBy(index);
+      setSortBy(header);
       setSortAsc(true);
     }
   }
 
-  const isFilterColume = filterBy.name === header.name;
-  const isSortedColume = sortBy === index;
+  const isFilterColume = filterBy.header?.id === header.id;
+  const isSortedColume = sortBy?.id === header.id;
 
   return (
     <th className={`border border-gray-600 px-4 py-2 ${isFilterColume ? "bg-[#824545]" : "bg-[#456882]"}`}>
@@ -38,7 +38,7 @@ function TableHeaderRow({header, sortBy, sortAsc, setSortBy, setSortAsc, filterB
   return (
     <tr>
       {header.map((h, idx) => (
-        <TableHeader key={idx} header={h} index={idx} sortBy={sortBy} sortAsc={sortAsc} setSortBy={setSortBy} setSortAsc={setSortAsc} filterBy={filterBy} setFilterBy={setFilterBy} />
+        <TableHeader key={idx} header={h} sortBy={sortBy} sortAsc={sortAsc} setSortBy={setSortBy} setSortAsc={setSortAsc} filterBy={filterBy} setFilterBy={setFilterBy} />
       ))}
     </tr>
   );
@@ -70,10 +70,10 @@ function TableItemCell({header, value, setting, sortBy, setSortBy, filterBy, set
       case 'string':
         innerElement = (
           <p className="text-right hover:bg-gray-600 px-2 py-1 rounded" onClick={() => {
-              if (filterBy.name === header.name && filterBy.value === value.toString()) {
-                setFilterBy({ name: null, value: '' });
+              if (filterBy.header?.id === header.id && filterBy.value === value.toString()) {
+                setFilterBy({ header: null, value: '' });
               } else {
-                setFilterBy({ name: header.name, value: value.toString() })
+                setFilterBy({ header: header, value: value.toString() })
                 setSortBy(null); setSortAsc(true);
               }
             }}>
@@ -109,7 +109,7 @@ function TableItemRow({headers, item, setting, sortBy, setSortBy, filterBy, setF
   return (
     <tr>
       {headers.map((h, idx) => (
-        <TableItemCell key={idx} header={h} value={item[idx]} setting={setting} sortBy={sortBy} setSortBy={setSortBy} filterBy={filterBy} setFilterBy={setFilterBy} />
+        <TableItemCell key={idx} header={h} value={item[h.id]} setting={setting} sortBy={sortBy} setSortBy={setSortBy} filterBy={filterBy} setFilterBy={setFilterBy} />
       ))}
     </tr>
   );
@@ -117,15 +117,15 @@ function TableItemRow({headers, item, setting, sortBy, setSortBy, filterBy, setF
 
 
 export default function ItemTable({itemTable, setting}) {
-  // item_table: {"headers": list[dict[str, str]], "items": list[list[Any]]}
-  //     - each header looks like: {"name": str, "type": Literal["number", "deviation", "string", "url", "item_name"]}
-  //     - each item is a list, in the order of headers
+  // item_table: {"headers": list[dict[str, str]], "items": list[dict[str, Any]]}
+  //     - each header looks like: {"id": str, "name": str, "type": Literal["number", "deviation", "string", "url", "item_name"]}
+  //     - each item is a dict, for each header's id, there should be a corresponding field in item
 
   // sorting, default (null, true) for no sorting (use the order from item_table)
-  const [sortBy, setSortBy] = useState(null);  // index of header to sort by
+  const [sortBy, setSortBy] = useState(null);    // should be a header (i.e., dict[str, str])
   const [sortAsc, setSortAsc] = useState(true);  // whether to sort ascending
   const [filterBy, setFilterBy] = useState({
-    name: null,  // header to filter by, indicated by its name, null means don't filter by this
+    header: null,  // header to filter by
     value: '',  // filter value
   });
 
@@ -137,8 +137,8 @@ export default function ItemTable({itemTable, setting}) {
 
   if (sortBy !== null) {
     sortedItems.sort((a, b) => {
-      let valA = a[sortBy];
-      let valB = b[sortBy];
+      let valA = a[sortBy.id];
+      let valB = b[sortBy.id];
 
       // handle null values
       if (valA === null && valB === null) return 0;
@@ -146,7 +146,7 @@ export default function ItemTable({itemTable, setting}) {
       if (valB === null) return -1;
 
       // handle number type items
-      switch (itemTable.headers[sortBy].type) {
+      switch (sortBy.type) {
         case 'integer':
         case 'float':
         case 'deviation':
@@ -160,12 +160,10 @@ export default function ItemTable({itemTable, setting}) {
     });
   }
 
-  if (filterBy.name !== null) {
-    const filterIdx = itemTable.headers.findIndex(h => h.name === filterBy.name);
-    console.log('filtering by', filterBy.name, 'with value', filterBy.value, 'at index', filterIdx);
+  if (filterBy.header !== null) {
+    console.log('filtering by', filterBy.header.name, 'with value', filterBy.value);
     sortedItems = sortedItems.filter(item => {
-      console.log('filtering item', item, 'with value', item[filterIdx]);
-      const val = item[filterIdx];
+      const val = item[filterBy.header.id];
       return val !== null && val.toString() === filterBy.value;
     });
   }

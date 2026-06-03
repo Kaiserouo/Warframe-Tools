@@ -28,7 +28,6 @@ except ImportError:
     HOST, PORT = 'localhost', 5000
 
 wfm.RETRY_MAX_TIME = 1    # reduce retry time for better responsiveness
-                          # (note that we effective use single thread here, because of Cyphon GIL and lack of `multiprocessing`)
 
 market_lock = threading.Lock()   # ok ngl i don't really know why i added this but better safe than sorry
 market_items: list[wfm.MarketItem] = None
@@ -527,6 +526,16 @@ def get_function_item_format(market_item_ls, oracle_type, ducantor_price_overrid
     assume that all other items are prepared
 
     returns: ItemTable format
+        {
+            "headers": [
+                {"id": str, "name": str, "type": str},  // id is for indexing item's field
+                ...                                     // headers are shown in order
+            ],
+            "items": [
+                {header_id: attr}                       // id should be one of the header id, attr is the value to display in the table
+                ...                                     // items are shown in order
+            ]
+        }
     """
     if ducantor_price_override not in ['none', 'day', 'hour']:
         raise ValueError("invalid ducantor_price_override")
@@ -558,8 +567,8 @@ def get_function_item_format(market_item_ls, oracle_type, ducantor_price_overrid
                 'rmax_plat': None,
                 'plat_times21': None,
                 'vol': get_vol(item),
-                'url': item.get_wfm_url(),
-                'wiki': item.wiki_link, # may be None
+                # 'url': item.get_wfm_url(),
+                # 'wiki': item.wiki_link, # may be None
             }
 
             if 'arcane_enhancement' in item.tags:
@@ -575,30 +584,17 @@ def get_function_item_format(market_item_ls, oracle_type, ducantor_price_overrid
 
     return {
         "headers": [
-            {"name": 'Name', "type": "item_name"},
-            {"name": 'Type', "type": "string"},
-            {"name": 'Plat\n(48hr)', "type": "float"},
-            {"name": 'RMP/21\n(Arcane)', "type": "float"},
-            {"name": 'R.Max Plat\n(48hr)', "type": "float"},
-            {"name": 'P*21\n(Arcane)', "type": "float"},
-            {"name": 'Volume\n(48hr)', "type": "integer"},
-            {"name": 'WFM URL', "type": "url"},
-            {"name": 'Wiki', "type": "url"},
+            {"id": "name", "name": 'Name', "type": "item_name"},
+            {"id": "type", "name": 'Type', "type": "string"},
+            {"id": "plat", "name": 'Plat\n(48hr)', "type": "float"},
+            {"id": "rmax_plat_div21", "name": 'RMP/21\n(Arcane)', "type": "float"},
+            {"id": "rmax_plat", "name": 'R.Max Plat\n(48hr)', "type": "float"},
+            {"id": "plat_times21", "name": 'P*21\n(Arcane)', "type": "float"},
+            {"id": "vol", "name": 'Volume\n(48hr)', "type": "integer"},
+            # {"id": "url", "name": 'WFM URL', "type": "url"},
+            # {"id": "wiki", "name": 'Wiki', "type": "url"},
         ],
-        "items": [
-            [
-                item['name'],
-                item['type'],
-                item['plat'],
-                item['rmax_plat_div21'],
-                item['rmax_plat'],
-                item['plat_times21'],
-                item['vol'],
-                item['url'],
-                item['wiki']
-            ]
-            for item in item_format_ls
-        ]
+        "items": item_format_ls
     }
 
 @app.route('/api/function_item', methods=['POST'])
