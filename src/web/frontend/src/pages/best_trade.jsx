@@ -46,6 +46,95 @@ function stringifySelectedItems(selectedItems) {
   return Object.entries(selectedItems).map(([item, qty]) => Array(qty).fill(`${item}`).join(' + ')).join(' + ');
 }
 
+function SelectedItemTable({selectedItems, setSelectedItems, setting, marketData}) {
+  /*
+    selectedItems: map of item name to quantity
+    setSelectedItems: function to update selected items
+    setting: the global setting
+    marketData: the market data directly from the API, used to get item categories
+  */
+
+
+  // return (<div className='flex flex-wrap'>
+  //   {Object.keys(selectedItems).map((item, index) => (
+  //     <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+  //   ))}
+  // </div>);
+  
+  const modArcaneList = [];
+  const primeList = {};
+  const otherList = [];
+
+  for (const item of Object.keys(selectedItems)) {
+    if (marketData && marketData.market_data && item in marketData.market_data) {
+      if (marketData.market_data[item].is_mod) {
+        modArcaneList.push(item);
+      } else if (item.includes(' Prime ')) {
+        const baseName = item.replace(/ Prime .+$/, ' Prime');
+        if (!primeList[baseName]) {
+          primeList[baseName] = [];
+        }
+        primeList[baseName].push(item);
+      } else {
+        otherList.push(item);
+      }
+    }
+  }
+
+  console.log('modArcaneList', modArcaneList);
+  console.log('primeList', primeList);
+  console.log('otherList', otherList);
+
+  // sort prime list by name
+  const sortedPrimeListKeys = Object.keys(primeList).sort();
+
+  return (<>
+    <div className='flex flex-wrap'>
+      {Object.keys(selectedItems).map((item, index) => (
+        <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+      ))}
+    </div>
+    <div className="border-l-2 border-gray-500 pl-4">
+      <p className="text-l font-bold text-gray-300 my-2">Category:</p>
+      {modArcaneList.length > 0 && (
+        <>
+          <p className="text-l font-bold text-gray-300 my-2">Mod / Arcane:</p>
+          <div className='flex flex-wrap'>
+            {modArcaneList.map((item, index) => (
+              <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+            ))}
+          </div>
+        </>
+      )}
+      {sortedPrimeListKeys.length > 0 && (
+        <>
+          <p className="text-l font-bold text-gray-300 my-2">Prime:</p>
+          <div className=''>
+            {sortedPrimeListKeys.map((baseName) => (
+              <div key={baseName} className='ml-4'>
+                <div className="text-l font-bold text-gray-300 my-2">- {baseName}</div>
+                {primeList[baseName].map((item, index) => (
+                  <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+                ))}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      {otherList.length > 0 && (
+        <>
+          <p className="text-l font-bold text-gray-300 my-2">Other:</p>
+          <div className='flex flex-wrap'>
+            {otherList.map((item, index) => (
+              <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  </>);
+}
+
 export default function BestTrade({setting}) {
   const [selectedItems, setSelectedItems] = useState({
     'Serration': 1, 
@@ -181,11 +270,9 @@ export default function BestTrade({setting}) {
         <input ref={copySelectionRef} readOnly className="hidden border rounded border-gray-500 focus:border-gray-300 border-black px-1 bg-gray-900 w-full font-sans text-white" type="text" value="" />
       </div>
 
-      <div className='flex flex-wrap'>
-        {Object.keys(selectedItems).map((item, index) => (
-          <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
-        ))}
-      </div>
+      
+
+      <SelectedItemTable selectedItems={selectedItems} setSelectedItems={setSelectedItems} setting={setting} marketData={marketData} />
       <br />
 
       {bestTradePollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={bestTradePollStatus.progress} /> : null}
