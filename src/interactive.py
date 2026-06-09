@@ -17,9 +17,9 @@ from . import util
 from .data.syndicate_data import additional_syndicates
 from .data.relic_data import relic_data_map, relic_set_map
 
-market_items = wfm.get_market_item_list()
-market_map = wfm.get_market_items_name_map(market_items)
-market_id_map = wfm.get_market_items_id_map(market_items)
+# market_items = wfm.get_market_item_list()
+# market_map = wfm.get_market_items_name_map(market_items)
+# market_id_map = wfm.get_market_items_id_map(market_items)
 
 # we had problem with item "Silve & Aegis" due to "&" character in HTML, so we escape "&" to "&amp;" here
 HTML = lambda text: prompt_toolkit.HTML(text.replace('&', '&amp;'))

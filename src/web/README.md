@@ -53,6 +53,11 @@ python -m src.web.backend.server
 # the built code should be in web/frontend/build
 cd Warframe-Tool/web/frontend
 npm build
+
+# ALTERNATIVELY, there's a script that sets up tmux
+# to run the above 2 commands in a tmux window
+cd Warframe-Tool
+bash prod_tmux.sh
 ```
 
 The flask server also hosts the files in `src/web/frontend/build`, the URL should be something like `http://localhost:5000` (flask default URL).
@@ -64,6 +69,23 @@ Note that the server should be hosted on `localhost`, since this is a developmen
 > # change to your own IP and port, DEBUG toggles the debug mode for Flask
 > echo "DEBUG, HOST, PORT = False, 'localhost', 5000" > src/web/backend/config.py    
 > ```
+
+> For reasons unknown, if you use IPv6 to request api.warframe.market, it would hang after the server runs for a while. We need to make sure python request doesn't use IPv6.
+> 
+> There is no clean way to do so. Disabling IPv6 for the whole system is the solution that works for me.
+> ```bash
+> # to automatically disable ipv6 after startup:
+> sudo nano /etc/sysctl.d/99-disable-ipv6.conf
+> 
+> # type the following into the config file
+> net.ipv6.conf.all.disable_ipv6 = 1
+> net.ipv6.conf.default.disable_ipv6 = 1
+> 
+> # back in terminal
+> sudo sysctl --system  # apply immediately
+> ``` 
+
+
 ### Develop
 
 To run the server, you need node.js and related packages:
@@ -76,8 +98,8 @@ npm start
 cd Warframe-Tool
 python -m src.web.backend.server
 
-# alternatively, there's a script that sets up tmux
-# to run the above 2 commands in a window
+# ALTERNATIVELY, there's a script that sets up tmux
+# to run the above 2 commands in a tmux window
 cd Warframe-Tool
 bash dev_tmux.sh
 ```
