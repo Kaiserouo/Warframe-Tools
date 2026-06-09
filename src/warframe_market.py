@@ -515,6 +515,7 @@ class MarketItem:
     url_name: Any
     thumb: Any
     item_name: Any
+    tags: Any
     orders: Any
     statistic: Any
     price: Any
@@ -551,6 +552,7 @@ class MarketItem:
             self.url_name = market_json['url_name']
             self.thumb = market_json['']
             self.item_name = market_json['item_name']
+            self.tags = []
             self.orders: Orders | None = None
             self.statistic: Statistic | None = None
             self.price: PriceOracle | None = None

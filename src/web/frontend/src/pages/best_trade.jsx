@@ -81,10 +81,6 @@ function SelectedItemTable({selectedItems, setSelectedItems, setting, marketData
     }
   }
 
-  console.log('modArcaneList', modArcaneList);
-  console.log('primeList', primeList);
-  console.log('otherList', otherList);
-
   // sort prime list by name
   const sortedPrimeListKeys = Object.keys(primeList).sort();
 
