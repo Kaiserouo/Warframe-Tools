@@ -176,16 +176,20 @@ function SearchTypeChoice({choices, searchType, setSearchType, setSearchText}) {
     setSearchText(null);  // reset search text
     setSearchType(choice);
   }
+
+  const cnUnselected = "bg-gray-900 hover:bg-gray-700 text-white border-gray-300";
+  const cnSelected = "bg-gray-100 hover:bg-gray-300 text-black border-gray-300";
+
   return (
     <div className="flex gap-2 my-2">
       {choices.map(choice => (
         <button
           key={choice}
           onClick={() => onClick(choice)}
-          className={`px-4 py-2 rounded ${
+          className={`px-4 py-2 rounded border ${
             searchType === choice
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              ? cnSelected
+              : cnUnselected
           }`}
         >
           Search by {choice.charAt(0).toUpperCase() + choice.slice(1)}

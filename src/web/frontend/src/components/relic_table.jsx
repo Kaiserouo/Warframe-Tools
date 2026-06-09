@@ -170,13 +170,13 @@ export default function RelicTable({relicTable, priceOracle, setting}) {
 
   return (<>
     <div className="flex gap-2 my-2">
-      <button onClick={() => setIsCollapsed(Array(relicTable.length).fill(false))} className={`px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700`}>
+      <button onClick={() => setIsCollapsed(Array(relicTable.length).fill(false))} className={`px-4 py-2 rounded border bg-blue-800 text-white hover:bg-blue-700`}>
         Expand All
       </button>
-      <button onClick={() => setIsCollapsed(Array(relicTable.length).fill(true))} className={`px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700`}>
+      <button onClick={() => setIsCollapsed(Array(relicTable.length).fill(true))} className={`px-4 py-2 rounded border bg-blue-800 text-white hover:bg-blue-700`}>
         Collapse All
       </button>
-      <button onClick={onClickSort} className={`px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700`}>
+      <button onClick={onClickSort} className={`px-4 py-2 rounded border bg-blue-800 text-white hover:bg-blue-700`}>
         Sort {sortAsc === null ? '' : sortAsc ? '▲' : '▼'}
       </button>
     </div>

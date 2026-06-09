@@ -28,8 +28,8 @@ function FilterOptionSelection({ filterOption, setFilterOption }) {
    * }
    */
   return (<>
-    <div className="flex font-mono my-1">
-      <p className="mr-2 py-1 text-white text-lg">Filter: </p>
+    <div className="flex my-1">
+      <p className="mr-2 font-mono py-1 text-white text-lg">Filter: </p>
 
       <OptionToggleButton
         label="Arcane"
