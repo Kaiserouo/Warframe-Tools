@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 import {
   QueryClient,
@@ -66,13 +66,17 @@ export default function App() {
     })()
   );
 
+  const setSettingAndSave = useCallback((newSetting) => {
+    document.cookie = `setting=${encodeURIComponent(JSON.stringify(newSetting))}; path=/; max-age=31536000`; // 1 year
+    setSetting(newSetting);
+  }, [setSetting]);
+
   // save to cookie
-  document.cookie = `setting=${encodeURIComponent(JSON.stringify(setting))}; path=/; max-age=31536000`; // 1 year
 
   console.log(currentPage, setting)
   return (<>
     <QueryClientProvider client={queryClient}>
-      <Navbar setCurrentPage={setCurrentPage} setting={setting} setSetting={setSetting} />
+      <Navbar setCurrentPage={setCurrentPage} setting={setting} setSetting={setSettingAndSave} />
       <MainContent currentPage={currentPage} setting={setting} />
       <Footer />
     </QueryClientProvider>

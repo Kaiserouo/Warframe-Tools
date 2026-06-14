@@ -257,9 +257,8 @@ def get_market_data():
     {
         'market_data': {
             item_name: {
-                'item_id': str,
+                'id': str,
                 'item_name': str,
-                'item_type': str,
                 ...
             },
             ...

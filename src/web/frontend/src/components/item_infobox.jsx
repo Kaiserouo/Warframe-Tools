@@ -89,16 +89,19 @@ export default function ItemInfobox({ setting, itemName }) {
   
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
-      <p 
+      <a 
         className={`${
           itemIsPending || itemIsFetching ? 'text-gray-500' : 
           itemError || (itemData && Object.keys(itemData).length === 0) ? 'text-white' :
           'text-white font-bold underline decoration-dashed underline-offset-3'} font-mono`} 
         onMouseEnter={() => setShowInfobox(true)} 
         onMouseLeave={() => setShowInfobox(false)}
+        href={itemData && itemData.market_link ? itemData.market_link : null}
+        target="_blank"
+        rel="noopener noreferrer"
       >
         {itemName}
-      </p>
+      </a>
       {showInfobox && !itemIsPending && !itemError && itemData && Object.keys(itemData).length !== 0 && (
         <div 
           className="bg-gray-900 border border-gray-700 rounded p-4 w-fit z-40 inline-block" 

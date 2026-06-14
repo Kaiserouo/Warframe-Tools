@@ -5,42 +5,42 @@ def to_number(s: str) -> int:
     return int(s)
 
 syndicates = [
-    # {
-    #     'name': 'Cavia',
-    #     'url': 'https://wiki.warframe.com/w/Cavia',
-    #     'sections': [
-    #         {'selector': "//*[@id='mw-customcollapsible-bird3wares']/div[1]/div"}
-    #     ],
-    #     'parse': {
-    #         'name': lambda div: div.xpath(".//span/text()")[-1],
-    #         'standing': lambda div: to_number(div.xpath("./p/span/text()")[0])
-    #     }
-    # },
-    # {
-    #     'name': 'The Hex',
-    #     'url': 'https://wiki.warframe.com/w/The_Hex_(Syndicate)',
-    #     'sections': [
-    #         {'selector': "//*[@id='mw-customcollapsible-Aoi']/div[1]/div"},
-    #         {'selector': "//*[@id='mw-customcollapsible-Amir']/div[1]/div"},
-    #         {'selector': "//*[@id='mw-customcollapsible-Quincy']/div[1]/div"},
-    #         {'selector': "//*[@id='mw-customcollapsible-Eleanor']/div[1]/div"}
-    #     ],
-    #     'parse': {
-    #         'name': lambda div: div.xpath(".//span/text()")[-1],
-    #         'standing': lambda div: to_number(div.xpath("./p/span/text()")[0])
-    #     }
-    # },
-    # {
-    #     'name': 'Roathe',
-    #     'url': 'https://wiki.warframe.com/w/Roathe',
-    #     'sections': [
-    #         {'selector': "//*[@id='mw-customcollapsible-Surplus']/div[1]/div"},
-    #     ],
-    #     'parse': {
-    #         'name': lambda div: div.xpath(".//span/text()")[-1],
-    #         'standing': lambda div: to_number(div.xpath("./p//a/span/text()")[0])
-    #     }
-    # },
+    {
+        'name': 'Cavia',
+        'url': 'https://wiki.warframe.com/w/Cavia',
+        'sections': [
+            {'selector': "//*[@id='mw-customcollapsible-bird3wares']/div[1]/div"}
+        ],
+        'parse': {
+            'name': lambda div: div.xpath(".//span/text()")[-1],
+            'standing': lambda div: to_number(div.xpath("./p/span/text()")[0])
+        }
+    },
+    {
+        'name': 'The Hex',
+        'url': 'https://wiki.warframe.com/w/The_Hex_(Syndicate)',
+        'sections': [
+            {'selector': "//*[@id='mw-customcollapsible-Aoi']/div[1]/div"},
+            {'selector': "//*[@id='mw-customcollapsible-Amir']/div[1]/div"},
+            {'selector': "//*[@id='mw-customcollapsible-Quincy']/div[1]/div"},
+            {'selector': "//*[@id='mw-customcollapsible-Eleanor']/div[1]/div"}
+        ],
+        'parse': {
+            'name': lambda div: div.xpath(".//span/text()")[-1],
+            'standing': lambda div: to_number(div.xpath("./p/span/text()")[0])
+        }
+    },
+    {
+        'name': 'Roathe',
+        'url': 'https://wiki.warframe.com/w/Roathe',
+        'sections': [
+            {'selector': "//*[@id='mw-customcollapsible-Surplus']/div[1]/div"},
+        ],
+        'parse': {
+            'name': lambda div: div.xpath(".//span/text()")[-1],
+            'standing': lambda div: to_number(div.xpath("./p//a/span/text()")[0])
+        }
+    },
     {
         'name': 'Operation: Belly of the Beast (Volatile Motes)',
         'url': 'https://wiki.warframe.com/w/Operation:_Belly_of_the_Beast',

@@ -29,7 +29,6 @@ function SettingItemRefreshMarketData({setting, setSetting}) {
   });
   const lastUpdateTime = marketData?.last_update ? timeFormat.format(new Date(Date.parse(marketData.last_update))) : null;
 
-  
   return (
     <div className="p-4 border-b border-gray-600">
       <p className="text-sm font-semibold mb-2">Refresh Market Data</p>

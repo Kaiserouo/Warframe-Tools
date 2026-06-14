@@ -8,7 +8,7 @@ import { fetchMarketData, fetchBestTrade } from '../api/fetch.jsx';
 import { makeHandleSubmit } from '../api/task.jsx';
 import UserBestTradeTable from '../components/user_best_trade_table.jsx';
 
-function SelectedItem({item, qty, setSelectedItems, setting}) {
+function SelectedItem({item, qty, setSelectedItems, setting, enableItemBox}) {
   const removeAllItem = () => {
     setSelectedItems((prevSelectedItems) => {
       const newSelectedItems = {...prevSelectedItems};
@@ -33,7 +33,11 @@ function SelectedItem({item, qty, setSelectedItems, setting}) {
   }
   return (
     <span className="inline-block bg-gray-700 border border-gray-500 text-white rounded-full px-3 py-1 font-semibold m-1">
-      <ItemInfobox itemName={item} setting={setting} />
+      {
+        enableItemBox ? 
+        (<ItemInfobox itemName={item} setting={setting} />) :
+        (<span className="text-white font-mono">{item}</span>)
+      }
       <button className="border rounded border-gray-500 ml-2 px-1 text-white text-sm hover:bg-gray-300" onClick={() => addItem(-1)}>▼</button>
       <span className="px-1">{qty}</span>
       <button className="border rounded border-gray-500 px-1 text-white text-sm hover:bg-gray-300" onClick={() => addItem(1)}>▲</button>
@@ -46,7 +50,7 @@ function stringifySelectedItems(selectedItems) {
   return Object.entries(selectedItems).map(([item, qty]) => Array(qty).fill(`${item}`).join(' + ')).join(' + ');
 }
 
-function SelectedItemTable({selectedItems, setSelectedItems, setting, marketData}) {
+function SelectedItemTable({enableItemBox, selectedItems, setSelectedItems, setting, marketData}) {
   /*
     selectedItems: map of item name to quantity
     setSelectedItems: function to update selected items
@@ -81,17 +85,13 @@ function SelectedItemTable({selectedItems, setSelectedItems, setting, marketData
     }
   }
 
-  console.log('modArcaneList', modArcaneList);
-  console.log('primeList', primeList);
-  console.log('otherList', otherList);
-
   // sort prime list by name
   const sortedPrimeListKeys = Object.keys(primeList).sort();
 
   return (<>
     <div className='flex flex-wrap'>
       {Object.keys(selectedItems).map((item, index) => (
-        <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+        <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} enableItemBox={enableItemBox} />
       ))}
     </div>
     <div className="border-l-2 border-gray-500 pl-4">
@@ -101,7 +101,7 @@ function SelectedItemTable({selectedItems, setSelectedItems, setting, marketData
           <p className="text-l font-bold text-gray-300 my-2">Mod / Arcane:</p>
           <div className='flex flex-wrap'>
             {modArcaneList.map((item, index) => (
-              <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+              <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} enableItemBox={enableItemBox} />
             ))}
           </div>
         </>
@@ -114,7 +114,7 @@ function SelectedItemTable({selectedItems, setSelectedItems, setting, marketData
               <div key={baseName} className='ml-4'>
                 <div className="text-l font-bold text-gray-300 my-2">- {baseName}</div>
                 {primeList[baseName].map((item, index) => (
-                  <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+                  <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} enableItemBox={enableItemBox} />
                 ))}
               </div>
             ))}
@@ -126,7 +126,7 @@ function SelectedItemTable({selectedItems, setSelectedItems, setting, marketData
           <p className="text-l font-bold text-gray-300 my-2">Other:</p>
           <div className='flex flex-wrap'>
             {otherList.map((item, index) => (
-              <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} />
+              <SelectedItem key={index} item={item} qty={selectedItems[item]} setSelectedItems={setSelectedItems} setting={setting} enableItemBox={enableItemBox} />
             ))}
           </div>
         </>
@@ -136,10 +136,22 @@ function SelectedItemTable({selectedItems, setSelectedItems, setting, marketData
 }
 
 export default function BestTrade({setting}) {
-  const [selectedItems, setSelectedItems] = useState({
-    'Serration': 1, 
-    'Hornet Strike': 1,
+  const [selectedItems, setSelectedItems] = useState(() => {
+    // initialize selected items from local storage
+    const defaultSelectedItems = {'Serration': 1, 'Hornet Strike': 1};
+    try {
+      const saved = localStorage.getItem('best_trade_selected_items');
+      return saved ? JSON.parse(saved) : defaultSelectedItems;
+    } catch (e) {
+      return defaultSelectedItems;
+    }
   });
+
+  const setSelectedItemsAndSave = useCallback((newSelectedItems) => {
+    localStorage.setItem('best_trade_selected_items', JSON.stringify(newSelectedItems));
+    setSelectedItems(newSelectedItems);
+  }, [setSelectedItems]);
+
   const [submittedItems, setSubmittedItems] = useState({});
   const copiedRef = useRef();
   const copySelectionRef = useRef();
@@ -174,10 +186,10 @@ export default function BestTrade({setting}) {
         newSelectedItems[itemName] = 1;
       }
     }
-    setSelectedItems(newSelectedItems);
+    setSelectedItemsAndSave(newSelectedItems);
   };
   const handleClearAll = () => {
-    setSelectedItems({});
+    setSelectedItemsAndSave({});
   };
   const handleSubmitSelectedItems = () => {
     setSubmittedItems({...selectedItems});
@@ -228,6 +240,30 @@ export default function BestTrade({setting}) {
     return () => { ignore_obj['ignore'] = true; };
   }, [submittedItems, bestTradeHandleSubmit]);
   
+  // if the table isn't showing, we disable ItemBox for the selected items
+  // because they will preemptively request the data, which would make the server fetch the
+  // data from the market sequentially for each item instead of in parallel
+  const tableIsShown = (
+    bestTradePollStatus.status === "done"
+    && bestTradePollStatus.data !== null
+    && (
+      bestTradePollStatus.data?.user_map !== null && bestTradePollStatus.data?.user_map !== undefined &&
+      bestTradePollStatus.data?.trade_options !== null && bestTradePollStatus.data?.trade_options !== undefined &&
+      bestTradePollStatus.data?.price_oracle !== null && bestTradePollStatus.data?.price_oracle !== undefined
+    )
+  );
+
+  const handleClearTable = useCallback(() => {
+    if (tableIsShown) {
+      setBestTradePollStatus({
+        'taskId': null,
+        'status': "done",
+        'data': null,
+        'progress': null
+      });
+    }
+  }, [tableIsShown, setBestTradePollStatus]);
+
   return (<>
     <div className="mx-4 my-4">
       <div className="text-2xl font-bold text-white my-2">
@@ -251,12 +287,24 @@ export default function BestTrade({setting}) {
 
       <div className='flex my-2'>
         <p className="mr-2 py-1 text-white text-lg font-mono font-semibold whitespace-nowrap">Current Item List: </p>
-        <button className="mr-2 px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300 whitespace-nowrap" onClick={handleClearAll}>
-          Clear All
+        <button 
+            className="mr-2 px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300 whitespace-nowrap" 
+            onClick={handleClearAll}
+            title="Clear all items from the list">
+          Clear Selection
+        </button>
+        <button 
+            className="mr-2 px-2 py-1 bg-red-900 hover:bg-red-700 text-white rounded border border-red-300 whitespace-nowrap" 
+            onClick={handleClearTable}
+            title="Clear the best trade table. For performance reasons, it's recommended to clear the table before adding new items to the item list">
+          Clear Table
         </button>
         <div className='mr-2 relative inline-block'>
-          <button className="px-2 py-1 bg-green-900 hover:bg-green-700 text-white rounded border border-green-300 whitespace-nowrap" onClick={handleCopySelection}>
-            Copy Selection
+          <button 
+              className="px-2 py-1 bg-green-900 hover:bg-green-700 text-white rounded border border-green-300 whitespace-nowrap" 
+              onClick={handleCopySelection} 
+              title="Turns all selected items as a string, e.g., 'Serration + Hornet Strike'">
+            Show Selection Text
           </button>
           <div ref={copiedRef} className="hidden absolute inset-0 bottom-full -translate-y-4 flex items-center justify-center">
             <div className="bg-black/70 text-white px-3 py-1 rounded whitespace-nowrap">
@@ -272,7 +320,7 @@ export default function BestTrade({setting}) {
 
       
 
-      <SelectedItemTable selectedItems={selectedItems} setSelectedItems={setSelectedItems} setting={setting} marketData={marketData} />
+      <SelectedItemTable enableItemBox={tableIsShown} selectedItems={selectedItems} setSelectedItems={setSelectedItemsAndSave} setting={setting} marketData={marketData} />
       <br />
 
       {bestTradePollStatus.status === "in_progress" ? <LoadingProgress message="Loading" progress={bestTradePollStatus.progress} /> : null}
@@ -282,7 +330,7 @@ export default function BestTrade({setting}) {
           tradeOptions={bestTradePollStatus.data?.trade_options} 
           priceOracle={bestTradePollStatus.data?.price_oracle} 
           setting={setting}
-          setSelectedItems={setSelectedItems}
+          setSelectedItems={setSelectedItemsAndSave}
         /> : null}
       
     </div>
