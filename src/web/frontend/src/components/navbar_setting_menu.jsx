@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient, useMutation  } from '@tanstack/react-query'
 import { Loading, Error } from '../components/loading_status.jsx';
 import { fetchMarketData, fetchRefreshData } from '../api/fetch.jsx';
+import { getInventoryFromFile } from '../utils/inventory.jsx';
 
 function SettingItemRefreshMarketData({setting, setSetting}) {
   const [clicked, setClicked] = useState(false);
@@ -92,12 +93,61 @@ function SettingItemDucantorPriceOverride({setting, setSetting}) {
     );
 }
 
+function SettingInventoryFile({setting, setSetting}) {
+  const [loadError, setLoadError] = useState(null);
+
+  const handleFileChange = useCallback(async (e) => {
+    if (e.target.files) {
+      getInventoryFromFile(e.target.files[0]).then(
+        (inventoryJson) => {
+          setSetting({...setting, 'inventory': {'data': inventoryJson, 'time': e.target.files[0].lastModified}});
+          setLoadError(null);
+        },
+        (error) => {
+          console.error("Error loading inventory file:", error);
+          setLoadError(error);
+        }
+      )
+    }
+  }, [setSetting]);
+
+  const handleClearInventory = useCallback(() => {
+    setSetting({...setting, 'inventory': null});
+  }, [setSetting]);
+
+  return (
+    <div className="p-4 border-b border-gray-600">
+      <p className="text-sm font-semibold mb-2">Inventory File</p>
+      <p className="text-sm text-gray-300 mb-2">Select the inventory file (<code>inventory.json, lastData.dat</code>) to use.<br />Will store the data in local storage.</p>
+      <p className="text-sm text-gray-300 mb-2">If you use AlecaFrame: Use <code>%localappdata%/AlecaFrame/lastData.dat</code></p>
+      <p className="text-sm text-gray-300 mb-2">If you don't: Use <a href="https://github.com/Sainan/warframe-api-helper/releases/latest" target="_blank" rel="noopener noreferrer" className='underline text-blue-400 font-bold'>warframe-api-helper</a> while game is on and logged in</p>
+      
+      {!setting.inventory && loadError ? (
+        <p className="text-sm text-red-400">{loadError}</p>
+      ) : null}
+      {setting.inventory ? (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-300">File time: <span className="font-mono">{new Date(setting.inventory.time).toLocaleString()}</span></p>
+          <button onClick={handleClearInventory} className="bg-red-900 text-white px-2 py-1 rounded hover:bg-red-600">
+            Clear Inventory
+          </button>
+        </div>
+      ) : (
+        <input 
+          className="w-full bg-gray-600 text-white p-2 rounded"
+          type="file" accept="*/*" onChange={handleFileChange} />
+      )}
+    </div>
+  );
+}
+
 function NavbarSettingMenuInner({setting, setSetting}) {
   return (
     <div className="mt-2 bg-gray-700 text-white rounded shadow-lg z-10 md:min-w-max">
       <SettingItemRefreshMarketData setting={setting} setSetting={setSetting} />
       <SettingItemPriceOracle setting={setting} setSetting={setSetting} />
       <SettingItemDucantorPriceOverride setting={setting} setSetting={setSetting} />
+      <SettingInventoryFile setting={setting} setSetting={setSetting} />
     </div>
   )
 }
@@ -117,9 +167,15 @@ export default function NavbarSettingMenu({setting, setSetting}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <li className="relative">
+    <li className="relative max-h-full">
       <NavbarSettingMenuButton isOpen={isOpen} setIsOpen={setIsOpen} />
-      {isOpen && <div className="absolute left-0 md:left-auto md:right-0"><NavbarSettingMenuInner setting={setting} setSetting={setSetting} /></div>}
+      {isOpen && (
+        // <div className="absolute top-full left-0 overflow-y-auto max-h-[calc(100vh-5rem)] md:relative max-h-maxz-50">
+        <div className="relative top-full left-0 overflow-y-auto md:absolute max-h-[calc(30vh)] md:left-auto md:right-0 md:max-h-[calc(100vh-5rem)]">
+        {/* // <div className="fixed left-2 right-2 top-2 bottom-2 md:absolute md:top-full md:left-auto md:right-0 md:bottom-auto md:inset-x-auto md:mt-2 md:left-0 md:right-auto max-h-[calc(100vh-1rem)] overflow-y-auto z-50"> */}
+          <NavbarSettingMenuInner setting={setting} setSetting={setSetting} />
+        </div>
+      )}
     </li>
   );
 }

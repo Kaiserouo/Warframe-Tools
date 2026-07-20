@@ -15,6 +15,7 @@ import Syndicate from './pages/syndicate.jsx';
 import TransientReward from './pages/transient_reward.jsx';
 import BestTrade from './pages/best_trade.jsx';
 import Test from './pages/test.jsx';
+import Riven from './pages/riven.jsx';
 
 import NavbarSettingMenu from './components/navbar_setting_menu.jsx';
 
@@ -47,6 +48,10 @@ let pageMap = {
   //   'name': 'Test',
   //   'factory': (setting) => (<Test setting={setting} />)
   // }
+  'riven': {
+    'name': 'Riven',
+    'factory': (setting) => (<Riven setting={setting} />)
+  }
 };
 
 export default function App() {
@@ -54,20 +59,19 @@ export default function App() {
     'oracle_type': 'default_oracle_price_48h',
     'ducantor_price_override': 'day',
     'update_count': 1,
+    'inventory_file': null,
   }
 
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState('riven');
   const [setting, setSetting] = useState(
     (() => {
-      const savedSetting = document.cookie.split('; ').find(row => row.startsWith('setting='));
-      return savedSetting ? (
-        {...defaultSetting, ...JSON.parse(decodeURIComponent(savedSetting.split('=')[1]))}
-      ) : defaultSetting;
+      const savedSetting = localStorage.getItem('setting');
+      return savedSetting ? JSON.parse(savedSetting) : defaultSetting;
     })()
   );
 
   const setSettingAndSave = useCallback((newSetting) => {
-    document.cookie = `setting=${encodeURIComponent(JSON.stringify(newSetting))}; path=/; max-age=31536000`; // 1 year
+    localStorage.setItem('setting', JSON.stringify(newSetting));
     setSetting(newSetting);
   }, [setSetting]);
 

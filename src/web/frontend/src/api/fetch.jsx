@@ -108,3 +108,13 @@ export async function fetchBestTrade(oracle_type, spec) {
     }
   );
 }
+
+export async function fetchRivenData() {
+  return {
+    weapon_name_map: await tryFetchJson('/api/public_export/data/en/get_weapon_name_map'),
+    weapon_riven_disposition: await tryFetchJson('/api/public_export/data/en/get_weapon_riven_disposition'),
+    riven_loctag_map: await tryFetchJson('/api/public_export/data/en/get_riven_loctag_map'),
+    incarnon_weapon_uname: await tryFetchJson('/api/public_export/data/en/get_incarnon_weapons'),
+    icon_map: await tryFetchJson('/api/public_export/data/en/get_icon_map'),
+  };
+}

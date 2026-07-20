@@ -17,6 +17,7 @@ from joblib import Parallel, delayed
 from ... import warframe_market as wfm
 from ... import interactive as wfi
 from ... import util as util
+from ...data.inventory.parse_inventory import WarframePublicExport
 
 app = Flask(__name__)
 
@@ -34,6 +35,7 @@ market_items: list[wfm.MarketItem] = None
 market_map: dict[str, wfm.MarketItem] = None
 market_id_map: dict[str, wfm.MarketItem] = None
 market_data_update_date: datetime.datetime = None
+wpe = WarframePublicExport()
 ducat_data = None
 cache = {}
 
@@ -51,7 +53,7 @@ oracle_price_fn_map = {
 }
 
 def refresh():
-    global market_items, market_map, market_id_map, market_data_update_date, ducat_data, cache
+    global market_items, market_map, market_id_map, market_data_update_date, wpe, ducat_data, cache
     print(f'{util.GREEN}[*] get market item...{util.RESET}')
     market_items = wfm.get_market_item_list()
     market_map = wfm.get_market_items_name_map(market_items)
@@ -59,6 +61,7 @@ def refresh():
     print(f'{util.GREEN}[*] get ducat data...{util.RESET}')
     ducat_data = wfm.get_ducat_data(market_items)
     market_data_update_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
+    wpe = WarframePublicExport()
     cache = {}
 
 def use(name, callback):
@@ -892,6 +895,21 @@ def function_best_trade():
 
     task_id = register_task(task)
     return {'task_id': task_id}
+
+@app.route('/api/public_export/data/<string:lang>/<string:function_name>')
+def data_public_export(lang, function_name):
+    function_map = {
+        'get_weapon_name_map': lambda lang: wpe.get_weapon_name_map(lang, use_cache=True),
+        'get_weapon_riven_disposition': lambda lang: wpe.get_weapon_riven_disposition(use_cache=True),
+        'get_riven_loctag_map': lambda lang: wpe.get_riven_loctag_map(lang, use_cache=True),
+        'get_incarnon_weapons': lambda lang: wpe.get_incarnon_weapons(use_cache=True),
+        'get_icon_map': lambda lang: wpe.get_icon_map(use_cache=True),
+    }
+
+    if function_name in function_map:
+        return function_map[function_name](lang)
+    else:
+        return {'error': 'Function not found'}, 404
 
 def _test_best_trade():
     USE_CACHE = True

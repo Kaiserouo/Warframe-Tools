@@ -8,6 +8,7 @@ export default function SearchBar({
   nameKey,
   searchMode,
   setSearchText,
+  searchOnChange=false,
 }) {
   // placeholder: str, placeholder text for the search input
   // items: list[dict | str], list of items for search suggestions, each item is a dict
@@ -20,6 +21,7 @@ export default function SearchBar({
   //   - each_word_starts_with: split Q by spaces into words [q1, q2, ...], and I into [i1, i2, ...]
   //      then for each qj, there must exist an ik that starts with qj
   // setSearchText: function(str or null), called when the user presses Enter to initialize search
+  // searchOnChange: bool, if true, call setSearchText on every change of the input value, instead of only on Enter
 
   // return (<div className="border border-gray-600">(Search Bar)</div>);
   return (
@@ -31,6 +33,12 @@ export default function SearchBar({
         list="search-suggestions"
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
+            const value = e.target.value.trim();
+            setSearchText(value.length > 0 ? value : null);
+          }
+        }}
+        onChange={(e) => {
+          if (searchOnChange) {
             const value = e.target.value.trim();
             setSearchText(value.length > 0 ? value : null);
           }
@@ -51,15 +59,18 @@ export default function SearchBar({
       >
         <BackspaceSvg className="w-6 h-6" />
       </button> 
-      <button
-        onClick={() => {
-          const input = document.querySelector('input[list="search-suggestions"]');
-          setSearchText(input.value);
-        }}
-        className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700"
-      >
-        <EnterSvg className="w-6 h-6" />
-      </button> 
+
+      {searchOnChange ? null : (
+        <button
+          onClick={() => {
+            const input = document.querySelector('input[list="search-suggestions"]');
+            setSearchText(input.value);
+          }}
+          className="px-4 py-2 bg-gray-600 text-white hover:bg-gray-700"
+        >
+          <EnterSvg className="w-6 h-6" />
+        </button> 
+      )}
     </div>
   );
 }
