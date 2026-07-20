@@ -1,4 +1,8 @@
-# test.py
+"""
+
+$ python -m src.test.test_connection -v
+
+"""
 import subprocess
 import unittest
 
@@ -21,14 +25,23 @@ class TestConnection(unittest.TestCase):
         self.assertTrue(is_success, 'curl command failed with return code {}'.format(returncode))
 
     def test_api_warframe_market_curl_items(self):
+        """
+        curl https://api.warframe.market/v2/items
+        """
         is_success, returncode = try_curl("https://api.warframe.market/v2/items")
         self.assertTrue(is_success, 'curl command failed with return code {}'.format(returncode))
 
     def test_api_warframe_market_curl_item(self):
-        is_success, returncode = try_curl("https://api.warframe.market/v2/items/your_item_id")
+        """
+        curl https://api.warframe.market/v2/items/serration
+        """
+        is_success, returncode = try_curl("https://api.warframe.market/v2/items/serration")
         self.assertTrue(is_success, 'curl command failed with return code {}'.format(returncode))
 
     def test_warframe_market_socket(self):
+        """
+        requests.get(https://api.warframe.market/v2/items/serration)
+        """
         r = retry_request(f'https://api.warframe.market/v2/orders/item/serration', headers={
             'accept': 'application/json',
             'Platform': 'pc',
@@ -38,4 +51,4 @@ class TestConnection(unittest.TestCase):
         
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
