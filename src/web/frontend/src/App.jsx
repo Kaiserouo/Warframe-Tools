@@ -62,7 +62,7 @@ export default function App() {
     'inventory_file': null,
   }
 
-  const [currentPage, setCurrentPage] = useState('riven');
+  const [currentPage, setCurrentPage] = useState('home');
   const [setting, setSetting] = useState(
     (() => {
       const savedSetting = localStorage.getItem('setting');

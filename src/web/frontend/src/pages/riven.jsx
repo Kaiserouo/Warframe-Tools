@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import SearchBar from '../components/search_bar.jsx';
 import RivenTable from '../components/riven_table.jsx';
+import RivenTableLackIncarnon from '../components/riven_table_lack_incarnon.jsx';
 import { iconIncarnon, iconIsEquipped, iconHasDuplicate } from '../components/riven_table.jsx';
 import { Loading, LoadingProgress, Error } from '../components/loading_status.jsx';
 import { fetchRivenData } from '../api/fetch.jsx';
@@ -118,7 +119,7 @@ function getRivenStatText(rivenItemType, rivenUpgradeFingerprint, rivenStat, riv
 
   const prefix = (!factionDamageTags.includes(rivenStat.tag) && rivenStat.displayValue > 0 ? "+" : "");
   const suffix = (factionDamageTags.includes(rivenStat.tag) ? "x" : "")
-  const displayValue = (factionDamageTags.includes(rivenStat.tag) ? (1 + rivenStat.displayValue).toFixed(2) : rivenStat.displayValue.toFixed(2))
+  const displayValue = (factionDamageTags.includes(rivenStat.tag) ? (1 + rivenStat.displayValue).toFixed(2) : rivenStat.displayValue.toFixed(1))
   
   const valStr = `${prefix}${displayValue}${suffix}`;
   
@@ -130,8 +131,45 @@ function getRivenStatText(rivenItemType, rivenUpgradeFingerprint, rivenStat, riv
   );
 }
 
+function RivenIncarnonPage({rivenData, rivenModInfos, searchText}) {
+  return <RivenIncarnonList
+    rivenModInfos={rivenModInfos}
+    searchText={searchText}
+  />
+}
+
+function TableTypeChoice({choices, tableType, setTableType, setSearchText}) {
+  // make buttons for each choice
+  function onClick(choice) {
+    setSearchText(null);  // reset search text
+    setTableType(choice);
+  }
+
+  const cnUnselected = "bg-gray-900 hover:bg-gray-700 text-white border-gray-300";
+  const cnSelected = "bg-gray-100 hover:bg-gray-300 text-black border-gray-300";
+
+  return (
+    <div className="flex gap-2 my-2">
+      {choices.map(choice => (
+        <button
+          key={choice}
+          onClick={() => onClick(choice)}
+          className={`px-4 py-2 rounded border ${
+            tableType === choice
+              ? cnSelected
+              : cnUnselected
+          }`}
+        >
+          {choice.charAt(0).toUpperCase() + choice.slice(1)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function Riven({setting}) {
   const [searchText, setSearchText] = useState(null);
+  const [tableType, setTableType] = useState('riven');  // riven, incarnon
 
   const { isPending: rivenIsPending, error: rivenError, data: rivenData } = useQuery({
     queryKey: ['riven_data'],
@@ -158,14 +196,22 @@ export default function Riven({setting}) {
     <div className="text-2xl font-bold text-white my-2">
       <p>Riven</p>
     </div>
+    <TableTypeChoice
+      choices={['riven', 'incarnon']}
+      tableType={tableType}
+      setTableType={setTableType}
+      setSearchText={setSearchText}
+    />
     <div className="flex flex-row justify-between items-center gap-x-4">
       <div>
         <div className="text-white font-sans my-2">
           <p className="text-yellow-500 font-bold">&lt; Requires inventory file: add that in the Options menu &gt;</p>
           <p>A riven viewer... hopefully a bit better than how Alecaframe did it.</p>
-          <p>Provides filter for True / False condition.</p>
-          <p>Provides sorting for ascending / descending. Can enable multiple sorting criteria. Drag & drop to reorder the sequence in which they are applied.</p>
+          <p>Provides filter for True / False condition. Provides sorting for ascending / descending.</p>
+          <p>Can enable multiple sorting criteria. Drag & drop to reorder the sequence in which they are applied.</p>
+          <p>The search bar can search any keyword you want, include names / tags / etc.</p>
         </div>
+
 
         <SearchBar 
           placeholder="Search..."
@@ -182,14 +228,27 @@ export default function Riven({setting}) {
         <span className="flex flex-row items-center">{iconHasDuplicate}: Has duplicate riven for this weapon</span>
       </div>
     </div>
-
+    
+    {rivenIsPending ? <Loading message="Loading riven data..." /> : null}
     {rivenError ? <Error message={`ERROR: ${rivenError}`} /> : null}
-    {rivenModInfos.length > 0 && (
+
+    {setting.inventory !== null && rivenData && tableType === 'riven' && (
       <RivenTable
+        rivenData={rivenData}
         rivenModInfos={rivenModInfos}
         searchText={searchText}
       />
     )}
+    {setting.inventory !== null && rivenData && tableType === 'incarnon' && (
+      <RivenTableLackIncarnon
+        rivenData={rivenData}
+        rivenModInfos={rivenModInfos}
+      />
+    )}
+    
+    {setting.inventory === null ? <div className="text-white font-mono my-2 font-extrabold">
+      [ No inventory file loaded. Please load your inventory file in the Options &gt; Inventory File.]
+    </div> : null}
   </div>
   </>);
 }

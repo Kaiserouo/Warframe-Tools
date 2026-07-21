@@ -15,6 +15,7 @@ return (<>
         <li><span className="text-yellow-400 font-bold">Syndicate</span>: Show item information and market prices sold by the syndicate.</li>
         <li><span className="text-yellow-400 font-bold">Transient Reward</span>: Show item information and market prices sold of transient rewards.</li>
         <li><span className="text-yellow-400 font-bold">Find Best Trade</span>: For a list of items, find the best users to trade with to minimize total price deviation from oracle price. (also serves as mass query for multiple items' current market prices & best to buy item currently)</li>
+        <li><span className="text-yellow-400 font-bold">Riven</span>: Riven viewer</li>
       </ul>
       <br />
       <p>Item name with underline show additional information and links in the hovering info box.</p>

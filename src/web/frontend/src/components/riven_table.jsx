@@ -9,14 +9,14 @@ function makeIcon(src, title, bgColor, iconSize=8) {
   // iconSize = 8 or 6
   return <>
     <div className="relative w-8 h-8">
-      <div className={`absolute left-1 top-1 w-6 h-6 blur-sm rounded`} style={{ backgroundColor: bgColor }}/>
+      <div className={`absolute left-2 top-2 w-4 h-4 blur-sm rounded`} style={{ backgroundColor: bgColor }}/>
       <img src={src} alt={title} title={title} className={`absolute left-${Math.floor((8-iconSize) / 2)} top-${Math.floor((8-iconSize) / 2)} w-${iconSize} h-${iconSize}`} />
     </div>
   </>
 }
 const iconIncarnon = makeIcon("https://wiki.warframe.com/images/LessRecoil%28xWhite%29.png", "Incarnon", "#0862BB", 8);
-const iconIsEquipped = makeIcon("https://wiki.warframe.com/images/IconIOSEmotes%28xWhite%29.png", "Is currently equipped", "#3D3D3D", 6)
-const iconHasDuplicate = makeIcon("https://wiki.warframe.com/images/IconModDuplicates%28xWhite%29.png", "Has duplicate riven for this weapon", "#3D3D3D", 6)
+const iconIsEquipped = makeIcon("https://wiki.warframe.com/images/IconIOSEmotes%28xWhite%29.png", "Is currently equipped", "#2E7821", 6)
+const iconHasDuplicate = makeIcon("https://wiki.warframe.com/images/IconModDuplicates%28xWhite%29.png", "Has duplicate riven for this weapon", "#6E2323", 6)
 export { iconIncarnon, iconIsEquipped, iconHasDuplicate };
 
 
@@ -25,16 +25,14 @@ function RivenSide({rivenModInfo}) {
   const [color, setColor] = useState('#FFFFFF');
   const [showTestColor, setShowTestColor] = useState(false);
   
-  const handleChange = useCallback((color) => {
-    setColor(color.hex);
-  }, []);
+  const handleChange = useCallback((color) => { setColor(color.hex); }, []);
 
   return (<>
     {showTestColor ? <>
       <PhotoshopPicker color={color} onChange={ handleChange } />
       <div className="relative w-8 h-8">
         <div className="absolute left-1 top-1 w-6 h-6 blur-sm rounded" style={{ backgroundColor: color }}/>
-        <img src="https://wiki.warframe.com/images/LessRecoil%28xWhite%29.png" alt="Incarnon" className="absolute left-0 top-0 w-8 h-8" />
+        <img src="https://wiki.warframe.com/images/IconIOSEmotes%28xWhite%29.png" alt="Incarnon" className="absolute left-1 top-1 w-6 h-6" />
       </div>
     </>
     : null}
@@ -58,7 +56,7 @@ function RivenTitle({rivenModInfo}) {
           <img src={iconMap[uname]} alt={weaponName} className="w-16 h-16" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white"><b className="text-yellow-400">{weaponName}</b></h3>
+          <h3 className="text-lg font-bold text-white"><b className="text-yellow-400 hover:underline"><a href={`https://wiki.warframe.com/w/${weaponName.replace(/\s/g, '_')}`} target="_blank" rel="noopener noreferrer">{weaponName}</a></b></h3>
           <h3 className="font-bold text-white">{rivenSuffix}</h3>
         </div>
       </div>
@@ -150,7 +148,6 @@ class RivenOrganizer {
     const searchLower = searchText ? searchText.toLowerCase() : null;
     return rivenModInfos.filter((rivenModInfo) => {
       if (searchLower) {
-        console.log(`searchLower: ${searchLower}, rivenModInfo.searchString: ${rivenModInfo.searchString}`);
         if (!rivenModInfo.searchString.includes(searchLower)) {
           return false;
         }
@@ -249,7 +246,6 @@ function RivenFilterBar({rivenOrganizer, setRivenOrganizer}) {
     </div>
   </>);
 }
-
 function SortOptionToggleButton({ label, state, onClick, draggable, onDragStart, onDragOver, onDrop }) {
   // state: null, true (isAsc), false (!isAsc)
   const cnUnselected = "bg-gray-900 hover:bg-gray-700 text-white border-gray-300";

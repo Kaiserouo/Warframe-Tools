@@ -11,7 +11,5 @@
 - Make settings scrollable (uhhhhhh)
 
 # TODO (small steps)
-- make toggleable filter for them
-- make ascend / descend sorting that the user can change the sequence of
 - missing incarnon rivens (list all incarnon weapons and see if there )
 - make search function

@@ -1053,7 +1053,7 @@ function valueToDisplayValue(tag, value) {
     if (tag == "WeaponFactionDamageGrineer" || tag == "WeaponFactionDamageCorpus" || tag == "WeaponFactionDamageInfested" || tag == "WeaponMeleeFactionDamageGrineer" || tag == "WeaponMeleeFactionDamageCorpus" || tag == "WeaponMeleeFactionDamageInfested") {
         return Math.round(value * 100) / 100;
     }
-    if (tag == "WeaponMeleeComboInitialBonusMod" || tag == "ComboDurationMod" || tag == "WeaponMeleeRangeIncMod") {
+    if (tag == "WeaponMeleeComboInitialBonusMod" || tag == "ComboDurationMod" || tag == "WeaponMeleeRangeIncMod" || tag == "WeaponPunctureDepthMod") {
         return Math.round(value * 10) / 10;
     }
     return Math.round(value * 1000) / 10;
@@ -1061,7 +1061,7 @@ function valueToDisplayValue(tag, value) {
 
 function displayValueToValue(tag, displayValue) {
     if (tag == "WeaponFactionDamageGrineer" || tag == "WeaponFactionDamageCorpus" || tag == "WeaponFactionDamageInfested" || tag == "WeaponMeleeFactionDamageGrineer" || tag == "WeaponMeleeFactionDamageCorpus" || tag == "WeaponMeleeFactionDamageInfested" ||
-        tag == "WeaponMeleeComboInitialBonusMod" || tag == "ComboDurationMod" || tag == "WeaponMeleeRangeIncMod") {
+        tag == "WeaponMeleeComboInitialBonusMod" || tag == "ComboDurationMod" || tag == "WeaponMeleeRangeIncMod" || tag == "WeaponPunctureDepthMod") {
         return displayValue;
     }
     return displayValue / 100;
