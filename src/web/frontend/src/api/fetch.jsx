@@ -116,5 +116,7 @@ export async function fetchRivenData() {
     riven_loctag_map: await tryFetchJson('/api/public_export/data/en/get_riven_loctag_map'),
     incarnon_weapon_uname: await tryFetchJson('/api/public_export/data/en/get_incarnon_weapons'),
     icon_map: await tryFetchJson('/api/public_export/data/en/get_icon_map'),
+    weapon_uname_family_map: await tryFetchJson('/api/wiki/data/get_weapon_uname_family_map'),
+    weapon_family_unames_map: await tryFetchJson('/api/wiki/data/get_weapon_family_unames_map'),
   };
 }

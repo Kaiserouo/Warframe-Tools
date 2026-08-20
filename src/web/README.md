@@ -14,6 +14,7 @@ Function:
     - Syndicate: Show item information and market prices sold by the syndicate.
     - Transient Reward: Show item information and market prices sold of transient rewards.
     - Find Best Trade: For a list of items, find the best users to trade with to minimize total price deviation from oracle price. (also serves as mass query for multiple items' current market prices & best to buy item currently)
+    - Riven: Riven Viewer
 ```
 
 ## Install
@@ -85,6 +86,26 @@ Note that the server should be hosted on `localhost`, since this is a developmen
 > sudo sysctl --system  # apply immediately
 > ``` 
 
+> For the inventory file related functionality (e.g., the Riven page. most notably the decryption of `lastData.dat`), we need the built-in crypto library, which is only available if (1) you host the server on localhost `http://localhost:<port>` or (2) you host it on another computer but you have HTTPS enabled `https://<addr>:<port>`.
+> 
+> If you are hosting it on a different computer, please use reverse proxy with a production web server (e.g., nginx, apache) with a self-signed certificate (at least) to make the website HTTPS enabled.
+> 
+> For example, if the host has IP `<VPN_IP_ADDR>`, uses apache server, have a self-signed certificate, have the python server run on localhost port 5000 and want to have the reverse proxy on port 6001 (note that you can't use the [unsafe ports defined by chromium](https://superuser.com/questions/188058/which-ports-are-considered-unsafe-by-chrome)), your site-enabled file should have something like:
+> ```
+> <VirtualHost *:6001>
+>    ServerName <VPN_IP_ADDR>
+>    DocumentRoot /var/www/html
+> 
+>    SSLEngine on
+>    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+>    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+> 
+>    ProxyPass / http://localhost:5000/
+>    ProxyPassReverse / http://localhost:5000/
+>    ProxyRequests Off
+> </VirtualHost>
+> ```
+> and you should be connected via `https://<VPN_IP_ADDR>:6001/`
 
 ### Develop
 

@@ -15,7 +15,7 @@ import Syndicate from './pages/syndicate.jsx';
 import TransientReward from './pages/transient_reward.jsx';
 import BestTrade from './pages/best_trade.jsx';
 import Test from './pages/test.jsx';
-import Riven from './pages/riven.jsx';
+import Inventory from './pages/inventory/main.jsx';
 
 import NavbarSettingMenu from './components/navbar_setting_menu.jsx';
 
@@ -44,14 +44,14 @@ let pageMap = {
     'name': 'Best Trade',
     'factory': (setting) => (<BestTrade setting={setting} />)
   },
-  // 'test': {
-  //   'name': 'Test',
-  //   'factory': (setting) => (<Test setting={setting} />)
-  // }
-  'riven': {
-    'name': 'Riven',
-    'factory': (setting) => (<Riven setting={setting} />)
-  }
+  'test': {
+    'name': 'Test',
+    'factory': (setting) => (<Test setting={setting} />)
+  },
+  'inventory': {
+    'name': 'Inventory',
+    'factory': (setting) => (<Inventory setting={setting} />)
+  },
 };
 
 export default function App() {

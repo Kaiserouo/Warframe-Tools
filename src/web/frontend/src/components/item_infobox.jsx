@@ -1,6 +1,7 @@
 import { fetchItemInfoboxData } from "../api/fetch";
 import { useState } from "react";
 import { useQuery } from '@tanstack/react-query';
+import Infobox from "./infobox";
 
 function ItemInfoboxInner({ itemData }) {
   /* ref. /api/item_infobox response format in server.py 
@@ -79,40 +80,37 @@ function ItemInfoboxInner({ itemData }) {
 }
 
 export default function ItemInfobox({ setting, itemName }) {
-  const [showInfobox, setShowInfobox] = useState(false);
-  
   const { isPending: itemIsPending, isFetching: itemIsFetching, error: itemError, data: itemData } = useQuery({
     queryKey: ['item_infobox_data', itemName, setting.oracle_type, setting.ducantor_price_override],
     queryFn: () => fetchItemInfoboxData(itemName, setting.oracle_type, setting.ducantor_price_override),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
-  
-  return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
-      <a 
+
+  const renderHeader = () => {
+    return <a 
         className={`${
           itemIsPending || itemIsFetching ? 'text-gray-500' : 
           itemError || (itemData && Object.keys(itemData).length === 0) ? 'text-white' :
           'text-white font-bold underline decoration-dashed underline-offset-3'} font-mono`} 
-        onMouseEnter={() => setShowInfobox(true)} 
-        onMouseLeave={() => setShowInfobox(false)}
         href={itemData && itemData.market_link ? itemData.market_link : null}
         target="_blank"
         rel="noopener noreferrer"
       >
         {itemName}
-      </a>
-      {showInfobox && !itemIsPending && !itemError && itemData && Object.keys(itemData).length !== 0 && (
-        <div 
-          className="bg-gray-900 border border-gray-700 rounded p-4 w-fit z-40 inline-block" 
-          // style={{ position: 'absolute', top: '100%', left: '0' }}
-          style={{ position: 'absolute', top: '0', left: '100%' }}
-          onMouseEnter={() => setShowInfobox(true)} 
-          onMouseLeave={() => setShowInfobox(false)}
-        >
-          <ItemInfoboxInner itemData={itemData} />
-        </div>
-      )}
-    </div>
-  );
+      </a>;
+  };
+
+  const renderInfoboxContent = () => {
+    return (
+      !itemIsPending && !itemError && itemData && Object.keys(itemData).length !== 0 ? 
+        <ItemInfoboxInner itemData={itemData} /> : 
+        null
+    );
+  };
+  
+  return <Infobox
+    renderHeader={renderHeader}
+    renderInfoboxContent={renderInfoboxContent}
+  />;
 }
+

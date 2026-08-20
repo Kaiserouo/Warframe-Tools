@@ -3,25 +3,30 @@ import ItemInfobox from './item_infobox';
 import RivenParser from '../utils/RivenParser.jsx';
 
 import { PhotoshopPicker } from 'react-color';
+import RivenInfobox from "./riven_infobox.jsx";
+import RivenVariantsInfobox from "./riven_variants_infobox.jsx";
 
 
-function makeIcon(src, title, bgColor, iconSize=8) {
+function makeIcon(src, title, bgColor, iconSize=8, text=null) {
   // iconSize = 8 or 6
   return <>
     <div className="relative w-8 h-8">
       <div className={`absolute left-2 top-2 w-4 h-4 blur-sm rounded`} style={{ backgroundColor: bgColor }}/>
       <img src={src} alt={title} title={title} className={`absolute left-${Math.floor((8-iconSize) / 2)} top-${Math.floor((8-iconSize) / 2)} w-${iconSize} h-${iconSize}`} />
+      {text ? <p className="absolute left-6 top-4 w-2 h-2 text-white text-xs font-bold text-center drop-shadow-[0_1.5px_1.5px_rgba(0,0,0,0.8)]">{text}</p> : null}
     </div>
   </>
 }
 const iconIncarnon = makeIcon("https://wiki.warframe.com/images/LessRecoil%28xWhite%29.png", "Incarnon", "#0862BB", 8);
 const iconIsEquipped = makeIcon("https://wiki.warframe.com/images/IconIOSEmotes%28xWhite%29.png", "Is currently equipped", "#2E7821", 6)
 const iconHasDuplicate = makeIcon("https://wiki.warframe.com/images/IconModDuplicates%28xWhite%29.png", "Has duplicate riven for this weapon", "#6E2323", 6)
+const makeIconHasDuplicateCount = (count) => makeIcon("https://wiki.warframe.com/images/IconModDuplicates%28xWhite%29.png", `Has ${count} duplicates for this weapon`, "#6E2323", 6, count.toString());
+const makeIconVariants = (count) => makeIcon("https://wiki.warframe.com/images/HouseLavan%28xWhite%29.png", "", "#6E2323", 6, count.toString());
 export { iconIncarnon, iconIsEquipped, iconHasDuplicate };
 
 
 function RivenSide({rivenModInfo}) {
-  const { isIncarnon, isEquipped, hasDuplicate } = rivenModInfo;
+  const { isIncarnon, isEquipped, hasDuplicate, familyUnames } = rivenModInfo;
   const [color, setColor] = useState('#FFFFFF');
   const [showTestColor, setShowTestColor] = useState(false);
   
@@ -41,7 +46,10 @@ function RivenSide({rivenModInfo}) {
     <div>
       {isIncarnon && iconIncarnon}
       {isEquipped && iconIsEquipped}
-      {hasDuplicate && iconHasDuplicate}
+      {hasDuplicate && makeIconHasDuplicateCount(rivenModInfo.duplicateCount)}
+      {familyUnames.length > 1 && <RivenVariantsInfobox 
+        rivenModInfo={rivenModInfo} 
+        header={makeIconVariants(familyUnames.length)} />}
     </div>
   </>);
 }
@@ -56,7 +64,14 @@ function RivenTitle({rivenModInfo}) {
           <img src={iconMap[uname]} alt={weaponName} className="w-16 h-16" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white"><b className="text-yellow-400 hover:underline"><a href={`https://wiki.warframe.com/w/${weaponName.replace(/\s/g, '_')}`} target="_blank" rel="noopener noreferrer">{weaponName}</a></b></h3>
+          <h3 className="text-lg font-bold text-white">
+            <b className="text-yellow-400 hover:underline">
+              {/* <a href={`https://wiki.warframe.com/w/${weaponName.replace(/\s/g, '_')}`} target="_blank" rel="noopener noreferrer">
+                {weaponName}
+              </a> */}
+              <RivenInfobox setting={null} weaponName={weaponName} />
+            </b>
+          </h3>
           <h3 className="font-bold text-white">{rivenSuffix}</h3>
         </div>
       </div>
@@ -105,6 +120,8 @@ class RivenOrganizer {
       isEquipped: [null, true, false],
       hasDuplicate: [null, true, false],
       isUpgraded: [null, true, false],
+      anyDupIsEquipped: [null, true, false],
+      anyDupIsUpgraded: [null, true, false],
     },
     sortOptions: {
       sortOrderType: [
@@ -120,6 +137,8 @@ class RivenOrganizer {
         isEquipped: null,
         hasDuplicate: null,
         isUpgraded: null,
+        anyDupIsEquipped: null,
+        anyDupIsUpgraded: null,
       },
       sortOptions: {
         sortOrder: [
@@ -214,6 +233,8 @@ function RivenFilterBar({rivenOrganizer, setRivenOrganizer}) {
     isEquipped: "Is Equipped",
     hasDuplicate: "Has Duplicate",
     isUpgraded: "Is Upgraded",
+    anyDupIsEquipped: "Any Duplicate Is Equipped",
+    anyDupIsUpgraded: "Any Duplicate Is Upgraded",
   };
 
   const handleFilterChange = useCallback((filterKey) => {
@@ -361,7 +382,7 @@ export default function RivenTable({rivenModInfos, searchText}) {
     <RivenOrganizeBar rivenOrganizer={rivenOrganizer} setRivenOrganizer={setRivenOrganizer} />
 
     <div className="flex flex-row">
-      <div className="grid gap-x-3 grid-cols-4">
+      <div className="grid gap-x-3 grid-cols-1 md:grid-cols-4">
         {organizedRivenModInfos.map((rivenModInfo, idx) => (
           <MemoizedRivenMod key={idx} rivenModInfo={rivenModInfo} />
         ))}

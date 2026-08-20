@@ -17,7 +17,7 @@ from joblib import Parallel, delayed
 from ... import warframe_market as wfm
 from ... import interactive as wfi
 from ... import util as util
-from ...data.inventory.parse_inventory import WarframePublicExport
+from ...data.inventory.parse_inventory import WarframePublicExport, WarframeWiki
 
 app = Flask(__name__)
 
@@ -36,6 +36,7 @@ market_map: dict[str, wfm.MarketItem] = None
 market_id_map: dict[str, wfm.MarketItem] = None
 market_data_update_date: datetime.datetime = None
 wpe = WarframePublicExport()
+wwiki = WarframeWiki()
 ducat_data = None
 cache = {}
 
@@ -53,7 +54,7 @@ oracle_price_fn_map = {
 }
 
 def refresh():
-    global market_items, market_map, market_id_map, market_data_update_date, wpe, ducat_data, cache
+    global market_items, market_map, market_id_map, market_data_update_date, wpe, wwiki, ducat_data, cache
     print(f'{util.GREEN}[*] get market item...{util.RESET}')
     market_items = wfm.get_market_item_list()
     market_map = wfm.get_market_items_name_map(market_items)
@@ -62,6 +63,7 @@ def refresh():
     ducat_data = wfm.get_ducat_data(market_items)
     market_data_update_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     wpe = WarframePublicExport()
+    wwiki = WarframeWiki()
     cache = {}
 
 def use(name, callback):
@@ -910,6 +912,19 @@ def data_public_export(lang, function_name):
         return function_map[function_name](lang)
     else:
         return {'error': 'Function not found'}, 404
+
+@app.route('/api/wiki/data/<string:function_name>')
+def data_wiki(function_name):
+    function_map = {
+        'get_weapon_uname_family_map': lambda: wwiki.get_weapon_uname_family_map(use_cache=True),
+        'get_weapon_family_unames_map': lambda: wwiki.get_weapon_family_unames_map(use_cache=True),
+    }
+
+    if function_name in function_map:
+        return function_map[function_name]()
+    else:
+        return {'error': 'Function not found'}, 404
+
 
 def _test_best_trade():
     USE_CACHE = True

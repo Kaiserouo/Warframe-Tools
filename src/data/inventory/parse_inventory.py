@@ -5,6 +5,7 @@ from typing import Counter
 import re
 import requests
 import lzma
+import luadata
 
 from colorama import Fore, Style
 for color in [Fore, Style]:
@@ -317,7 +318,21 @@ class WarframePublicExport:
             entry['uniqueName']: f"https://content.warframe.com/PublicExport{entry['textureLocation']}"
             for entry in self._get_public_export('ExportManifest', 'en', use_cache)
         }
-        
+
+    def get_mod_name_map(self, lang='en', use_cache=True):
+        """
+        get a mapping of mod unique names to their display names
+        e.g.,
+        {
+            '/Lotus/Weapons/Tenno/Melee/Polearms/Naginata/ShrineMaidenNaginataAugment': 'Amanata Pressure', 
+        }
+        """
+        mods = self._get_public_export('ExportUpgrades', lang, use_cache)
+        mods_un_map = {
+            mod['uniqueName']: mod['name']
+            for mod in mods
+        }
+        return mods_un_map
 
 def main_public_export():
     # https://wiki.warframe.com/w/Public_Export
@@ -674,12 +689,172 @@ def main_incarnon():
     print(i, len(i))
     print(incarnon_weapon, len(incarnon_weapon))
     print(set().difference(set(i), set(incarnon_weapon)))
-    
-    
 
+def main_corrupted_mods():
+    corrupted_mods_set = set(["Corrupt Charge", "Hollow Point", "Spoiled Strike", "Magnum Force", "Tainted Clip", "Critical Delay", "Heavy Caliber", "Tainted Mag", "Vile Precision", "Narrow Minded", "Fleeting Expertise", "Blind Rage", "Overextended", "Tainted Shell", "Vicious Spread", "Burdened Magazine", "Anemic Agility", "Vile Acceleration", "Frail Momentum", "Critical Deceleration", "Creeping Bullseye", "Transient Fortitude", "Depleted Reload", "Catalyzing Shields"])
+
+    if len(sys.argv) < 2:
+        p = Path("/mnt/c/Users/User/AppData/Local/AlecaFrame/lastData.dat")
+    else:
+        p = Path(sys.argv[1])
+    inv = get_inventory(p)
+
+    wd = WarframePublicExport()
+    mod_un_name_map = wd.get_mod_name_map(lang='en', use_cache=True)
+    mod_name_un_map = {v: k for k, v in mod_un_name_map.items()}
+    upgrades = inv['Upgrades'] + inv['RawUpgrades']
+    for i in corrupted_mods_set:
+        if i not in mod_name_un_map:
+            print(f"Mod {i} not found in mod_name_un_map")
+            continue
+        un = mod_name_un_map[i]
+        mod_info = next((mod for mod in upgrades if mod['ItemType'] == un), None)
+        if mod_info is None:
+            print(f"{RED}Mod {i} ({un}) info not found in inventory{RESET}")
+            continue
+        print(f"{GREEN}Mod {i} ({un}) found in inventory with info: {mod_info}{RESET}")
+
+    mods_set = set()
+    for mod in inv['Upgrades'] + inv['RawUpgrades']:
+        mods_set.add(mod_un_name_map.get(mod['ItemType'], mod['ItemType']))
+
+    unobtained_cmods = list(corrupted_mods_set.difference(mods_set))
+    print(unobtained_cmods)
+    
+def main_get_platform_name():
+    import zlib
+    
+    magic_numbers = [753, 639, 247, 37, 60, 161]
+    
+    def get_discriminator(name, platform_id):
+        name_lower = name.lower() + "595"
+        return (zlib.crc32(name_lower.encode()) + magic_numbers[platform_id]) % 1000
+    
+    print(list(get_discriminator("Orrka", i) for i in range(6)))
+
+def main_explore_inventory():
+    if len(sys.argv) < 2:
+        p = Path("/mnt/c/Users/User/AppData/Local/AlecaFrame/lastData.dat")
+    else:
+        p = Path(sys.argv[1])
+    inv = get_inventory(p)
+    with open('./export/inv.json', 'w') as f:
+        f.write(json.dumps(inv, indent=4))
+
+class WarframeWiki:
+    def __init__(self):
+        self.weapon_data_cache = None
+        self.baro_data_cache = None
+
+    def _get_data_from_url(self, url):
+            """
+                we expect the returned text is: "return {...}"
+                and we manually patch out stuff that can't be parsed by luadata, e.g., math.huge
+            """
+            import requests
+            r = requests.get(url)
+            if r.status_code != 200:
+                raise Exception(f"Failed to get data from {url}, status code: {r.status_code}")
+            lua_code = r.text
+            try:
+                lua_code = lua_code.replace('return ', '', 1)
+                lua_code = lua_code.replace('math.huge', '10000000')
+                data = luadata.unserialize(lua_code, encoding="utf-8", multival=False)
+            except Exception as e:
+                print(f"Error occurred while parsing {url}: {e}")
+                raise e
+            return data
+
+    def _get_all_weapon_data(self, use_cache=True):
+        if use_cache and self.weapon_data_cache is not None:
+            return self.weapon_data_cache
+
+        # return {'primary': the dict that warframe market returns, etc}
+        urls = {
+            'primary': 'https://wiki.warframe.com/w/Module:Weapons/data/primary?action=raw',
+            'secondary': 'https://wiki.warframe.com/w/Module:Weapons/data/secondary?action=raw',
+            'melee': 'https://wiki.warframe.com/w/Module:Weapons/data/melee?action=raw',
+            'archwing': 'https://wiki.warframe.com/w/Module:Weapons/data/archwing?action=raw',
+            'companion': 'https://wiki.warframe.com/w/Module:Weapons/data/companion?action=raw',
+            'railjack': 'https://wiki.warframe.com/w/Module:Weapons/data/railjack?action=raw',
+            'modular': 'https://wiki.warframe.com/w/Module:Weapons/data/modular?action=raw',
+            'misc': 'https://wiki.warframe.com/w/Module:Weapons/data/misc?action=raw',
+        }
+
+        datas = {}
+        for key, url in urls.items():
+            print(f"Fetching data for {key} from {url}...")
+            datas[key] = self._get_data_from_url(url)
+
+        if use_cache:
+            self.weapon_data_cache = datas
+        return datas
+
+    def _get_baro_data(self, use_cache=True):
+        url = "https://wiki.warframe.com/w/Module:Baro/data?action=raw"
+        if use_cache and self.baro_data_cache is not None:
+            return self.baro_data_cache
+        data = self._get_data_from_url(url)
+        if use_cache:
+            self.baro_data_cache = data
+        return data
+
+    def get_weapon_uname_family_map(self, use_cache=True):
+        # get the weapon family map
+        # it will return two dicts: {uname -> family_name}, {family_name -> [uname1, uname2, ...]}
+        weapon_data = self._get_all_weapon_data(use_cache=use_cache)
+        uname_family_map = {}
+        for data in weapon_data.values():
+            for info in data.values():
+                uname = info.get('InternalName', None)
+                family_name = info.get('Family', None)
+                if uname is None or family_name is None:
+                    continue
+                uname_family_map[uname] = family_name
+        return uname_family_map
+
+    def get_weapon_family_unames_map(self, use_cache=True):
+        weapon_data = self._get_all_weapon_data(use_cache=use_cache)
+        family_unames_map = {}
+        for data in weapon_data.values():
+            for info in data.values():
+                uname = info.get('InternalName', None)
+                family_name = info.get('Family', None)
+                if uname is None or family_name is None:
+                    continue
+                if family_name not in family_unames_map:
+                    family_unames_map[family_name] = []
+                family_unames_map[family_name].append(uname)
+        return family_unames_map
+
+    def get_baro_items(self, use_cache=True):
+        # return {'mod': ['Primed Chamber', ...], 'weapon': ['Zylok', ...]}
+        baro_data = self._get_baro_data(use_cache=use_cache)
+        with open('./export/warframe_wiki_baro_data.json', 'w') as f:
+            json.dump(baro_data, f)
+        items = {
+            'mod': [],
+            'weapon': [],
+        }
+        for item in baro_data.get('Items', []).values():
+            item_type = item.get('Type', None)
+            if 'Mod' in item_type:
+                items['mod'].append(item.get('Name', None))
+            elif item_type == 'Weapon':
+                items['weapon'].append(item.get('Name', None))
+        return items
+
+    def main(self):
+        a = self.get_baro_items()
+        with open('./export/warframe_wiki_weapon_data.json', 'w') as f:
+            f.write(json.dumps(a, indent=4))
 if __name__ == '__main__':
     # main_decrypt_lastdata()
     # main_incarnon_riven()
-    main_incarnon()
+    # main_incarnon()
+    # main_corrupted_mods()
+    # main_explore_inventory()
+    WarframeWiki().main()
+    # main_get_platform_name()
     # main_public_export()
     # main_disposition()

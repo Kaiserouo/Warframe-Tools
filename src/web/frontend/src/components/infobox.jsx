@@ -1,14 +1,6 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query'
+import { useState } from "react";
 
-import SearchBar from '../components/search_bar.jsx';
-import ItemTable from '../components/item_table.jsx';
-import { Loading, Error } from '../components/loading_status.jsx';
-import { fetchMarketData } from '../api/fetch.jsx';
-import { makeHandleSubmit } from '../api/task.jsx';
-
-
-function Infobox({ renderHeader, renderInfoboxContent }) {
+export default function Infobox({ renderHeader, renderInfoboxContent }) {
   // renderHeader() -> the element outside, which would show the infobox when hovered
   // renderInfoboxContent() -> the element inside the infobox, which would show when hovering the outside element
   // the infobox itself isn't customizable
@@ -42,29 +34,3 @@ function Infobox({ renderHeader, renderInfoboxContent }) {
     </div>
   );
 }
-
-export default function Test({setting}) {
-
-  return (<>
-    <div className="mx-4 my-4">
-      <div className="text-2xl font-bold text-white my-2">
-        <p>Test</p>
-      </div>
-      <div className="space-y-4">
-        <Infobox 
-          renderHeader={() => <a 
-              className={`text-yellow-400 font-bold underline decoration-dashed underline-offset-3 text-lg font-bold`} 
-              href={null}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              ABC
-            </a>
-          }
-          renderInfoboxContent={() => <p className="whitespace-nowrap">Infobox content for ABC</p>}
-        />
-      </div>
-    </div>
-  </>);
-}
-
