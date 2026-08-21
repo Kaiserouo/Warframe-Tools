@@ -69,7 +69,7 @@ function TableItemCell({header, value, setting, sortBy, setSortBy, filterBy, set
         break;
       case 'string':
         innerElement = (
-          <p className="text-right hover:bg-gray-600 px-2 py-1 rounded" onClick={() => {
+          <p className="text-right hover:bg-gray-600 rounded" onClick={() => {
               if (filterBy.header?.id === header.id && filterBy.value === value.toString()) {
                 setFilterBy({ header: null, value: '' });
               } else {
@@ -114,7 +114,6 @@ function TableItemRow({headers, item, setting, sortBy, setSortBy, filterBy, setF
     </tr>
   );
 }
-
 
 export default function ItemTable({itemTable, setting}) {
   // item_table: {"headers": list[dict[str, str]], "items": list[dict[str, Any]]}

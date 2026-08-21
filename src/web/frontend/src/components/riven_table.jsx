@@ -69,7 +69,7 @@ function RivenTitle({rivenModInfo}) {
               {/* <a href={`https://wiki.warframe.com/w/${weaponName.replace(/\s/g, '_')}`} target="_blank" rel="noopener noreferrer">
                 {weaponName}
               </a> */}
-              <RivenInfobox setting={null} weaponName={weaponName} />
+              <RivenInfobox weaponName={weaponName} />
             </b>
           </h3>
           <h3 className="font-bold text-white">{rivenSuffix}</h3>

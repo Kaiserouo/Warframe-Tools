@@ -120,3 +120,10 @@ export async function fetchRivenData() {
     weapon_family_unames_map: await tryFetchJson('/api/wiki/data/get_weapon_family_unames_map'),
   };
 }
+export async function fetchBaroData() {
+  return {
+    baro_items: await tryFetchJson('/api/wiki/data/get_baro_items'),
+    mod_name_map: await tryFetchJson('/api/public_export/data/en/get_mod_name_map'),
+    weapon_name_map: await tryFetchJson('/api/public_export/data/en/get_weapon_name_map')
+  };
+}

@@ -1,8 +1,6 @@
 import { useState, useCallback, memo, useMemo } from "react";
-import ItemInfobox from './item_infobox';
-import RivenParser from '../utils/RivenParser.jsx';
+import RivenInfobox from "./riven_infobox";
 
-import { PhotoshopPicker } from 'react-color';
 
 function WeaponTitle({weaponName, iconUrl, disposition}) {
   return (<>
@@ -13,7 +11,11 @@ function WeaponTitle({weaponName, iconUrl, disposition}) {
           <img src={iconUrl} alt={weaponName} className="w-16 h-16" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white"><b className="text-yellow-400 hover:underline"><a href={`https://wiki.warframe.com/w/${weaponName.replace(/\s/g, '_')}`} target="_blank" rel="noopener noreferrer">{weaponName}</a></b></h3>
+          <h3 className="text-lg font-bold text-white">
+            <b className="text-yellow-400 hover:underline">
+              <RivenInfobox weaponName={weaponName} />
+            </b>
+          </h3>
         </div>
       </div>
       <div className="flex flex-row items-center">

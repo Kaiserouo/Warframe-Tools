@@ -830,8 +830,6 @@ class WarframeWiki:
     def get_baro_items(self, use_cache=True):
         # return {'mod': ['Primed Chamber', ...], 'weapon': ['Zylok', ...]}
         baro_data = self._get_baro_data(use_cache=use_cache)
-        with open('./export/warframe_wiki_baro_data.json', 'w') as f:
-            json.dump(baro_data, f)
         items = {
             'mod': [],
             'weapon': [],

@@ -102,9 +102,7 @@ function ItemInfoboxInnerNoData({ weaponName }) {
   );
 }
 
-export default function RivenInfobox({ setting, weaponName }) {
-  const [showInfobox, setShowInfobox] = useState(false);
-  
+export default function RivenInfobox({ weaponName }) {
   // const { isPending: weaponIsPending, isFetching: weaponIsFetching, error: weaponError, data: weaponData } = useQuery({
   //   queryKey: ['riven_infobox_data', weaponName, setting.oracle_type, setting.ducantor_price_override],
   //   queryFn: () => fetchRivenInfoboxData(weaponName, setting.oracle_type, setting.ducantor_price_override),

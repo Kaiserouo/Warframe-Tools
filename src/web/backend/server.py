@@ -906,6 +906,7 @@ def data_public_export(lang, function_name):
         'get_riven_loctag_map': lambda lang: wpe.get_riven_loctag_map(lang, use_cache=True),
         'get_incarnon_weapons': lambda lang: wpe.get_incarnon_weapons(use_cache=True),
         'get_icon_map': lambda lang: wpe.get_icon_map(use_cache=True),
+        'get_mod_name_map': lambda lang: wpe.get_mod_name_map(use_cache=True),
     }
 
     if function_name in function_map:
@@ -918,6 +919,7 @@ def data_wiki(function_name):
     function_map = {
         'get_weapon_uname_family_map': lambda: wwiki.get_weapon_uname_family_map(use_cache=True),
         'get_weapon_family_unames_map': lambda: wwiki.get_weapon_family_unames_map(use_cache=True),
+        'get_baro_items': lambda: wwiki.get_baro_items(use_cache=True),
     }
 
     if function_name in function_map:

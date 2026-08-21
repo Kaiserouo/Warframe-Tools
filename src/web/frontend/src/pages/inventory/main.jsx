@@ -1,11 +1,16 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query'
 import Riven from './riven.jsx';
+import Baro from './baro.jsx';
 
 let pageMap = {
   'riven': {
     'name': 'Riven',
     'factory': (setting) => (<Riven setting={setting} />)
+  },
+  'baro': {
+    'name': 'Baro',
+    'factory': (setting) => (<Baro setting={setting} />)
   }
 };
 
