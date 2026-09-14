@@ -25,6 +25,12 @@ fetch_urls = [
     'api/public_export/data/en/get_relic_set',
     'api/public_export/data/en/get_relic_reward',
     'api/public_export/data/en/get_name_lookup_map',
+    'api/public_export/data/en/get_warframe_info_map',
+    'api/public_export/data/en/get_ability_info_map',
+    'api/overframe/data/get_item_id',
+    'api/overframe/data/get_mod_id',
+    'api/overframe/data/get_ability_id',
+    '/api/other/data/get_archon_shard_info',
     'api/missing_item_checklist'
 ]
 fetch_output_dir_path = Path(argv[1])  # e.g. "./src/web/frontend/build_github_page"

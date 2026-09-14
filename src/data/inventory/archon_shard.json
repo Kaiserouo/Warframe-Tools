@@ -1,0 +1,116 @@
+{
+    "ACC_RED": {
+        "Name": "Crimson Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeMeleeCritDamage": "+25% Melee Critical Damage",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradePrimaryStatusChance": "+25% Primary Status Chance",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeSecondaryCritChance": "+25% Secondary Critical Chance",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityStrength": "+10% Ability Strength",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityDuration": "+10% Ability Duration"
+        }
+    },
+    "ACC_YELLOW": {
+        "Name": "Amber Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeStartingEnergy": "+30% Maximum Energy is filled on Spawn",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectHealth": "+100% Effectiveness on Health Orbs",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectEnergy": "+50% Effectiveness on Energy Orbs",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCastingSpeed": "+25% Casting Speed",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeParkourVelocity": "+15% Parkour Velocity"
+        }
+    },
+    "ACC_BLUE": {
+        "Name": "Azure Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHealthMax": "+150 Max Health",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeShieldMax": "+150 Shield Capacity",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeEnergyMax": "+50 Energy Max",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeArmourMax": "+150 Armor",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRegen": "+5 Health/s Regenerated"
+        }
+    },
+    "ACC_GREEN": {
+        "Name": "Emerald Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinDamage": "Toxin Status Effects deal +30% more damage.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinHeal": "Recover +2 Health each time enemies are damaged by a Toxin Status Effect.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveDamageBoost": "Gain +10% Ability Damage on enemies affected by Corrosion Status.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveStack": "Increase max stacks of Corrosion Status by +2."
+        }
+    },
+    "ACC_ORANGE": {
+        "Name": "Topaz Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHPBoostFromImpact": "Gain 1 Max Health per enemy killed with Blast Damage. Max 300 Health.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeBlastProc": "Regenerate +5 Shield when you kill an enemy with Blast Damage.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWeaponCritBoostFromHeat": "Increase Secondary Critical Chance by 1% every time you kill an enemy affected by Heat Status. Max 50%.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRadiationDamageBoost": "Gain +10% Ability Damage on enemies affected by Radiation Status."
+        }
+    },
+    "ACC_PURPLE": {
+        "Name": "Violet Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageBoost": "Gain +10% Ability Damage on enemies affected by Electricity Status.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamage": "Gain +30% Primary Electricity Damage. Gain an additional +10% per Crimson, Azure, or Violet Archon Shard equipped. Electricity will combine with Mods.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoost": "Gain +25% Melee Critical Damage. When Max Energy is over 500, the damage boost doubles.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeEquilibrium": "Health pickups give +20% Energy. Energy pickups give +20% Health."
+        }
+    },
+    "ACC_RED_MYTHIC": {
+        "Name": "Tauforged Crimson Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeMeleeCritDamageMythic": "+37.5% Melee Critical Damage",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradePrimaryStatusChanceMythic": "+37.5% Primary Status Chance",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeSecondaryCritChanceMythic": "+37.5% Secondary Critical Chance",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityStrengthMythic": "+15% Ability Strength",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityDurationMythic": "+15% Ability Duration"
+        }
+    },
+    "ACC_YELLOW_MYTHIC": {
+        "Name": "Tauforged Amber Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeStartingEnergyMythic": "+45% Maximum Energy is filled on Spawn",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectHealthMythic": "+150% Effectiveness on Health Orbs",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectEnergyMythic": "+75% Effectiveness on Energy Orbs",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCastingSpeedMythic": "+37.5% Casting Speed",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeParkourVelocityMythic": "+22.5% Parkour Velocity"
+        }
+    },
+    "ACC_BLUE_MYTHIC": {
+        "Name": "Tauforged Azure Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHealthMaxMythic": "+225 Max Health",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeShieldMaxMythic": "+225 Shield Capacity",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeEnergyMaxMythic": "+75 Energy Max",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeArmourMaxMythic": "+225 Armor",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRegenMythic": "+7.5 Health/s Regenerated"
+        }
+    },
+    "ACC_GREEN_MYTHIC": {
+        "Name": "Tauforged Emerald Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinDamageMythic": "Toxin Status Effects deal +45% more damage.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinHealMythic": "Recover +3 Health each time enemies are damaged by a Toxin Status Effect.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveDamageBoostMythic": "Gain +15% Ability Damage on enemies affected by Corrosion Status.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveStackMythic": "Increase max stacks of Corrosion Status by +3."
+        }
+    },
+    "ACC_ORANGE_MYTHIC": {
+        "Name": "Tauforged Topaz Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHPBoostFromImpactMythic": "Gain 2 Max Health per enemy killed with Blast Damage. Max 450 Health.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeBlastProcMythic": "Regenerate +7.5 Shield when you kill an enemy with Blast Damage.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWeaponCritBoostFromHeatMythic": "Increase Secondary Critical Chance by 1.5% every time you kill an enemy affected by Heat Status. Max 75%.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRadiationDamageBoostMythic": "Gain +15% Ability Damage on enemies affected by Radiation Status."
+        }
+    },
+    "ACC_PURPLE_MYTHIC": {
+        "Name": "Tauforged Violet Archon Shard",
+        "Attributes": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageBoostMythic": "Gain +15% Ability Damage on enemies affected by Electricity Status.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageMythic": "Gain +45% Primary Electricity Damage. Gain an additional +15% per Crimson, Azure, or Violet Archon Shard equipped. Electricity will combine with Mods.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoostMythic": "Gain +37.5% Melee Critical Damage. When Max Energy is over 500, the damage boost doubles.",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeEquilibriumMythic": "Health pickups give +30% Energy. Energy pickups give +30% Health."
+        }
+    }
+}

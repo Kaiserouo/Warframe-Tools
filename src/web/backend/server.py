@@ -17,7 +17,7 @@ from joblib import Parallel, delayed
 from ... import warframe_market as wfm
 from ... import interactive as wfi
 from ... import util as util
-from ...data.inventory.parse_inventory import WarframePublicExport, WarframeWiki
+from ...data.inventory.parse_inventory import WarframePublicExport, WarframeWiki, get_archon_shard_info, Overframe
 
 app = Flask(__name__)
 
@@ -39,6 +39,7 @@ wpe = WarframePublicExport()
 wwiki = WarframeWiki()
 ducat_data = None
 cache = {}
+wof = Overframe()
 
 # args, kwargs is passed to price oracle functions
 # for now, kwargs = stat_filter
@@ -66,6 +67,7 @@ def refresh():
     print(f'{util.GREEN}[*] get public export data...{util.RESET}')
     wpe._prefetch_all_public_export(lang='en')
     wwiki = WarframeWiki()
+    wof = Overframe()
     cache = {}
 
 
@@ -88,7 +90,11 @@ stop_obj_pool = {}
 
 def register_task(task_callback):
     """
-    Registers a task for execution and returns its ID.
+    Registers a task for execution and returns its ID. This function is non-blocking.
+    After registering the task, you can poll the task status by calling /api/progress/${task_id} to get the result.
+
+    For the task (i.e., task_callback), there are some conditions that should be met:
+
     The task callback should be:
         def task(task_id, task_status, stop_obj):
             ...
@@ -108,7 +114,10 @@ def register_task(task_callback):
     - when status is 'error', error should be set
     - when status is 'in_progress', total and current should be set properly
 
-    if, during the task, you find that stop_obj['stop'] is True, you should terminate the task ASAP and call task_stop(task_id)
+    if, during the task, you find that stop_obj['stop'] is True, you should terminate the task ASAP and call task_stop(task_id),
+    if stop[obj]['stop'] is True, then task_status will never be used anymore after task_stop(task_id) 
+
+    if your task return normally, do NOT call task_stop(task_id) anywhere, and simply return None
     """
     task_id = str(uuid.uuid4())
     task_status = {
@@ -913,7 +922,9 @@ def data_public_export(lang, function_name):
         'get_mod_name_map': lambda lang: wpe.get_mod_name_map(use_cache=True),
         'get_relic_reward': lambda lang: wpe.get_relic_reward(lang, use_cache=True),
         'get_relic_sets': lambda lang: wpe.get_relic_sets(lang, use_cache=True),
-        'get_name_lookup_map': lambda lang: wpe.get_name_lookup_map(lang, use_cache=True)
+        'get_name_lookup_map': lambda lang: wpe.get_name_lookup_map(lang, use_cache=True),
+        'get_warframe_info_map': lambda lang: wpe.get_warframe_info_map(lang, use_cache=True),
+        'get_ability_info_map': lambda lang: wpe.get_ability_info_map(lang, use_cache=True)
     }
 
     if function_name in function_map:
@@ -931,6 +942,30 @@ def data_wiki(function_name):
 
     if function_name in function_map:
         return use(f'WIKI__{function_name}', lambda: function_map[function_name]())
+    else:
+        return {'error': 'Function not found'}, 404
+
+@app.route('/api/overframe/data/<string:function_name>')
+def data_overframe(function_name):
+    function_map = {
+        'get_item_id': lambda: wof.get_item_id(use_cache=True),
+        'get_mod_id': lambda: wof.get_mod_id(use_cache=True),
+        'get_ability_id': lambda: wof.get_ability_id(use_cache=True),
+    }
+
+    if function_name in function_map:
+        return use(f'OVERFRAME__{function_name}', lambda: function_map[function_name]())
+    else:
+        return {'error': 'Function not found'}, 404
+
+@app.route('/api/other/data/<string:function_name>')
+def data_other(function_name):
+    function_map = {
+        'get_archon_shard_info': lambda: get_archon_shard_info(),
+    }
+
+    if function_name in function_map:
+        return use(f'OTHER__{function_name}', lambda: function_map[function_name]())
     else:
         return {'error': 'Function not found'}, 404
 

@@ -2,6 +2,10 @@
 
 - Add logging for backend
   - more specifically, every single call to the 
+- Add loadout page
+  - deal with loadout table
+  - deal with riven information
+  - deal with polarity information
 
 # Abandoned
 

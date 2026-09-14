@@ -1,4 +1,5 @@
 from collections import defaultdict
+import os
 import sys
 from pathlib import Path
 import json
@@ -7,6 +8,7 @@ import re
 import requests
 import lzma
 import luadata
+import subprocess
 
 from colorama import Fore, Style
 for color in [Fore, Style]:
@@ -493,7 +495,52 @@ class WarframePublicExport:
                 if 'uniqueName' in entry and 'name' in entry:
                     name_lookup[entry['uniqueName']] = entry['name']
         return name_lookup
-        
+
+    def get_warframe_info_map(self, lang='en', use_cache=True):
+        """
+        return warframe info map, i.e., from warframe uname to the dict in ExportWarframes.
+        we also add warframe icon and ability icons to the dict
+        """
+        wf_info_map = {}
+        icon_map = self.get_icon_map(use_cache)
+        for wf in self._get_public_export('ExportWarframes', lang, use_cache):
+            wf_info = {
+                **wf,
+                'icon': icon_map.get(wf['uniqueName'], None)
+            }
+            wf_info['abilities'] = [
+                {**ability, 'icon': icon_map.get(ability['abilityUniqueName'], None)}
+                for ability in wf['abilities']
+            ]
+            wf_info_map[wf['uniqueName']] = wf_info
+
+        return wf_info_map
+
+    def get_ability_info_map(self, lang='en', use_cache=True):
+        """
+        return ability uname -> ability
+        e.g., {
+            "/Lotus/Powersuits/Cowgirl/Abilities/GunFuAbility": {
+                "abilityUniqueName": "/Lotus/Powersuits/Cowgirl/Abilities/GunFuAbility",
+                "abilityName": "Peacemaker",
+                "description": "With intense focus, Mesa draws her Regulator pistols, shooting down her foes in rapid succession."
+                
+                "warframe": <Warframe uname>
+                "icon": <a URL to the icon>
+            }
+        }
+        """
+        ab_info_map = {}
+        icon_map = self.get_icon_map(use_cache)
+        for wf in self._get_public_export('ExportWarframes', lang, use_cache):
+            for ability in wf['abilities']:
+                ab_info_map[ability['abilityUniqueName']] = {
+                    **ability, 
+                    'warframe': wf['uniqueName'],
+                    'icon': icon_map.get(ability['abilityUniqueName'], None)
+                }
+        return ab_info_map
+
 def main_public_export():
     # https://wiki.warframe.com/w/Public_Export
     wd = WarframePublicExport()
@@ -1083,6 +1130,189 @@ class WarframeWiki:
         with open('./export/warframe_wiki_weapon_data.json', 'w') as f:
             f.write(json.dumps(a, indent=4))
 
+def get_archon_shard_info():
+    """
+        the data will be like:
+        {
+            "ACC_RED": {
+                "Name": "Crimson Archon Shard",
+                "Attributes": {
+                    "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeMeleeCritDamage": "+25% Melee Critical Damage",
+                    "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradePrimaryStatusChance": "+25% Primary Status Chance",
+                    ...
+                }
+            },
+            ...
+        }
+    """
+    path = Path(__file__).parent / 'archon_shard.json'
+    with open(path, 'r') as f:
+        data = json.load(f)
+    return data
+
+class Overframe:
+    def __init__(self):
+        self.DEFAULT_PAGE = "https://overframe.gg/build/new/13/atlas/"
+        self.overframe_page_cache = {}
+        self.overframe_url_map_cache = None
+        self.overframe_page_data_cache = {}
+
+    def _get_overframe_page(self, page_url, use_cache=True):
+        """
+        get the page content of overframe.gg page
+        ref. src/data/inventory/overframe.md: Overframe > Data > Data Fetching > Webpack Fetching
+        """
+        if use_cache and page_url in self.overframe_page_cache:
+            return self.overframe_page_cache[page_url]
+        script_path = Path(__file__).parent / 'get_webpage.py'
+        text = subprocess.Popen(
+            ['xvfb-run', '-a', 'python', str(script_path), page_url], 
+            stdout=subprocess.PIPE
+        ).stdout.read().decode('utf-8')
+        if use_cache:
+            self.overframe_page_cache[page_url] = text
+        return text
+
+    def _get_overframe_url_map(self, use_cache=True):
+        """
+            return a dict of {name: url} for all the webpack js files used in overframe.gg
+            e.g., {
+                'db/variants': 'https://static.overframe.gg/_next/static/db/variants.3a89436831e541ca.js',
+                ...
+            }
+            There should be at least:
+                'db/abilities', 'db/abilitystats', 'db/glyphs', 'db/items', 'db/moddescriptions', 
+                'db/mods', 'db/modsets', 'db/modularparts', 'db/patchlogs', 'db/relicrewards', 'db/rivens', 
+                'db/sources', 'db/variants', 
+                'i18n/de-json', 'i18n/es-json', 'i18n/fr-json', 'i18n/it-json', 'i18n/ja-json', 'i18n/ko-json', 
+                'i18n/pl-json', 'i18n/pt-json', 'i18n/ru-json', 'i18n/tc-json', 'i18n/tr-json', 'i18n/uk-json', 'i18n/zh-json'
+        """
+        if use_cache and self.overframe_url_map_cache is not None:
+            return self.overframe_url_map_cache
+
+        text = self._get_overframe_page(self.DEFAULT_PAGE)
+        webpack_filename = re.search(r'webpack.*?\.js', text).group()
+        r = requests.get(f'https://static.overframe.gg/_next/static/chunks/{webpack_filename}')
+        t = r.text
+        t = t[t.find('"static/chunks/"'):]
+        name_map, nonce_map = tuple([
+            json.loads(re.sub(r'(\d+):', r'"\1":', bracket_text.group(0))) 
+            for bracket_text, _ in zip(re.finditer(r'\{([^}]+)\}', t), range(2))
+        ])
+
+        url_map = {
+            name_map[i]: f"https://static.overframe.gg/_next/static/chunks/{name_map[i]}.{nonce_map[i]}.js"
+            for i in name_map
+        }
+        if use_cache:
+            self.overframe_url_map_cache = url_map
+        return url_map 
+
+    def _parse_webpack_js(self, text):
+        """
+        ref. src/data/inventory/overframe.md: Overframe > Data > Data Parsing
+        
+        text is the content of a webpack js file, 
+        e.g., requests.get('https://static.overframe.gg/_next/static/chunks/db/abilities.a658d8c8a74f481a.js').text
+        """
+        json_text = text[text.find("JSON.parse('")+12:text.rfind("'")].replace("\\'", "'").replace('\\\\', '\\')
+        # escape unicude \x
+        json_text = re.sub(r'\\x([0-9a-fA-F]{2})', lambda m: chr(int(m.group(1), 16)), json_text)
+        data = json.loads(json_text)
+        return data
+
+    def _test_get_all_pages(self):
+        url_map = self._get_overframe_url_map()
+        for name, url in url_map.items():
+            print(f"Fetching {name} from {url}...")
+            text = requests.get(url).content.decode('utf-8')
+            filename = Path(f'./export/overframe/{name}.json')
+            if not filename.parent.exists():
+                filename.parent.mkdir(parents=True)
+            with open(filename, 'w') as f:
+                json.dump(self._parse_webpack_js(text), f, indent=4)
+
+    def _get_data(self, name, use_cache=True):
+        """
+            name: str, the name of the webpack js file, e.g., 'db/variants'
+            return: dict, the data
+        """
+        if use_cache and name in self.overframe_page_data_cache:
+            return self.overframe_page_data_cache[name]
+
+        url_map = self._get_overframe_url_map(use_cache=use_cache)
+        if name not in url_map:
+            raise ValueError(f"Name {name} not found in overframe url map")
+        url = url_map[name]
+        text = requests.get(url).content.decode('utf-8')
+        data = self._parse_webpack_js(text)
+
+        if use_cache:
+            self.overframe_page_data_cache[name] = data
+
+        return data
+
+    def get_item_id(self, use_cache=True):
+        """
+        return id of all moddable items, from uname to id
+        """
+        return {
+            uname: item['id']
+            for uname, item in self._get_data('db/items', use_cache=use_cache).items()
+            if 'id' in item
+        }
+
+    def get_mod_id(self, use_cache=True):
+        """
+        return id of all mods, from uname to id
+        """
+        return {
+            uname: mod['id']
+            for uname, mod in self._get_data('db/mods', use_cache=use_cache).items()
+            if 'id' in mod
+        }
+
+    def get_ability_id(self, use_cache=True):
+        """
+        return id of all abilities, from uname to id
+        """
+        return {
+            uname: mod['id']
+            for uname, mod in self._get_data('db/abilities', use_cache=use_cache).items()
+            if 'id' in mod
+        }
+
+
+
+def main_tmp():
+    # if len(sys.argv) < 2:
+    #     p = Path("/mnt/c/Users/User/AppData/Local/AlecaFrame/lastData.dat")
+    # else:
+    #     p = Path(sys.argv[1])
+    # inv = get_inventory(p)
+
+    # upgrades = {
+    #     upgrade['ItemId']['$oid']: upgrade
+    #     for upgrade in inv['Upgrades']
+    # }
+
+    # # umbra = [suit for suit in inv['Suits'] if suit['ItemType'] == "/Lotus/Powersuits/Excalibur/ExcaliburUmbra"][0]
+    # umbra = [suit for suit in inv['Pistols'] if suit['ItemType'] == "/Lotus/Weapons/Tenno/Pistols/SapientPistol/SapientPistol"][0]
+    # print(umbra['Configs'][0]['Upgrades'])
+    # for upgrade_id in umbra['Configs'][0]['Upgrades']:
+    #     if upgrade_id in upgrades:
+    #         upgrade = upgrades[upgrade_id]
+    #         print(upgrade['ItemType'], upgrade.get('UpgradeFingerprint', None))
+    #     elif upgrade_id == "":
+    #         print("(N/A)")
+    #     else:
+    #         print(upgrade_id, "(raw)")
+    wof = Overframe()
+    wof.get_item_id()
+    wof.get_mod_id()
+    wof.get_ability_id()
+
+
 if __name__ == '__main__':
     # main_decrypt_lastdata()
     # main_incarnon_riven()
@@ -1093,5 +1323,6 @@ if __name__ == '__main__':
     # main_get_platform_name()
     # main_public_export()
     # main_disposition()
-    pe_weapon = WarframePublicExport()._get_public_export('ExportWeapons')
-    print(set([w['productCategory'] for w in pe_weapon]))
+    # pe_weapon = WarframePublicExport()._get_public_export('ExportWeapons')
+    # print(set([w['productCategory'] for w in pe_weapon]))
+    main_tmp()

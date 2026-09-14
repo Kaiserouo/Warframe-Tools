@@ -134,11 +134,22 @@ export async function fetchPERelicData() {
     name_lookup_map: await tryFetchJson('api/public_export/data/en/get_name_lookup_map'),
   };
 }
-
 export async function fetchMissingItemChecklistData() {
   return {
     missing_item_checklist: await tryFetchJson('api/missing_item_checklist'),
     mod_name_map: await tryFetchJson('api/public_export/data/en/get_mod_name_map'),
     weapon_name_map: await tryFetchJson('api/public_export/data/en/get_weapon_name_map')
+  };
+}
+export async function fetchLoadoutData() {
+  return {
+    archon_shard_map: await tryFetchJson('api/other/data/get_archon_shard_info'),
+    mod_name_map: await tryFetchJson('api/public_export/data/en/get_mod_name_map'),
+    warframe_info_map: await tryFetchJson('api/public_export/data/en/get_warframe_info_map'),
+    ability_info_map: await tryFetchJson('api/public_export/data/en/get_ability_info_map'),
+
+    overframe_item_id_map: await tryFetchJson('api/overframe/data/get_item_id'),
+    overframe_mod_id_map: await tryFetchJson('api/overframe/data/get_mod_id'),
+    overframe_ability_id_map: await tryFetchJson('api/overframe/data/get_ability_id'),
   };
 }
