@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchLoadoutData } from '../../api/fetch.jsx';
 import LoadoutTable from '../../components/loadout_table.jsx';
 import { Loading, LoadingProgress, Error } from '../../components/loading_status.jsx';
+import SearchBar from '../../components/search_bar.jsx';
 
 function parseLoadoutInfos(loadoutData, inventoryData) {
     /*
@@ -38,7 +39,21 @@ function parseLoadoutInfos(loadoutData, inventoryData) {
         overframe_item_id_map: OFItemIdMap,
         overframe_mod_id_map: OFModIdMap,
         overframe_ability_id_map: OFAbilityIdMap,
+        overframe_riven_tag_id_map: OFRivenTagIdMap,
     } = loadoutData;
+
+    const polarityMap = {
+        // the polarity id on overframe
+        AP_UNIVERSAL: 0,
+        AP_ATTACK: 1,
+        AP_DEFENSE: 2,
+        AP_TACTIC: 3,
+        AP_POWER: 4,
+        AP_PRECEPT: 5,
+        AP_WARD: 7,     // yes there's a gap
+        AP_UMBRA: 8,
+        AP_ANY: 9
+    }
 
     const modOidMap = {};       // oid -> [overframe mod id, mod level, 0 (set polarity yourself)]
     for (const mod of inventoryData['Upgrades']) {
@@ -46,9 +61,26 @@ function parseLoadoutInfos(loadoutData, inventoryData) {
             continue;   // this mod isn't in overframe
         }
         const upgradeFingerprint = JSON.parse(mod['UpgradeFingerprint']);
-
-        // TODO: deal with riven mod
         modOidMap[mod['ItemId']['$oid']] = [OFModIdMap[mod['ItemType']], upgradeFingerprint['lvl'], 0];
+        
+        if (mod['ItemType'] in OFRivenTagIdMap) {
+            // riven mod
+
+            if (!('buffs' in upgradeFingerprint)) {
+                // it isn't a unveiled riven mod, skipping
+                continue;
+            }
+            
+            modOidMap[mod['ItemId']['$oid']] = [
+                ...modOidMap[mod['ItemId']['$oid']],
+                upgradeFingerprint['buffs'].map(({Tag, Value}) => [OFRivenTagIdMap[mod['ItemType']][Tag], Value / 0x3FFFFFFF]),
+                upgradeFingerprint['curses'] && upgradeFingerprint['curses'].length > 0 ? 
+                    [OFRivenTagIdMap[mod['ItemType']][upgradeFingerprint['curses'][0].Tag], upgradeFingerprint['curses'][0].Value / 0x3FFFFFFF] : null,
+                upgradeFingerprint['lvlReq'],
+                polarityMap[upgradeFingerprint['pol']],
+                upgradeFingerprint['rerolls'],
+            ]
+        }
     }
 
     function _parseMod(modId) {
@@ -77,14 +109,22 @@ function parseLoadoutInfos(loadoutData, inventoryData) {
         });
     }
 
-    function _genOverframeLink(itemType, config) {
-        const id = OFItemIdMap?.[itemType] || -1;
+    function _genOverframeLink(itemData, config) {
+        console.log('_genOverframeLink', itemData, config);
+        const id = OFItemIdMap?.[itemData['ItemType']] || -1;
         if (id === -1) {
             return null;    // this item isn't in overframe
         }
 
         const of_list = [1, id, 30, 1];
         const mod_list = (config['Upgrades'] || []).map((modId) => _parseMod(modId));
+
+        for (const polarity of itemData['Polarity'] || []) {
+            if (mod_list[polarity['Slot']]) {
+                mod_list[polarity['Slot']][2] = polarityMap[polarity['Value']];
+            }
+        }
+
         of_list.push(mod_list);
         
         if ('AbilityOverride' in config) {
@@ -117,14 +157,21 @@ function parseLoadoutInfos(loadoutData, inventoryData) {
 
             for (const i in itemData['Configs']) {
                 const config = itemData['Configs'][i];
+                if (!config['Upgrades'] || config['Upgrades'].length === 0) {
+                    continue;   // we skip configs with no mods
+                }
                 const loadout = {
                     name: config['Name'] || `CONFIG ${String.fromCharCode("A".charCodeAt(0) + Number(i))}`,
-                    overframe_link: _genOverframeLink(itemData['ItemType'], config),
+                    overframe_link: _genOverframeLink(itemData, config),
                 };
                 item['loadouts'].push(loadout);
             }
 
-            item['search_text'] = `${item['name']}|${item['uname']}|${item['loadouts'].map((loadout) => loadout['name']).join('|')}`;
+            if (item['loadouts'].length === 0) {
+                continue;   // we skip items with no loadouts
+            }
+
+            item['searchString'] = `${item['name']}|${item['uname']}|${item['loadouts'].map((loadout) => loadout['name']).join('|')}`;
             
             ls.push(item);
         }
@@ -179,6 +226,15 @@ export default function Loadout({setting}) {
           <p>An loadout viewer... kinda.</p>
           <p>Generates overframe links for the loadout.</p>
         </div>
+
+        <SearchBar 
+            placeholder="Search..."
+            items={[]}
+            nameKey={null}
+            searchMode="contains"
+            setSearchText={setSearchText}
+            searchOnChange={true} />
+        {searchText && <div className="text-white my-2">Search Text: {searchText}</div>}
     </div>
     </div>
 

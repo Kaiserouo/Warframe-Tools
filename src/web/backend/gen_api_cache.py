@@ -30,6 +30,7 @@ fetch_urls = [
     'api/overframe/data/get_item_id',
     'api/overframe/data/get_mod_id',
     'api/overframe/data/get_ability_id',
+    'api/overframe/data/get_riven_tag_id',
     'api/other/data/get_archon_shard_info',
     'api/missing_item_checklist'
 ]

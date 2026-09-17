@@ -951,6 +951,7 @@ def data_overframe(function_name):
         'get_item_id': lambda: wof.get_item_id(use_cache=True),
         'get_mod_id': lambda: wof.get_mod_id(use_cache=True),
         'get_ability_id': lambda: wof.get_ability_id(use_cache=True),
+        'get_riven_tag_id': lambda: wof.get_riven_tag_id(use_cache=True),
     }
 
     if function_name in function_map:

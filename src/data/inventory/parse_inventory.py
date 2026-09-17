@@ -1274,7 +1274,7 @@ class Overframe:
         """
         return {
             uname: mod['id']
-            for uname, mod in self._get_data('db/mods', use_cache=use_cache).items()
+            for uname, mod in list(self._get_data('db/mods', use_cache=use_cache).items()) + list(self._get_data('db/rivens', use_cache=use_cache).items())
             if 'id' in mod
         }
 
@@ -1288,7 +1288,17 @@ class Overframe:
             if 'id' in mod
         }
 
-
+    def get_riven_tag_id(self, use_cache=True):
+        """
+        return id of riven tags
+        return {riven_uname: {tag: id}}
+        """
+        tag_map = {}
+        for riven_uname, riven in self._get_data('db/rivens', use_cache=use_cache).items():
+            tag_map[riven_uname] = {}
+            for tag_info in riven['data']['UpgradeEntries']:
+                tag_map[riven_uname][tag_info['Tag']] = tag_info['__id']
+        return tag_map
 
 def main_tmp():
     # if len(sys.argv) < 2:

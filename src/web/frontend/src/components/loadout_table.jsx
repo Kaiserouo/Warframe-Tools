@@ -12,15 +12,6 @@ function makeIcon(src, title, bgColor, iconSize=8, text=null) {
   </>
 }
 
-function _renderLoadoutBlock(loadoutInfo) {
-  return <div className="flex flex-col gap-y-2">
-    <p className="text-white">{loadoutInfo.name}</p>
-    {loadoutInfo.loadouts.map((loadout, idx) => (<>
-      <p className="text-white" key={idx}>{loadout.name}: <a href={loadout.overframe_link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Overframe</a></p>
-    </>))}
-  </div>
-}
-
 function LoadoutBlockSide({loadoutInfo}) {
   return (<>
     <div className="px-4">
@@ -54,7 +45,6 @@ function LoadoutBlockTitle({loadoutInfo}) {
         </h3>
         <div className="grid gap-x-4 grid-cols-5 w-full">
           {archonShards && archonShards.length > 0 ? archonShards.map((archonShard, idx) => {
-            console.log('archon shard', archonShards, archonShard, archonShardMap[archonShard.color]);
             if (!archonShardMap[archonShard.color]) {
               // either there's a new archon shard or color is undefined
               return null;
@@ -76,7 +66,7 @@ function LoadoutBlockTitle({loadoutInfo}) {
   </>);
 }
 function LoadoutBlockEntry({loadoutInfo}) {
-  return <div className="flex flex-col gap-y-2">
+  return <div className="flex flex-col gap-y-2 my-2">
     {loadoutInfo.loadouts.map((loadout, idx) => (<>
       <p className="text-white font-bold" key={idx}>
         {loadout.name}: <a href={loadout.overframe_link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
@@ -89,10 +79,10 @@ function LoadoutBlockEntry({loadoutInfo}) {
 function LoadoutBlock({loadoutInfo}) {
   return (
     <div className="flex border border-gray-600 rounded h-full my-2" >
-      <div className={`p-2 bg-[#511a6d] text-white border-r border-gray-600`}>
+      <div className={`p-2 bg-[#1a3a6d] text-white border-r border-gray-600`}>
         <LoadoutBlockSide loadoutInfo={loadoutInfo} />
       </div>
-      <div className={`p-4 grow bg-[#2b2130]`}>
+      <div className={`p-4 grow bg-[#212630]`}>
         <LoadoutBlockTitle loadoutInfo={loadoutInfo} />
         <LoadoutBlockEntry loadoutInfo={loadoutInfo} />
       </div>

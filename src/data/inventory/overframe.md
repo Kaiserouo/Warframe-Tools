@@ -134,7 +134,7 @@ for the mod list:
   - if a category doesn't have it (e.g., weapons don't have aura mods) then simply skip it in the sequence
   - note that this sequence is EXACTLY how the inventory file stores it
     - also if the inventory file seems shorter (e.g., only have 3 entries on warframe which should in theory have a lot more), that means the later ones are all empty. overframe deals with this nicely
-- For arcanes, polarity = 0. For mods, in 0-indexing, the sequence goes [no_polarity, <POLARITY_ATTACK>, <POLARITY_DEFENSE>, <POLARITY_TACTIC>, <POLARITY_POWER>, <POLARITY_PRECEPT>, <POLARITY_WARD>, <POLARITY_UMBRA>, <POLARITY_ANY>]
+- For arcanes, polarity = 0. For mods, in 0-indexing, the sequence goes [AP_UNIVERSAL(no polarity), AP_ATTACK, AP_DEFENSE, AP_TACTIC, AP_POWER, AP_PRECEPT, AP_WARD, AP_UMBRA, AP_ANY]
 - For riven, the mod instead goes like: [2499,8,0,[[37,1],[26,1],[38,1]],[46,0.9996952686721667],8,1,35], where:
 ```
 [

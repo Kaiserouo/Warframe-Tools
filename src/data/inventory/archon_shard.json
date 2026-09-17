@@ -96,10 +96,10 @@
         "AttributesAbbreviation": {
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageBoost": "+Abi",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamage": "+Pri",
-            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoost": "+CC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoost": "+CD",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeEquilibrium": "+Equil"
         },
-        "Icon": "https://wiki.warframe.com/images/TopazArchonShard.png"
+        "Icon": "https://wiki.warframe.com/images/VioletArchonShard.png"
     },
     "ACC_RED_MYTHIC": {
         "Name": "Tauforged Crimson Archon Shard",
@@ -198,7 +198,7 @@
         "AttributesAbbreviation": {
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageBoostMythic": "+Abi",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageMythic": "+Pri",
-            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoostMythic": "+CC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoostMythic": "+CD",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeEquilibriumMythic": "+Equil"
         },
         "Icon": "https://wiki.warframe.com/images/TauforgedVioletArchonShard.png"

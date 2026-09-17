@@ -153,5 +153,6 @@ export async function fetchLoadoutData() {
     overframe_item_id_map: await tryFetchJson('api/overframe/data/get_item_id'),
     overframe_mod_id_map: await tryFetchJson('api/overframe/data/get_mod_id'),
     overframe_ability_id_map: await tryFetchJson('api/overframe/data/get_ability_id'),
+    overframe_riven_tag_id_map: await tryFetchJson('api/overframe/data/get_riven_tag_id'),
   };
 }

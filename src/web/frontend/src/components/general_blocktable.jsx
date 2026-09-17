@@ -42,7 +42,7 @@ class Organizer {
     }
   }
 
-  copySetting(setting) {
+  copySetting() {
     // make a copy of setting
     return {
       filterOptions: {...this.setting.filterOptions},
@@ -57,7 +57,7 @@ class Organizer {
     const searchLower = searchText ? searchText.toLowerCase() : null;
     return blockInfos.filter((blockInfo) => {
       if (searchLower) {
-        if (!blockInfo.searchString.includes(searchLower)) {
+        if (!blockInfo.searchString.toLowerCase().includes(searchLower)) {
           return false;
         }
       }
