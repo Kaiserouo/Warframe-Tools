@@ -1190,10 +1190,10 @@ class Overframe:
         if use_cache and self.overframe_url_map_cache is not None:
             return self.overframe_url_map_cache
 
-        text = self._get_overframe_page(self.DEFAULT_PAGE)
-        webpack_filename = re.search(r'webpack.*?\.js', text).group()
-
-        if not webpack_filename:
+        try:
+            text = self._get_overframe_page(self.DEFAULT_PAGE)
+            webpack_filename = re.search(r'webpack.*?\.js', text).group()
+        except Exception as e:
             # we use a backup link...
             from .overframe_link import OVERFRAME_WEBPACK_FILENAME
             webpack_filename = OVERFRAME_WEBPACK_FILENAME
