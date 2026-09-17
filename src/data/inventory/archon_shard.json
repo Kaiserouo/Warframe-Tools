@@ -7,7 +7,15 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeSecondaryCritChance": "+25% Secondary Critical Chance",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityStrength": "+10% Ability Strength",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityDuration": "+10% Ability Duration"
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeMeleeCritDamage": "+CD",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradePrimaryStatusChance": "+SC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeSecondaryCritChance": "+CC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityStrength": "+Str",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityDuration": "+Dur"
+        },
+        "Icon": "https://wiki.warframe.com/images/CrimsonArchonShard.png"
     },
     "ACC_YELLOW": {
         "Name": "Amber Archon Shard",
@@ -17,7 +25,15 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectEnergy": "+50% Effectiveness on Energy Orbs",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCastingSpeed": "+25% Casting Speed",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeParkourVelocity": "+15% Parkour Velocity"
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeStartingEnergy": "+Start",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectHealth": "+H.Orb",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectEnergy": "+E.Orb",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCastingSpeed": "+CS",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeParkourVelocity": "+PV"
+        },
+        "Icon": "https://wiki.warframe.com/images/AmberArchonShard.png"
     },
     "ACC_BLUE": {
         "Name": "Azure Archon Shard",
@@ -27,7 +43,15 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeEnergyMax": "+50 Energy Max",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeArmourMax": "+150 Armor",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRegen": "+5 Health/s Regenerated"
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHealthMax": "+Health",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeShieldMax": "+Shield",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeEnergyMax": "+Energy",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeArmourMax": "+Armor",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRegen": "+Regen"
+        },
+        "Icon": "https://wiki.warframe.com/images/AzureArchonShard.png"
     },
     "ACC_GREEN": {
         "Name": "Emerald Archon Shard",
@@ -36,7 +60,14 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinHeal": "Recover +2 Health each time enemies are damaged by a Toxin Status Effect.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveDamageBoost": "Gain +10% Ability Damage on enemies affected by Corrosion Status.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveStack": "Increase max stacks of Corrosion Status by +2."
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinDamage": "+T.Dmg",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinHeal": "+T.Heal",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveDamageBoost": "+C.Dmg",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveStack": "+C.Stk"
+        },
+        "Icon": "https://wiki.warframe.com/images/EmeraldArchonShard.png"
     },
     "ACC_ORANGE": {
         "Name": "Topaz Archon Shard",
@@ -45,7 +76,14 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeBlastProc": "Regenerate +5 Shield when you kill an enemy with Blast Damage.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWeaponCritBoostFromHeat": "Increase Secondary Critical Chance by 1% every time you kill an enemy affected by Heat Status. Max 50%.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRadiationDamageBoost": "Gain +10% Ability Damage on enemies affected by Radiation Status."
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHPBoostFromImpact": "+Health",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeBlastProc": "+Shield",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWeaponCritBoostFromHeat": "+CC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRadiationDamageBoost": "+R.Dmg"
+        },
+        "Icon": "https://wiki.warframe.com/images/TopazArchonShard.png"
     },
     "ACC_PURPLE": {
         "Name": "Violet Archon Shard",
@@ -54,7 +92,14 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamage": "Gain +30% Primary Electricity Damage. Gain an additional +10% per Crimson, Azure, or Violet Archon Shard equipped. Electricity will combine with Mods.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoost": "Gain +25% Melee Critical Damage. When Max Energy is over 500, the damage boost doubles.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeEquilibrium": "Health pickups give +20% Energy. Energy pickups give +20% Health."
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageBoost": "+Abi",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamage": "+Pri",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoost": "+CC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeEquilibrium": "+Equil"
+        },
+        "Icon": "https://wiki.warframe.com/images/TopazArchonShard.png"
     },
     "ACC_RED_MYTHIC": {
         "Name": "Tauforged Crimson Archon Shard",
@@ -64,7 +109,15 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeSecondaryCritChanceMythic": "+37.5% Secondary Critical Chance",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityStrengthMythic": "+15% Ability Strength",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityDurationMythic": "+15% Ability Duration"
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeMeleeCritDamageMythic": "+CD",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradePrimaryStatusChanceMythic": "+SC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeSecondaryCritChanceMythic": "+CC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityStrengthMythic": "+Str",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeAbilityDurationMythic": "+Dur"
+        },
+        "Icon": "https://wiki.warframe.com/images/TauforgedCrimsonArchonShard.png"
     },
     "ACC_YELLOW_MYTHIC": {
         "Name": "Tauforged Amber Archon Shard",
@@ -74,7 +127,15 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectEnergyMythic": "+75% Effectiveness on Energy Orbs",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCastingSpeedMythic": "+37.5% Casting Speed",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeParkourVelocityMythic": "+22.5% Parkour Velocity"
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeStartingEnergyMythic": "+Start",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectHealthMythic": "+H.Orb",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeGlobeEffectEnergyMythic": "+E.Orb",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCastingSpeedMythic": "+CS",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeParkourVelocityMythic": "+PV"
+        },
+        "Icon": "https://wiki.warframe.com/images/TauforgedAmberArchonShard.png"
     },
     "ACC_BLUE_MYTHIC": {
         "Name": "Tauforged Azure Archon Shard",
@@ -84,7 +145,15 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeEnergyMaxMythic": "+75 Energy Max",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeArmourMaxMythic": "+225 Armor",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRegenMythic": "+7.5 Health/s Regenerated"
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHealthMaxMythic": "+Health",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeShieldMaxMythic": "+Shield",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeEnergyMaxMythic": "+Energy",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeArmourMaxMythic": "+Armor",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRegenMythic": "+Regen"
+        },
+        "Icon": "https://wiki.warframe.com/images/TauforgedAzureArchonShard.png"
     },
     "ACC_GREEN_MYTHIC": {
         "Name": "Tauforged Emerald Archon Shard",
@@ -93,7 +162,14 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinHealMythic": "Recover +3 Health each time enemies are damaged by a Toxin Status Effect.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveDamageBoostMythic": "Gain +15% Ability Damage on enemies affected by Corrosion Status.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveStackMythic": "Increase max stacks of Corrosion Status by +3."
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinDamageMythic": "+T.Dmg",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeToxinHealMythic": "+T.Heal",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveDamageBoostMythic": "+C.Dmg",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCorrosiveStackMythic": "+C.Stk"
+        },
+        "Icon": "https://wiki.warframe.com/images/TauforgedEmeraldArchonShard.png"
     },
     "ACC_ORANGE_MYTHIC": {
         "Name": "Tauforged Topaz Archon Shard",
@@ -102,7 +178,14 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeBlastProcMythic": "Regenerate +7.5 Shield when you kill an enemy with Blast Damage.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWeaponCritBoostFromHeatMythic": "Increase Secondary Critical Chance by 1.5% every time you kill an enemy affected by Heat Status. Max 75%.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRadiationDamageBoostMythic": "Gain +15% Ability Damage on enemies affected by Radiation Status."
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeHPBoostFromImpactMythic": "+Health",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeBlastProcMythic": "+Shield",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWeaponCritBoostFromHeatMythic": "+CC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeRadiationDamageBoostMythic": "+R.Dmg"
+        },
+        "Icon": "https://wiki.warframe.com/images/TauforgedTopazArchonShard.png"
     },
     "ACC_PURPLE_MYTHIC": {
         "Name": "Tauforged Violet Archon Shard",
@@ -111,6 +194,13 @@
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageMythic": "Gain +45% Primary Electricity Damage. Gain an additional +15% per Crimson, Azure, or Violet Archon Shard equipped. Electricity will combine with Mods.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoostMythic": "Gain +37.5% Melee Critical Damage. When Max Energy is over 500, the damage boost doubles.",
             "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeEquilibriumMythic": "Health pickups give +30% Energy. Energy pickups give +30% Health."
-        }
+        },
+        "AttributesAbbreviation": {
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageBoostMythic": "+Abi",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeElectricDamageMythic": "+Pri",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeWarframeCritDamageBoostMythic": "+CC",
+            "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/ArchonCrystalUpgradeEquilibriumMythic": "+Equil"
+        },
+        "Icon": "https://wiki.warframe.com/images/TauforgedVioletArchonShard.png"
     }
 }

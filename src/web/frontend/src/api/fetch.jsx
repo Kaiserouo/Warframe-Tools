@@ -147,6 +147,8 @@ export async function fetchLoadoutData() {
     mod_name_map: await tryFetchJson('api/public_export/data/en/get_mod_name_map'),
     warframe_info_map: await tryFetchJson('api/public_export/data/en/get_warframe_info_map'),
     ability_info_map: await tryFetchJson('api/public_export/data/en/get_ability_info_map'),
+    icon_map: await tryFetchJson('api/public_export/data/en/get_icon_map'),
+    name_lookup_map: await tryFetchJson('api/public_export/data/en/get_name_lookup_map'),
 
     overframe_item_id_map: await tryFetchJson('api/overframe/data/get_item_id'),
     overframe_mod_id_map: await tryFetchJson('api/overframe/data/get_mod_id'),

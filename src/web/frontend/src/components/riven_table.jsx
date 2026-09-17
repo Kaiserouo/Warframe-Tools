@@ -312,6 +312,7 @@ function RivenFilterBar({rivenOrganizer, setRivenOrganizer}) {
     </div>
   </>);
 }
+
 function SortOptionToggleButton({ label, state, onClick, draggable, onDragStart, onDragOver, onDrop }) {
   // state: null, true (isAsc), false (!isAsc)
   const cnUnselected = "bg-gray-900 hover:bg-gray-700 text-white border-gray-300";

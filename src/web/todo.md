@@ -3,9 +3,11 @@
 - Add logging for backend
   - more specifically, every single call to the 
 - Add loadout page
-  - deal with loadout table
+  - change block color
   - deal with riven information
   - deal with polarity information
+  - deal with search functions
+  - deal with empty config (kinda just don't show them...?)
 
 # Abandoned
 

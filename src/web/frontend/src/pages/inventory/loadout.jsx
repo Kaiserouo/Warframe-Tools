@@ -4,41 +4,36 @@ import { fetchLoadoutData } from '../../api/fetch.jsx';
 import LoadoutTable from '../../components/loadout_table.jsx';
 import { Loading, LoadingProgress, Error } from '../../components/loading_status.jsx';
 
-function parseLoadout(loadoutData, inventoryData) {
+function parseLoadoutInfos(loadoutData, inventoryData) {
     /*
         make loadouts
         
         the loadout is formed as follows:
-        {
-            category (str in [warframe, primary, secondary, melee, companions, archwing, necramech, exalted]): [
-                {
-                    uname: str,
-                    name: str,
-                    search_text: str,
-                    loadouts: [
-                        {
-                            name: str (if no name, please follow warframe naming tradition and use CONFIG A etc),
-                            overframe_link: str
-                        }, ...
-                    ],
-                    archon_shard (optional): [
-                        {
-                            color: str (e.g., "ACC_GREEN"),
-                            attribute: str (e.g., "/Lotus/Upgrades/Invigorations/ArchonCrystalUpgrades/*"),
-                        }
-                    ]
-                }, ...
-            ]
-        }
+            LoadoutInfos := {category: LoadoutInfo, ...} // category in [warframe, primary, secondary, melee, companions, archwing, necramech, exalted]
+            LoadoutInfo := {
+                uname: str, 
+                name: str, 
+                search_text: str, 
+                loadouts: [Loadout, ...], 
+                archon_shard: [ArchonShard, ...]
+                category: str
+            }
+            Loadout := {
+                name: str,          // if no name, please fill in with "CONFIG A", "CONFIG B", etc.
+                overframe_link: str
+            }
+            ArchonShard := {
+                color: str,          // 
+                attribute: str
+            }
     */
-
-    console.log("parseLoadout", loadoutData, inventoryData);
 
     const {
         archon_shard_map: archonShardMap,
         mod_name_map: modNameMap,
         warframe_info_map: warframeInfoMap,
         ability_info_map: abilityInfoMap,
+        name_lookup_map: nameLookupMap,
 
         overframe_item_id_map: OFItemIdMap,
         overframe_mod_id_map: OFModIdMap,
@@ -74,7 +69,7 @@ function parseLoadout(loadoutData, inventoryData) {
     function _parseArchonShard(archonShardUpgrades) {
         return archonShardUpgrades.map((archonShardUpgrade) => {
             const color = archonShardUpgrade['Color'];
-            const attribute = archonShardUpgrade['Attribute'];
+            const attribute = archonShardUpgrade['UpgradeType'];
             return {
                 color: color,
                 attribute: attribute,
@@ -104,14 +99,16 @@ function parseLoadout(loadoutData, inventoryData) {
         return `https://overframe.gg/build/new/${id}/?bs=${b64_of_list_str}`;
     }
 
-    function _parseCategory(itemDatas) {
+    function _parseCategory(category, itemDatas) {
         /* return a list of parsed items for the given category */
         const ls = [];
         for (const itemData of itemDatas) {
             const item = {
                 uname: itemData['ItemType'],
-                name: itemData['ItemType'], // TODO
+                name: nameLookupMap[itemData['ItemType']],
+                category: category,
                 loadouts: [],
+                loadoutData: loadoutData,
             };
 
             if ('ArchonCrystalUpgrades' in itemData) {
@@ -121,7 +118,7 @@ function parseLoadout(loadoutData, inventoryData) {
             for (const i in itemData['Configs']) {
                 const config = itemData['Configs'][i];
                 const loadout = {
-                    name: config['Name'] || `CONFIG ${String.fromCharCode("A".charCodeAt(0) + i)}`,
+                    name: config['Name'] || `CONFIG ${String.fromCharCode("A".charCodeAt(0) + Number(i))}`,
                     overframe_link: _genOverframeLink(itemData['ItemType'], config),
                 };
                 item['loadouts'].push(loadout);
@@ -135,18 +132,18 @@ function parseLoadout(loadoutData, inventoryData) {
     }
 
     return {
-        warframe: _parseCategory(inventoryData['Suits']),
-        primary: _parseCategory(inventoryData['LongGuns']),
-        secondary: _parseCategory(inventoryData['Pistols']),
-        melee: _parseCategory(inventoryData['Melee']),
+        warframe: _parseCategory('warframe', inventoryData['Suits']),
+        primary: _parseCategory('primary', inventoryData['LongGuns']),
+        secondary: _parseCategory('secondary', inventoryData['Pistols']),
+        melee: _parseCategory('melee', inventoryData['Melee']),
         companions: [
-            ..._parseCategory(inventoryData['Sentinels']),
-            ..._parseCategory(inventoryData['KubrowPets']),
-            ..._parseCategory(inventoryData['MoaPets']),
+            ..._parseCategory('companions', inventoryData['Sentinels']),
+            ..._parseCategory('companions', inventoryData['KubrowPets']),
+            ..._parseCategory('companions', inventoryData['MoaPets']),
         ],
-        archwing: _parseCategory(inventoryData['SpaceSuits']),
-        necramech: _parseCategory(inventoryData['MechSuits']),
-        exalted: _parseCategory(inventoryData['SpecialItems']),
+        archwing: _parseCategory('archwing', inventoryData['SpaceSuits']),
+        necramech: _parseCategory('necramech', inventoryData['MechSuits']),
+        exalted: _parseCategory('exalted', inventoryData['SpecialItems']),
     }
 }
 
@@ -159,20 +156,21 @@ export default function Loadout({setting}) {
     staleTime: 60 * 60 * 1000, // 1 hour, it's most likely not needing a refresh until Options > Refresh
   })
 
-  const loadoutInfo = useMemo(
+  const loadoutInfos = useMemo(
     () => {
       if (!loadoutData || !setting.inventory?.data) 
         return {};
-      return parseLoadout(loadoutData, setting.inventory?.data);
+      return parseLoadoutInfos(loadoutData, setting.inventory?.data);
     },
     [loadoutData, setting.inventory?.data]
   );
 
+  console.log("Loadout", loadoutData, loadoutInfos, searchText);
 
   return (<>
   <div className="mx-4 my-4">
     <div className="text-2xl font-bold text-white my-2">
-      <p>Riven</p>
+      <p>Loadout</p>
     </div>
     <div className="flex flex-row justify-between items-center gap-x-4">
       <div>
@@ -187,7 +185,7 @@ export default function Loadout({setting}) {
     {loadoutIsPending ? <Loading message="Loading loadout data..." /> : null}
     {loadoutError ? <Error message={`ERROR: ${loadoutError}`} /> : null}
 
-    <LoadoutTable loadoutData={loadoutData} loadoutInfo={loadoutInfo} searchText={searchText} />
+    <LoadoutTable loadoutData={loadoutData} loadoutInfos={loadoutInfos} searchText={searchText} />
   </div>
   </>);
 }
