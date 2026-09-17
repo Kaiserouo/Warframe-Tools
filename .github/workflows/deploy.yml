@@ -55,7 +55,9 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r ./requirements.txt
       - name: Install xvfb
-        run: apt install -y xvfb
+        run: |
+          sudo apt update
+          sudo apt install -y xvfb
       - name: Generate API data for frontend
         run: python -m src.web.backend.gen_api_cache ./src/web/frontend/build_github_page
 
