@@ -30,7 +30,7 @@ fetch_urls = [
     'api/overframe/data/get_item_id',
     'api/overframe/data/get_mod_id',
     'api/overframe/data/get_ability_id',
-    '/api/other/data/get_archon_shard_info',
+    'api/other/data/get_archon_shard_info',
     'api/missing_item_checklist'
 ]
 fetch_output_dir_path = Path(argv[1])  # e.g. "./src/web/frontend/build_github_page"

@@ -1192,6 +1192,12 @@ class Overframe:
 
         text = self._get_overframe_page(self.DEFAULT_PAGE)
         webpack_filename = re.search(r'webpack.*?\.js', text).group()
+
+        if not webpack_filename:
+            # we use a backup link...
+            from .overframe_link import OVERFRAME_WEBPACK_FILENAME
+            webpack_filename = OVERFRAME_WEBPACK_FILENAME
+
         r = requests.get(f'https://static.overframe.gg/_next/static/chunks/{webpack_filename}')
         t = r.text
         t = t[t.find('"static/chunks/"'):]
