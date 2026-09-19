@@ -30,7 +30,6 @@ function calculateLackCount(relicSet, itemCount) {
       acc[item] = Math.max(0, secondLowestSetCount * relicSet[item] - (itemCount[item] || 0));
       return acc;
     }, {});
-  console.log('calculateLackCount', "relicSet", relicSet, "itemCount", itemCount, "secondLowestSetCount", secondLowestSetCount, "lackingCount", lackingCount);
   return lackingCount;
 }
 
@@ -107,11 +106,11 @@ function getRelicAvailableForItem(relicRewards, itemCount) {
   */
   const itemRelicCount = {};
   for (let [relicUname, relic] of Object.entries(relicRewards)) {
-    relicUname = relicUname.replace('/StoreItems', '', 1);
     if (!itemCount[relicUname]) {
       continue;
     }
-    for (const itemUname in relic.relicRewards) {
+    for (let itemUname in relic.relicRewards) {
+      itemUname = itemUname.replace('/StoreItems', '', 1);
       if (!itemRelicCount[itemUname]) {
         itemRelicCount[itemUname] = {
           totalCount: 0,
@@ -145,6 +144,7 @@ function getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, inventory
   const itemCount = getItemCount(inventoryData);
   const itemLackingCount = calculateLackCountAll(relicSets, itemCount);
   const itemRelicCount = getRelicAvailableForItem(relicRewards, itemCount);
+  console.log("itemRelicCount", itemRelicCount);
   return Object.keys(itemToRelicSet).reduce((acc, itemUname) => {
     acc[itemUname] = {
       itemUname: itemUname,
@@ -172,10 +172,10 @@ function RelicSetString(relicSetUname, relicSets, itemUname, itemCount, nameLook
   return (<>
     <p className="font-bold text-yellow-500">{`[${nameLookupMap[relicSetUname] || relicSetUname}](${itemCountForSet} sets)`}</p>
     <ul className="list-disc list-inside">
-      {Object.keys(relicSet).map(item => {
+      {Object.keys(relicSet).map((item, idx) => {
         const itemName = nameLookupMap[item] || item;
         const itemCountForItem = itemCount[item] || 0;
-        return <li className={item === itemUname ? "font-bold text-green-500" : ""}>{itemName} ({itemCountForItem}/{relicSet[item]})</li>;
+        return <li key={idx} className={item === itemUname ? "font-bold text-green-500" : ""}>{itemName} ({itemCountForItem}/{relicSet[item]})</li>;
       })}
     </ul>
   </>)

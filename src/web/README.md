@@ -130,3 +130,17 @@ bash dev_tmux.sh
 
 The URL should be something like `http://localhost:5173` (vite default URL).
 We use vite, and you can change the code and restart the server with the new code by typing `r` in the vite terminal.
+
+## Note
+
+### Overframe Data
+
+> ref. `src/data/inventory/overframe.md`
+
+To get overframe data automatically, we need to use non-headless Selenium to get the webpack nonce.
+This is not possible in two cases:
+- In github actions, cloudflare blocks this method.
+- In architectures in which chromium isn't available (e.g., aarch64, i.e., on raspberry pi).
+
+This can be mitigated by manually entering the nonce in `src/data/inventory/overframe_link.py`.
+Make sure to update it if you want overframe related functionalities (e.g., Inventory > Loadout page)
