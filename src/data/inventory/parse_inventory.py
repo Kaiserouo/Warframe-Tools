@@ -494,6 +494,11 @@ class WarframePublicExport:
             for entry in data:
                 if 'uniqueName' in entry and 'name' in entry:
                     name_lookup[entry['uniqueName']] = entry['name']
+
+        # apparently blueprints doesn't really have a name anywhere...? so we made one
+        for entry in self._get_public_export('ExportRecipes', lang, use_cache):
+            if entry['uniqueName'] not in name_lookup and entry['resultType'] in name_lookup:
+                name_lookup[entry['uniqueName']] = f'{name_lookup[entry["resultType"]]} Blueprint'
         return name_lookup
 
     def get_warframe_info_map(self, lang='en', use_cache=True):

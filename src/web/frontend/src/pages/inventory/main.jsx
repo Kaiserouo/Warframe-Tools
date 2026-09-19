@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import Riven from './riven.jsx';
+import Relic from './relic.jsx';
 import MissingItemChecklist from './missing_item_checklist.jsx';
 import Loadout from './loadout.jsx';
 
@@ -15,6 +16,10 @@ let pageMap = {
   'loadout': {
     'name': 'Loadout',
     'factory': (setting) => (<Loadout setting={setting} />)
+  },
+  'relic': {
+    'name': 'Relic',
+    'factory': (setting) => (<Relic setting={setting} />)
   }
 };
 

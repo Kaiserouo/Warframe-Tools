@@ -3,6 +3,7 @@ import { useQueries } from '@tanstack/react-query'
 
 import { Loading, Error } from '../../components/loading_status.jsx';
 import { queriesInventoryRelicData } from '../../api/fetch.jsx';
+import ItemTable from '../../components/item_table.jsx';
 
 function calculateLackCount(relicSet, itemCount) {
   /*
@@ -22,29 +23,15 @@ function calculateLackCount(relicSet, itemCount) {
     > lacking count of this set, if we can make N more sets when the user gets N more of this item.
     > note that with this definition, only one item at most would have a non-zero lacking count for a set
   */
-  let lowestSetCount = Infinity;
-  let nItemLowestSetCount = 0;
-  for (const item of relicSet) {
-    const curItemCount = itemCount[item] || 0;
-    const setCount = Math.floor(curItemCount / relicSet[item]);
-    if (setCount < lowestSetCount) {
-      lowestSetCount = setCount;
-      nItemLowestSetCount = 1;
-    } else if (setCount === lowestSetCount) {
-      nItemLowestSetCount += 1;
-    }
-  }
-  if (nItemLowestSetCount > 1) {
-    // all zero
-    return relicSet.items().reduce((acc, item) => {
-      acc[item] = 0;
+  let availSetCounts = Object.keys(relicSet).map(item => Math.floor((itemCount[item] || 0) / relicSet[item]));
+  availSetCounts = availSetCounts.sort((a, b) => a - b);
+  const secondLowestSetCount = availSetCounts.length >= 2 ? availSetCounts[1] : 0;
+  const lackingCount = Object.keys(relicSet).reduce((acc, item) => {
+      acc[item] = Math.max(0, secondLowestSetCount * relicSet[item] - (itemCount[item] || 0));
       return acc;
     }, {});
-  }
-  return relicSet.items().reduce((acc, item) => {
-      acc[item] = Math.max(0, (itemCount[item] || 0) - lowestSetCount * relicSet[item]);
-      return acc;
-    }, {});
+  console.log('calculateLackCount', "relicSet", relicSet, "itemCount", itemCount, "secondLowestSetCount", secondLowestSetCount, "lackingCount", lackingCount);
+  return lackingCount;
 }
 
 function calculateLackCountAll(relicSets, itemCount) {
@@ -93,24 +80,24 @@ function getRelicSetForItem(relicSets) {
   /*
     return the relic set that contains the item
     e.g., {
-      "/Lotus/Types/Recipes/WarframeRecipes/VorunaPrimeHelmetBlueprint": [VorunaPrimeSet],
+      "/Lotus/Types/Recipes/WarframeRecipes/VorunaPrimeHelmetBlueprint": [VorunaPrimeSetUname],
       ...
     }
-    where VorunaPrimeSet is the dict for voruna prime in the relic set
+    where VorunaPrimeSetUname is the uname of the voruna prime set, which is a key in relicSets
   */
   const itemToRelicSet = {};
-  for (const [relicSetName, relicSet] of Object.entries(relicSets)) {
+  for (const [relicSetUname, relicSet] of Object.entries(relicSets)) {
     for (const item of Object.keys(relicSet)) {
       if (!itemToRelicSet[item]) {
         itemToRelicSet[item] = [];
       }
-      itemToRelicSet[item].push(relicSet);
+      itemToRelicSet[item].push(relicSetUname);
     }
   }
   return itemToRelicSet;
 }
 
-function getItemInfo(relicSets, iconMap, nameLookupMap) {
+function getItemInfo(relicSets, iconMap, nameLookupMap, inventoryData) {
   /*
     for each item, return the info about it to be rendered
     i.e., 
@@ -118,14 +105,14 @@ function getItemInfo(relicSets, iconMap, nameLookupMap) {
     itemInfo := {
       itemUname: string    // the unique name of the item
       itemName: string     // the name of the item
-      itenCount: int       // the number of this item the user has
+      itemCount: int       // the number of this item the user has
       icon: string         // url
-      relicSet: [relicSet] // the relic set that contains this item
+      relicSetUnames: [relicSetUname, ...] // the relic set that contains this item
       lackingCount: int    // the lacking count of an item
     }
   */
   const itemToRelicSet = getRelicSetForItem(relicSets);
-  const itemCount = getItemCount(setting.inventory.data);
+  const itemCount = getItemCount(inventoryData);
   const itemLackingCount = calculateLackCountAll(relicSets, itemCount);
   return Object.keys(itemToRelicSet).reduce((acc, itemUname) => {
     acc[itemUname] = {
@@ -133,41 +120,85 @@ function getItemInfo(relicSets, iconMap, nameLookupMap) {
       itemName: nameLookupMap[itemUname] || null,
       itemCount: itemCount[itemUname] || 0,
       icon: iconMap[itemUname] || null,
-      relicSet: itemToRelicSet[itemUname],
-      lackingCount: itemLackingCount[itemUname] || -1
+      relicSetUnames: itemToRelicSet[itemUname],
+      lackingCount: itemLackingCount[itemUname] || 0
     };
+    return acc;
   }, {});
+}
+
+function RelicSetString(relicSetUname, relicSets, itemCount, nameLookupMap) {
+  /*
+    return a string that describes the relic set, e.g., "
+      [Voruna Prime](3)
+        - Voruna Prime Blueprint (1)
+    "
+  */
+  const relicSet = relicSets[relicSetUname];
+  const itemCountForSet = Math.min(...Object.keys(relicSet).map(item => Math.floor((itemCount[item] || 0) / relicSet[item])));
+  return (<>
+    <p>{`[${nameLookupMap[relicSetUname] || relicSetUname}](${itemCountForSet} sets)`}</p>
+    <ul className="list-disc list-inside">
+      {Object.keys(relicSet).map(item => {
+        const itemName = nameLookupMap[item] || item;
+        const itemCountForItem = itemCount[item] || 0;
+        return <li>{itemName} ({itemCountForItem}/{relicSet[item]})</li>;
+      })}
+    </ul>
+  </>)
+}
+function RelicSetsString(relicSetUnames, relicSets, itemCount, nameLookupMap) {
+  return (<>
+    {relicSetUnames.map((relicSetUname, idx) => <div key={idx}>{RelicSetString(relicSetUname, relicSets, itemCount, nameLookupMap)}</div>)}
+  </>);
 }
 
 export default function Relic({setting}) {
   const { isPending: relicIsPending, error: relicError, data: relicData } = useQueries(queriesInventoryRelicData);
 
-  let itemTable = {};
-  if (relicData && setting.inventory.data) {
-    const {icon_map: iconMap, name_lookup_map: nameLookupMap} = relicData;
-    const itemInfos = getItemInfo(relicData.relic_set, relicData.icon_map, relicData.name_lookup_map);
-    
+  let itemTable = null;
+  if (relicData && setting.inventory?.data) {
+    const {relic_sets: relicSets, icon_map: iconMap, name_lookup_map: nameLookupMap} = relicData;
+    console.log("relicSets", relicSets, "iconMap", iconMap, "nameLookupMap", nameLookupMap);
+    const itemInfos = getItemInfo(relicSets, iconMap, nameLookupMap, setting.inventory.data);
+    const itemCount = getItemCount(setting.inventory.data);
     itemTable = {
       "headers": [
-        {"id": "relic_name", "name": "Relic Name"},
-        {"id": "max_lacking_count_item", "name": "Max Lacking Count Item"},
-        {"id": "max_lacking_count", "name": "Max Lacking Count"},
-        {}
-      ]
-    };
+        // {"id": str, "name": str, "type": Literal["number", "deviation", "string", "url", "item_name"], setting: Optional[dict]}
+        {id: "item_name", name: "Item Name", type: "string"},
+        {id: "item_count", name: "Item Count", type: "integer"},
+        {id: "lacking_count", name: "Lacking Count", type: "integer"},
+        {id: "relic_sets", name: "Relic Sets", type: "react"},
+      ],
+      "items": Object.values(itemInfos).map(itemInfo => ({
+        "item_name": itemInfo.itemName,
+        "item_count": itemInfo.itemCount,
+        "lacking_count": itemInfo.lackingCount,
+        "relic_sets": RelicSetsString(itemInfo.relicSetUnames, relicSets, itemCount, nameLookupMap),
+      })),
+    }
   }
-
+  console.log("itemTable", itemTable);
 
   return (<>
   <div className="mx-4 my-4">
     <div className="text-2xl font-bold text-white my-2">
       <p>Relic</p>
     </div>
+    <div className="text-white font-sans my-2">
+      <p className="text-yellow-500 font-bold">&lt; Requires inventory file: add that in the Options menu &gt;</p>
+      <p>Sometimes, you wanna see what relics to farm based on whether you can make more sets of items.</p>
+      <p className="text-gray-400">(For example, if you have 3 Xaku Prime BP, 13 Xaku Prime Chassis BP, 17 Xaku Prime Systems BP, 23 Xaku Prime Neuroptics BP, you wanna farm Xaku Prime BP because you can make more sets of Xaku Prime out of it.)</p>
+      <br />
+      <p>We caculate the <span className="font-bold">Lacking Count</span> of each item based on your inventory.</p>
+      <p>If an item's lacking count is N, it means you can make N more sets if you get N more of that item.</p>
+      <p className="text-gray-400">(In the above example, the lacking count of Xaku Prime BP is 10, because you can make 10 more Xaku Prime Sets if you get 10 more Xaku Prime BP. Note that the lacking count of Xaku Prime Chassis BP is 0 because you can't make any more Xaku Prime Sets even if you get more of it.)</p>
+    </div>
 
     {/* we separate the loading progress and error display because if there is still data from last time, we still wanna display that */}
     {relicIsPending ? <Loading message="Loading Relic Data" /> : null}
     {!relicIsPending && relicError ? <Error message={`ERROR: ${relicError}`} /> : null}
-    {relicData && itemTable ? <p>a</p> : null}
+    {relicData && itemTable ? <ItemTable itemTable={itemTable} setting={setting} /> : null}
     </div>
   </>);
 }

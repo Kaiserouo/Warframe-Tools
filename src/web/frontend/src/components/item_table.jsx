@@ -94,6 +94,9 @@ function TableItemCell({header, value, setting, sortBy, setSortBy, filterBy, set
             </a>
         );
         break;
+      case 'react': 
+        innerElement = value;
+        break;
       default:
         innerElement = (<p>{value.toString()}</p>);
     }
@@ -122,7 +125,7 @@ export default function ItemTable({itemTable, setting}) {
   /* 
     item_table: {"headers": list[dict[str, str]], "items": list[dict[str, Any]]}
       - each header looks like: 
-        {"id": str, "name": str, "type": Literal["number", "deviation", "string", "url", "item_name"], setting: Optional[dict]}
+        {"id": str, "name": str, "type": Literal["integer", "float", "deviation", "string", "url", "item_name", "react"], setting: Optional[dict]}
         where:
           - id: a unique ID for this header, will be used to index the items
           - name: the display name for this header
