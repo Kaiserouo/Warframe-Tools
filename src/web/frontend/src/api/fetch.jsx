@@ -232,7 +232,7 @@ const queryPEIncarnonWeaponUname = makeStaticQuery('pe__incarnon_weapon_uname', 
 const queryPEIconMap = makeStaticQuery('pe__icon_map', 'api/public_export/data/en/get_icon_map');
 const queryPEModNameMap = makeStaticQuery('pe__mod_name_map', 'api/public_export/data/en/get_mod_name_map');
 const queryPERelicSets = makeStaticQuery('pe__relic_sets', 'api/public_export/data/en/get_relic_sets');
-const queryPERelicReward = makeStaticQuery('pe__relic_reward', 'api/public_export/data/en/get_relic_reward');
+const queryPERelicRewards = makeStaticQuery('pe__relic_rewards', 'api/public_export/data/en/get_relic_rewards');
 const queryPENameLookupMap = makeStaticQuery('pe__name_lookup_map', 'api/public_export/data/en/get_name_lookup_map');
 const queryPEWarframeInfoMap = makeStaticQuery('pe__warframe_info_map', 'api/public_export/data/en/get_warframe_info_map');
 const queryPEAbilityInfoMap = makeStaticQuery('pe__ability_info_map', 'api/public_export/data/en/get_ability_info_map');
@@ -269,7 +269,7 @@ export const queriesBaroData = makeStaticQueries({
 });
 export const queriesInventoryRelicData = makeStaticQueries({
   relic_sets: queryPERelicSets,
-  relic_reward: queryPERelicReward,
+  relic_rewards: queryPERelicRewards,
   icon_map: queryPEIconMap,
   name_lookup_map: queryPENameLookupMap,
 });

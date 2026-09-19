@@ -920,7 +920,7 @@ def data_public_export(lang, function_name):
         'get_incarnon_weapons': lambda lang: wpe.get_incarnon_weapons(use_cache=True),
         'get_icon_map': lambda lang: wpe.get_icon_map(use_cache=True),
         'get_mod_name_map': lambda lang: wpe.get_mod_name_map(use_cache=True),
-        'get_relic_reward': lambda lang: wpe.get_relic_reward(lang, use_cache=True),
+        'get_relic_rewards': lambda lang: wpe.get_relic_rewards(lang, use_cache=True),
         'get_relic_sets': lambda lang: wpe.get_relic_sets(lang, use_cache=True),
         'get_name_lookup_map': lambda lang: wpe.get_name_lookup_map(lang, use_cache=True),
         'get_warframe_info_map': lambda lang: wpe.get_warframe_info_map(lang, use_cache=True),

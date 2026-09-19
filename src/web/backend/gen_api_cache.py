@@ -23,7 +23,7 @@ fetch_urls = [
     'api/wiki/data/get_baro_items',
     'api/public_export/data/en/get_mod_name_map',
     'api/public_export/data/en/get_relic_sets',
-    'api/public_export/data/en/get_relic_reward',
+    'api/public_export/data/en/get_relic_rewards',
     'api/public_export/data/en/get_name_lookup_map',
     'api/public_export/data/en/get_warframe_info_map',
     'api/public_export/data/en/get_ability_info_map',

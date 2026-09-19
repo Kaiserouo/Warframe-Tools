@@ -367,7 +367,7 @@ class WarframePublicExport:
         }
         return mods_un_map
 
-    def get_relic_reward(self, lang='en', use_cache=True):
+    def get_relic_rewards(self, lang='en', use_cache=True):
         """
             return {
                 "/Lotus/Types/Game/Projections/T4VoidProjectionTitaniaPrimeAPlatinum": {
@@ -422,7 +422,7 @@ class WarframePublicExport:
         ])
 
         relic_item_unames = set()
-        for relic in self.get_relic_reward(lang, use_cache).values():
+        for relic in self.get_relic_rewards(lang, use_cache).values():
             relic_item_unames.update(relic['relicRewards'].keys())
         relic_item_unames = set(
             [uname.replace('/StoreItems', '', 1) for uname in relic_item_unames]
