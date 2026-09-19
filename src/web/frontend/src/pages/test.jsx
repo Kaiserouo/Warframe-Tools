@@ -1,12 +1,4 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query'
-
-import SearchBar from '../components/search_bar.jsx';
-import ItemTable from '../components/item_table.jsx';
-import { Loading, Error } from '../components/loading_status.jsx';
-import { fetchMarketData } from '../api/fetch.jsx';
-import { makeHandleSubmit } from '../api/task.jsx';
-
 
 function Infobox({ renderHeader, renderInfoboxContent }) {
   // renderHeader() -> the element outside, which would show the infobox when hovered

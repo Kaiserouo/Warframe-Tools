@@ -1,6 +1,3 @@
-import { fetchItemInfoboxData } from "../api/fetch";
-import { useState } from "react";
-import { useQuery } from '@tanstack/react-query';
 import Infobox from "./infobox";
 
 function ItemInfoboxInnerNoData({ weaponName }) {

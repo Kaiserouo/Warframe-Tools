@@ -5,7 +5,7 @@ import SearchBar from '../components/search_bar.jsx';
 import RelicTable from '../components/relic_table.jsx';
 import { Loading, LoadingProgress, Error } from '../components/loading_status.jsx';
 import { makeHandleSubmit } from '../api/task.jsx';
-import { fetchRelicData, fetchMarketData, fetchPriceOracle } from '../api/fetch.jsx';
+import { queryMarketData, queryRelicData, fetchPriceOracle } from '../api/fetch.jsx';
 
 function getRelicTable(relicData, searchType, searchText) {
   const relicTable = [];
@@ -85,17 +85,9 @@ export default function Relic({setting}) {
     'progress': null
   });
 
-  const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery({
-    queryKey: ['market_data'],
-    queryFn: () => fetchMarketData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+  const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery(queryMarketData);
 
-  const { isPending: relicIsPending, error: relicError, data: relicData } = useQuery({
-    queryKey: ['relic_data'],
-    queryFn: () => fetchRelicData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+  const { isPending: relicIsPending, error: relicError, data: relicData } = useQuery(queryRelicData);
 
   const relicTable = useMemo(() => {
     if (!relicIsPending && !relicError && relicData && searchText !== null) {

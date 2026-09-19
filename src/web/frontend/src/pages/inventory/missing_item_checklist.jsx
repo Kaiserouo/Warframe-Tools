@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query'
 
 import ItemTable from '../../components/item_table.jsx';
 import { Loading, LoadingProgress, Error } from '../../components/loading_status.jsx';
-import { fetchMissingItemChecklistData } from '../../api/fetch.jsx';
+import { queriesMissingItemChecklistData } from '../../api/fetch.jsx';
+import { useQueries } from '@tanstack/react-query'
 
 function SelectMenu({options, choice, setChoice, setting}) {
     return (<>
@@ -23,11 +23,7 @@ function SelectMenu({options, choice, setChoice, setting}) {
 }
 
 export default function MissingItemChecklist({setting}) {
-  const { isPending: micIsPending, error: micError, data: micData } = useQuery({
-    queryKey: ['missing_item_checklist_data'],
-    queryFn: () => fetchMissingItemChecklistData(),
-    staleTime: 30 * 60 * 1000, // 30 minutes
-  })
+  const { isPending: micIsPending, error: micError, data: micData } = useQueries(queriesMissingItemChecklistData);
 
   const [choice, setChoice] = useState(null);   // null | anything in micData
 

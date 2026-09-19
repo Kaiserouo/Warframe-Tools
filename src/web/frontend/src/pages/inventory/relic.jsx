@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query'
+import { useQueries } from '@tanstack/react-query'
 
 import { Loading, Error } from '../../components/loading_status.jsx';
-import { fetchPERelicData } from '../../api/fetch.jsx';
+import { queriesInventoryRelicData } from '../../api/fetch.jsx';
 
 function calculateLackCount(relicSet, itemCount) {
   /*
@@ -15,7 +15,7 @@ function calculateLackCount(relicSet, itemCount) {
       }
     itemCount: dict with the same keys (or less) which contains the number of items the user has
 
-    returns: the dict with the same keys, with values indicating how many of this item the user is lacking
+    returns: the dict with the same keys as relicSet, with values indicating how many of this item the user is lacking
     in order to make a set
     
     > the definition of the lacking count is a bit weird. given an item and a set, the number N is called this number's
@@ -71,7 +71,7 @@ function calculateLackCountAll(relicSets, itemCount) {
   for (const relicSet of Object.values(relicSets)) {
     const curLackingCount = calculateLackCount(relicSet, itemCount);
     for (const [item, count] of Object.entries(curLackingCount)) {
-      if (lackingCount[item] === undefined || count > lackingCount[item]) {
+      if (lackingCount[item] === undefined || lackingCount[item] < count) {
         lackingCount[item] = count;
       }
     }
@@ -89,17 +89,63 @@ function getItemCount(inventoryData) {
   return itemCount;
 }
 
+function getRelicSetForItem(relicSets) {
+  /*
+    return the relic set that contains the item
+    e.g., {
+      "/Lotus/Types/Recipes/WarframeRecipes/VorunaPrimeHelmetBlueprint": [VorunaPrimeSet],
+      ...
+    }
+    where VorunaPrimeSet is the dict for voruna prime in the relic set
+  */
+  const itemToRelicSet = {};
+  for (const [relicSetName, relicSet] of Object.entries(relicSets)) {
+    for (const item of Object.keys(relicSet)) {
+      if (!itemToRelicSet[item]) {
+        itemToRelicSet[item] = [];
+      }
+      itemToRelicSet[item].push(relicSet);
+    }
+  }
+  return itemToRelicSet;
+}
+
+function getItemInfo(relicSets, iconMap, nameLookupMap) {
+  /*
+    for each item, return the info about it to be rendered
+    i.e., 
+    return := {itemUname: itemInfo}
+    itemInfo := {
+      itemUname: string    // the unique name of the item
+      itemName: string     // the name of the item
+      itenCount: int       // the number of this item the user has
+      icon: string         // url
+      relicSet: [relicSet] // the relic set that contains this item
+      lackingCount: int    // the lacking count of an item
+    }
+  */
+  const itemToRelicSet = getRelicSetForItem(relicSets);
+  const itemCount = getItemCount(setting.inventory.data);
+  const itemLackingCount = calculateLackCountAll(relicSets, itemCount);
+  return Object.keys(itemToRelicSet).reduce((acc, itemUname) => {
+    acc[itemUname] = {
+      itemUname: itemUname,
+      itemName: nameLookupMap[itemUname] || null,
+      itemCount: itemCount[itemUname] || 0,
+      icon: iconMap[itemUname] || null,
+      relicSet: itemToRelicSet[itemUname],
+      lackingCount: itemLackingCount[itemUname] || -1
+    };
+  }, {});
+}
+
 export default function Relic({setting}) {
-  const { isPending: relicIsPending, error: relicError, data: relicData } = useQuery({
-    queryKey: ['pe_relic_data'],
-    queryFn: () => fetchPERelicData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+  const { isPending: relicIsPending, error: relicError, data: relicData } = useQueries(queriesInventoryRelicData);
 
   let itemTable = {};
   if (relicData && setting.inventory.data) {
-    const itemCount = useMemo(() => getItemCount(setting.inventory.data), [setting.inventory.data]);
-    const lackCount = useMemo(() => calculateLackCountAll(relicData.relic_set, itemCount), [relicData.relic_set, itemCount]);
+    const {icon_map: iconMap, name_lookup_map: nameLookupMap} = relicData;
+    const itemInfos = getItemInfo(relicData.relic_set, relicData.icon_map, relicData.name_lookup_map);
     
     itemTable = {
       "headers": [

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import SearchBar from '../components/search_bar.jsx';
 import ItemTable from '../components/item_table.jsx';
 import { Loading, LoadingProgress, Error } from '../components/loading_status.jsx';
-import { fetchFunctionItemItemList, fetchSyndicateData, fetchMarketData } from '../api/fetch.jsx';
+import { fetchFunctionItemItemList, queryMarketData, querySyndicateData } from '../api/fetch.jsx';
 import { makeHandleSubmit } from '../api/task.jsx';
 
 function OptionToggleButton({ label, isSelected, onClick }) {
@@ -64,16 +64,9 @@ export default function Syndicate({setting}) {
     'hasWeaponTag': false,
   });
 
-  const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery({
-    queryKey: ['market_data'],
-    queryFn: () => fetchMarketData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
-  const { isPending: syndicateIsPending, error: syndicateError, data: syndicateData } = useQuery({
-    queryKey: ['syndicate_data'],
-    queryFn: () => fetchSyndicateData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+  const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery(queryMarketData);
+  const { isPending: syndicateIsPending, error: syndicateError, data: syndicateData } = useQuery(querySyndicateData);
+
 
   let itemList = useMemo(() => {
     const syndicateItems = syndicateData?.[searchText] ?? [];

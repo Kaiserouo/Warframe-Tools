@@ -34,6 +34,9 @@ npm install
 
 # if it complains that it doesn't have vite:
 npm install vite @vitejs/plugin-react --save-dev
+
+# install xvfb, ref. src/data/inventory/overframe.md: Overframe > Data > Data Fetching > Webpack Fetching
+sudo apt-get install -y xvfb
 ```
 
 

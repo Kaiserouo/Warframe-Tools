@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query'
-import { fetchLoadoutData } from '../../api/fetch.jsx';
+import { useQueries } from '@tanstack/react-query'
+import { queriesLoadoutData } from '../../api/fetch.jsx';
 import LoadoutTable from '../../components/loadout_table.jsx';
 import { Loading, LoadingProgress, Error } from '../../components/loading_status.jsx';
 import SearchBar from '../../components/search_bar.jsx';
@@ -197,11 +197,7 @@ function parseLoadoutInfos(loadoutData, inventoryData) {
 export default function Loadout({setting}) {
   const [searchText, setSearchText] = useState(null);
 
-  const { isPending: loadoutIsPending, error: loadoutError, data: loadoutData } = useQuery({
-    queryKey: ['loadout_data'],
-    queryFn: () => fetchLoadoutData(),
-    staleTime: 60 * 60 * 1000, // 1 hour, it's most likely not needing a refresh until Options > Refresh
-  })
+  const { isPending: loadoutIsPending, error: loadoutError, data: loadoutData } = useQueries(queriesLoadoutData);
 
   const loadoutInfos = useMemo(
     () => {

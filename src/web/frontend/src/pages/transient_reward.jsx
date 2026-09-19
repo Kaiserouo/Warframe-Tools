@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import SearchBar from '../components/search_bar.jsx';
 import ItemTable from '../components/item_table.jsx';
 import { Loading, LoadingProgress, Error } from '../components/loading_status.jsx';
-import { fetchFunctionItemItemList, fetchTransientData } from '../api/fetch.jsx';
+import { fetchFunctionItemItemList, queryTransientData } from '../api/fetch.jsx';
 import { makeHandleSubmit } from '../api/task.jsx';
 
 export default function TransientReward({setting}) {
@@ -16,11 +16,7 @@ export default function TransientReward({setting}) {
     'progress': null
   });
 
-  const { isPending: transientIsPending, error: transientError, data: transientData } = useQuery({
-    queryKey: ['transient_data'],
-    queryFn: () => fetchTransientData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+  const { isPending: transientIsPending, error: transientError, data: transientData } = useQuery(queryTransientData);
 
   let itemList = useMemo(() => transientData?.[searchText] ?? [], [transientData, searchText]);
 

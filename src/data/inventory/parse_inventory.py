@@ -1195,7 +1195,9 @@ class Overframe:
             webpack_filename = re.search(r'webpack.*?\.js', text).group()
         except Exception as e:
             # we use a backup link...
-            from .overframe_link import OVERFRAME_WEBPACK_FILENAME
+            from .overframe_link import OVERFRAME_WEBPACK_FILENAME, OVERFRAME_LAST_UPDATE_DATE
+            print(f"Failed to get webpack filename from overframe.gg, error: {e}")
+            print(f"Using backup link {OVERFRAME_WEBPACK_FILENAME} to get webpack filename... (Last update date: {OVERFRAME_LAST_UPDATE_DATE})")
             webpack_filename = OVERFRAME_WEBPACK_FILENAME
 
         r = requests.get(f'https://static.overframe.gg/_next/static/chunks/{webpack_filename}')
@@ -1261,9 +1263,29 @@ class Overframe:
     def get_item_id(self, use_cache=True):
         """
         return id of all moddable items, from uname to id
+        this should preferrably only be used for generating overframe links
+        we also override some stuff that's kinda broken
+        """
+        ret = {
+            uname: item['id']
+            for uname, item in self._get_data('db/items', use_cache=use_cache).items()
+            if 'id' in item
+        }
+        
+        # for now (2026/09/19), orion has its own ID (7994) and names and other stuff
+        # but his page doesn't actually exist on overframe, so for the overframe link 
+        # we use sirius (7962) instead
+        ret['/Lotus/Powersuits/SiriusOrion/OrionSuit'] = 7962
+        
+        return ret
+
+    def get_item_name(self, use_cache=True):
+        """
+        unfortunately some of the item names cannot be found in public export (e.g., lizzie)
+        we need a list of item names on overframe.gg specifically
         """
         return {
-            uname: item['id']
+            uname: item['name']
             for uname, item in self._get_data('db/items', use_cache=use_cache).items()
             if 'id' in item
         }

@@ -1,12 +1,12 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query'
+import { useQueries } from '@tanstack/react-query'
 
 import SearchBar from '../../components/search_bar.jsx';
 import RivenTable from '../../components/riven_table.jsx';
 import RivenTableLackIncarnon from '../../components/riven_table_lack_incarnon.jsx';
 import { iconIncarnon, iconIsEquipped, iconHasDuplicate, iconVariants } from '../../components/riven_table.jsx';
 import { Loading, LoadingProgress, Error } from '../../components/loading_status.jsx';
-import { fetchRivenData } from '../../api/fetch.jsx';
+import { queriesRivenData } from '../../api/fetch.jsx';
 import { makeHandleSubmit } from '../../api/task.jsx';
 import RivenParser from '../../utils/RivenParser.jsx';
 
@@ -193,11 +193,8 @@ export default function Riven({setting}) {
   const [searchText, setSearchText] = useState(null);
   const [tableType, setTableType] = useState('riven');  // riven, incarnon
 
-  const { isPending: rivenIsPending, error: rivenError, data: rivenData } = useQuery({
-    queryKey: ['riven_data'],
-    queryFn: () => fetchRivenData(),
-    staleTime: 60 * 60 * 1000, // 1 hour, it's most likely not needing a refresh until Options > Refresh
-  })
+  const { isPending: rivenIsPending, error: rivenError, data: rivenData } = useQueries(queriesRivenData);
+  console.log(`rivenIsPending: ${rivenIsPending}, rivenError: ${rivenError}, rivenData: `, rivenData);
 
   const rivenMods = setting.inventory ? (
     setting.inventory.data.Upgrades.filter((mod) => mod.ItemType.includes('Random') && mod.UpgradeFingerprint.includes('compat'))

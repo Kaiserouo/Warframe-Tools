@@ -1,6 +1,3 @@
-import { fetchItemInfoboxData } from "../api/fetch";
-import { useState } from "react";
-import { useQuery } from '@tanstack/react-query';
 import Infobox from "./infobox";
 
 function ItemInfoboxInner({ weaponData }) {
@@ -103,11 +100,6 @@ function ItemInfoboxInnerNoData({ weaponName }) {
 }
 
 export default function RivenInfobox({ weaponName }) {
-  // const { isPending: weaponIsPending, isFetching: weaponIsFetching, error: weaponError, data: weaponData } = useQuery({
-  //   queryKey: ['riven_infobox_data', weaponName, setting.oracle_type, setting.ducantor_price_override],
-  //   queryFn: () => fetchRivenInfoboxData(weaponName, setting.oracle_type, setting.ducantor_price_override),
-  //   staleTime: 5 * 60 * 1000, // 5 minutes
-  // })
   const { isPending: weaponIsPending, isFetching: weaponIsFetching, error: weaponError, data: weaponData } = {
     isPending: false, isFetching: false, error: null, data: null
   }

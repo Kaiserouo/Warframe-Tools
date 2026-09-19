@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query'
 import Riven from './riven.jsx';
 import MissingItemChecklist from './missing_item_checklist.jsx';
 import Loadout from './loadout.jsx';

@@ -83,7 +83,7 @@ export default function ItemInfobox({ setting, itemName }) {
   const { isPending: itemIsPending, isFetching: itemIsFetching, error: itemError, data: itemData } = useQuery({
     queryKey: ['item_infobox_data', itemName, setting.oracle_type, setting.ducantor_price_override],
     queryFn: () => fetchItemInfoboxData(itemName, setting.oracle_type, setting.ducantor_price_override),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: Infinity, // 5 minutes
   })
 
   const renderHeader = () => {

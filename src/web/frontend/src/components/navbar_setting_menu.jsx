@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient, useMutation  } from '@tanstack/react-query'
 import { Loading, Error } from '../components/loading_status.jsx';
-import { fetchMarketData, fetchRefreshData } from '../api/fetch.jsx';
+import { queryMarketData, fetchRefreshData } from '../api/fetch.jsx';
 import { getInventoryFromFile } from '../utils/inventory.jsx';
 
 function SettingItemRefreshMarketData({setting, setSetting}) {
@@ -9,11 +9,7 @@ function SettingItemRefreshMarketData({setting, setSetting}) {
   console.log("SettingItemRefreshMarketData clicked:", clicked);
   const queryClient = useQueryClient();
 
-  const { isPending: marketIsPending, isFetching: marketIsFetching, error: marketError, data: marketData } = useQuery({
-    queryKey: ['market_data'],
-    queryFn: () => fetchMarketData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  const { isPending: marketIsPending, isFetching: marketIsFetching, error: marketError, data: marketData } = useQuery(queryMarketData);
 
   const mutation = useMutation({
     mutationFn: () => fetchRefreshData(),

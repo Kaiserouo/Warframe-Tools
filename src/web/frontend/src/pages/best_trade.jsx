@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import SearchBar from '../components/search_bar.jsx';
 import ItemInfobox from '../components/item_infobox.jsx';
 import { Loading, LoadingProgress, Error } from '../components/loading_status.jsx';
-import { fetchMarketData, fetchBestTrade } from '../api/fetch.jsx';
+import { queryMarketData, fetchBestTrade } from '../api/fetch.jsx';
 import { makeHandleSubmit } from '../api/task.jsx';
 import UserBestTradeTable from '../components/user_best_trade_table.jsx';
 
@@ -163,11 +163,7 @@ export default function BestTrade({setting}) {
     'progress': null
   });
 
-  const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery({
-    queryKey: ['market_data'],
-    queryFn: () => fetchMarketData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+  const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery(queryMarketData);
 
   // search bar
   const handleSearchBarText = (itemName) => {

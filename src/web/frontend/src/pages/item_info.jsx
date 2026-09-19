@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import SearchBar from '../components/search_bar.jsx';
 import ItemTable from '../components/item_table.jsx';
 import { Loading, LoadingProgress, Error } from '../components/loading_status.jsx';
-import { fetchMarketData, fetchFunctionItemSearchText } from '../api/fetch.jsx';
+import { queryMarketData, fetchFunctionItemSearchText } from '../api/fetch.jsx';
 import { makeHandleSubmit } from '../api/task.jsx';
 
 export default function ItemInfo({setting}) {
@@ -16,11 +16,7 @@ export default function ItemInfo({setting}) {
     'progress': null
   });
 
-  const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery({
-    queryKey: ['market_data'],
-    queryFn: () => fetchMarketData(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+  const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery(queryMarketData);
 
   const fetchTaskIdCallback = useCallback(
     async () => fetchFunctionItemSearchText(setting.oracle_type, setting.ducantor_price_override, searchText).then(data => data.task_id),
