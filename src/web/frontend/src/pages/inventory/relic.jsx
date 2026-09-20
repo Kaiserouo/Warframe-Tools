@@ -101,11 +101,16 @@ function getRelicAvailableForItem(relicRewards, itemCount) {
     return {itemUname: relicCountInfo}
     relicCountInfo := {
       totalCount: int,
+      t1Count: int,
+      t2Count: int,
+      t3Count: int,
+      t4Count: int,
       relics: {relicUname: int, ...}
     }
   */
   const itemRelicCount = {};
   for (let [relicUname, relic] of Object.entries(relicRewards)) {
+    const relicType = relicUname.split('/').slice(-1)[0].slice(0, 2); // T1, T2, T3, T4
     if (!itemCount[relicUname]) {
       continue;
     }
@@ -114,10 +119,28 @@ function getRelicAvailableForItem(relicRewards, itemCount) {
       if (!itemRelicCount[itemUname]) {
         itemRelicCount[itemUname] = {
           totalCount: 0,
+          t1Count: 0,
+          t2Count: 0,
+          t3Count: 0,
+          t4Count: 0,
           relics: {}
         };
       }
       itemRelicCount[itemUname].totalCount += itemCount[relicUname];
+      switch (relicType) {
+        case 'T1':
+          itemRelicCount[itemUname].t1Count += itemCount[relicUname];
+          break;
+        case 'T2':
+          itemRelicCount[itemUname].t2Count += itemCount[relicUname];
+          break;
+        case 'T3':
+          itemRelicCount[itemUname].t3Count += itemCount[relicUname];
+          break;
+        case 'T4':
+          itemRelicCount[itemUname].t4Count += itemCount[relicUname];
+          break;
+      }
       itemRelicCount[itemUname].relics[relicUname] = itemCount[relicUname];
     }
   }
@@ -136,7 +159,7 @@ function getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, inventory
       icon: string         // url
       relicSetUnames: [relicSetUname, ...] // the relic set that contains this item
       lackingCount: int    // the lacking count of an item
-      relicCount: int      // the number of relics available for this item
+      relicCounts: Dict      // the number of relics available for this item, ref. getRelicAvailableForItem()
       relics: {relicUname: int, ...} // the relics available for this item
     }
   */
@@ -153,11 +176,26 @@ function getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, inventory
       icon: iconMap[itemUname] || null,
       relicSetUnames: itemToRelicSet[itemUname],
       lackingCount: itemLackingCount[itemUname] || 0,
-      relicCount: itemRelicCount[itemUname]?.totalCount || 0,
+      relicCount: itemRelicCount[itemUname] || {
+        totalCount: 0, t1Count: 0, t2Count: 0, t3Count: 0, t4Count: 0, relics: {}
+      },
       relics: itemRelicCount[itemUname]?.relics || {},
     };
     return acc;
   }, {});
+}
+
+function RelicTypesString(itemInfo) {
+  if (itemInfo.relicCount.totalCount === 0) {
+    return (<p className="text-gray-400">No Relics</p>);
+  }
+
+  return (<>
+    <p>Lith: {itemInfo.relicCount.t1Count}</p>
+    <p>Meso: {itemInfo.relicCount.t2Count}</p>
+    <p>Neo: {itemInfo.relicCount.t3Count}</p>
+    <p>Axi: {itemInfo.relicCount.t4Count}</p>
+  </>);
 }
 
 function RelicSetString(relicSetUname, relicSets, itemUname, itemCount, nameLookupMap) {
@@ -203,13 +241,15 @@ export default function Relic({setting}) {
         {id: "item_count", name: "Item Count", type: "integer"},
         {id: "lacking_count", name: "Lacking Count", type: "integer"},
         {id: "relic_count", name: "Relic Count", type: "integer"},
+        {id: "relic_types", name: "Relic Types", type: "react"},
         {id: "relic_sets", name: "Relic Sets", type: "react"},
       ],
       "items": Object.values(itemInfos).map(itemInfo => ({
         "item_name": itemInfo.itemName,
         "item_count": itemInfo.itemCount,
         "lacking_count": itemInfo.lackingCount,
-        "relic_count": itemInfo.relicCount,
+        "relic_count": itemInfo.relicCount.totalCount,
+        "relic_types": RelicTypesString(itemInfo),
         "relic_sets": RelicSetsString(itemInfo.relicSetUnames, relicSets, itemInfo.itemUname, itemCount, nameLookupMap),
       })).filter(item => item.lacking_count > 0),
     }
