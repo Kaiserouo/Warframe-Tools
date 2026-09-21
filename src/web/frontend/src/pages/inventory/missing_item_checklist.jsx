@@ -99,7 +99,10 @@ export default function MissingItemChecklist({setting}) {
     <div className="text-2xl font-bold text-white my-2">
       <p>Missing Item Checklist</p>
     </div>
-
+    <div className="text-white font-sans my-2">
+      <p className="text-yellow-500 font-bold">&lt; Requires inventory file: add that in the Options menu &gt;</p>
+    </div>
+    
     {/* we separate the loading progress and error display because if there is still data from last time, we still wanna display that */}
     {micIsPending ? <Loading message="Loading Checklist Data" /> : null}
     {!micIsPending && micError ? <Error message={`ERROR: ${micError}`} /> : null}

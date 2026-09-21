@@ -104,8 +104,8 @@ export default function RivenInfobox({ weaponName }) {
     isPending: false, isFetching: false, error: null, data: null
   }
 
-  const renderHeader = () => {
-      return <a 
+  const header = (
+      <a 
         className={`${
           weaponIsPending || weaponIsFetching ? 'text-gray-500' : 
           weaponError || (weaponData && Object.keys(weaponData).length === 0) ? 'text-yellow-400' :
@@ -115,18 +115,17 @@ export default function RivenInfobox({ weaponName }) {
         rel="noopener noreferrer"
       >
         {weaponName}
-      </a>;
-  }
+      </a>
+  );
 
-  const renderInfoboxContent = () => {
-    return (!weaponIsPending && !weaponError && weaponData && Object.keys(weaponData).length !== 0 ? 
+  const content = (
+    !weaponIsPending && !weaponError && weaponData && Object.keys(weaponData).length !== 0 ? 
       (<ItemInfoboxInner weaponData={weaponData} />) : 
       (<ItemInfoboxInnerNoData weaponName={weaponName} />)
-    );
-  };
+  );
   
   return <Infobox
-    renderHeader={renderHeader}
-    renderInfoboxContent={renderInfoboxContent}
+    header={header}
+    content={content}
   />;
 }

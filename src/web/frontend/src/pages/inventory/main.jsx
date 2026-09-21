@@ -3,6 +3,7 @@ import Riven from './riven.jsx';
 import Relic from './relic.jsx';
 import MissingItemChecklist from './missing_item_checklist.jsx';
 import Loadout from './loadout.jsx';
+import JsonViewer from './json_viewer.jsx';
 
 let pageMap = {
   'riven': {
@@ -20,6 +21,10 @@ let pageMap = {
   'relic': {
     'name': 'Relic',
     'factory': (setting) => (<Relic setting={setting} />)
+  },
+  'json': {
+    'name': 'JSON Viewer',
+    'factory': (setting) => (<JsonViewer setting={setting} />)
   }
 };
 

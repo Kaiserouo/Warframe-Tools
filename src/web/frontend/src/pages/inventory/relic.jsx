@@ -4,6 +4,7 @@ import { useQueries } from '@tanstack/react-query'
 import { Loading, Error } from '../../components/loading_status.jsx';
 import { queriesInventoryRelicData } from '../../api/fetch.jsx';
 import ItemTable from '../../components/item_table.jsx';
+import Infobox from '../../components/infobox.jsx';
 
 function calculateLackCount(relicSet, itemCount) {
   /*
@@ -105,8 +106,14 @@ function getRelicAvailableForItem(relicRewards, itemCount) {
       t2Count: int,
       t3Count: int,
       t4Count: int,
+      
       relics: {relicUname: int, ...}
     }
+
+
+    Silver
+    Bronze
+    Platinum
   */
   const itemRelicCount = {};
   for (let [relicUname, relic] of Object.entries(relicRewards)) {
@@ -186,16 +193,21 @@ function getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, inventory
 }
 
 function RelicTypesString(itemInfo) {
+  let header = null;
+  let content = null;
   if (itemInfo.relicCount.totalCount === 0) {
-    return (<p className="text-gray-400">No Relics</p>);
+    header = (<p className="text-gray-400">No Relics</p>);
+    content = null;
+  } else {
+    header = (<p className="text-white font-bold">(
+      <span className="text-amber-500">{itemInfo.relicCount.t1Count}</span>/
+      <span className="text-gray-300">{itemInfo.relicCount.t2Count}</span>/
+      <span className="text-gray-100">{itemInfo.relicCount.t3Count}</span>/
+      <span className="text-yellow-300">{itemInfo.relicCount.t4Count}</span>
+    )</p>);
   }
 
-  return (<>
-    <p>Lith: {itemInfo.relicCount.t1Count}</p>
-    <p>Meso: {itemInfo.relicCount.t2Count}</p>
-    <p>Neo: {itemInfo.relicCount.t3Count}</p>
-    <p>Axi: {itemInfo.relicCount.t4Count}</p>
-  </>);
+  return (<Infobox header={header} content={content} pos="right" />);
 }
 
 function RelicSetString(relicSetUname, relicSets, itemUname, itemCount, nameLookupMap) {
@@ -207,15 +219,23 @@ function RelicSetString(relicSetUname, relicSets, itemUname, itemCount, nameLook
   */
   const relicSet = relicSets[relicSetUname];
   const itemCountForSet = Math.min(...Object.keys(relicSet).map(item => Math.floor((itemCount[item] || 0) / relicSet[item])));
-  return (<>
-    <p className="font-bold text-yellow-500">{`[${nameLookupMap[relicSetUname] || relicSetUname}](${itemCountForSet} sets)`}</p>
-    <ul className="list-disc list-inside">
+  const header = (
+    <p className="font-bold text-yellow-500 underline underline-offset-2 decoration-dotted">
+      {`[${nameLookupMap[relicSetUname] || relicSetUname}](${itemCountForSet} sets)`}
+    </p>
+  );
+  const content = (
+    <ul className="list-disc list-inside whitespace-nowrap">
       {Object.keys(relicSet).map((item, idx) => {
         const itemName = nameLookupMap[item] || item;
         const itemCountForItem = itemCount[item] || 0;
         return <li key={idx} className={item === itemUname ? "font-bold text-green-500" : ""}>{itemName} ({itemCountForItem}/{relicSet[item]})</li>;
       })}
     </ul>
+  );
+
+  return (<>
+    <Infobox header={header} content={content} pos="bottom-right-10" />
   </>)
 }
 function RelicSetsString(relicSetUnames, relicSets, itemUname, itemCount, nameLookupMap) {

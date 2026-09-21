@@ -86,31 +86,26 @@ export default function ItemInfobox({ setting, itemName }) {
     staleTime: Infinity, // 5 minutes
   })
 
-  const renderHeader = () => {
-    return <a 
-        className={`${
-          itemIsPending || itemIsFetching ? 'text-gray-500' : 
-          itemError || (itemData && Object.keys(itemData).length === 0) ? 'text-white' :
-          'text-white font-bold underline decoration-dashed underline-offset-3'} font-mono`} 
-        href={itemData && itemData.market_link ? itemData.market_link : null}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {itemName}
-      </a>;
-  };
+  const header = (<>
+    <a 
+      className={`${
+        itemIsPending || itemIsFetching ? 'text-gray-500' : 
+        itemError || (itemData && Object.keys(itemData).length === 0) ? 'text-white' :
+        'text-white font-bold underline decoration-dashed underline-offset-3'} font-mono`} 
+      href={itemData && itemData.market_link ? itemData.market_link : null}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {itemName}
+    </a>
+  </>)
 
-  const renderInfoboxContent = () => {
-    return (
-      !itemIsPending && !itemError && itemData && Object.keys(itemData).length !== 0 ? 
-        <ItemInfoboxInner itemData={itemData} /> : 
-        null
-    );
-  };
+  const content = (
+    !itemIsPending && !itemError && itemData && Object.keys(itemData).length !== 0 ? 
+      <ItemInfoboxInner itemData={itemData} /> : 
+      null
+  );
   
-  return <Infobox
-    renderHeader={renderHeader}
-    renderInfoboxContent={renderInfoboxContent}
-  />;
+  return <Infobox header={header} content={content} />;
 }
 
