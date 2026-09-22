@@ -16,6 +16,7 @@ export default function JsonViewer({setting}) {
       <p>The raw inventory file, for people curious to see what's in there.</p>
       <p>You can use the clipboard button (<CopySvg className="inline-block" />) to copy the JSON to your clipboard.</p>
       <p>For the unique names (<pre className="inline-block">"/Lotus/..."</pre>), you can use <a href="https://browse.wf/" target="_blank" rel="noopener noreferrer" className='underline text-blue-400 font-bold'>browse.wf</a> to find more information.</p>
+      <p>If you wanna see my take on the meaning of entries, ref. <a href="https://github.com/Kaiserouo/Warframe-Tools/blob/main/src/data/inventory/inv_keys.md" target="_blank" rel="noopener noreferrer" className='underline text-blue-400 font-bold'>inv_keys_en.md</a></p>
     </div>
     <div className="bg-[#1e1e1e] p-4 rounded-md">
       <JsonView 
