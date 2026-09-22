@@ -546,6 +546,16 @@ class WarframePublicExport:
                 }
         return ab_info_map
 
+    def get_ducat_price(self, use_cache=True):
+        return {
+            entry['uniqueName']: entry['primeSellingPrice']
+            for entry in (
+                self._get_public_export('ExportResources', 'en', use_cache) +
+                self._get_public_export('ExportRecipes', 'en', use_cache)
+            )
+            if 'primeSellingPrice' in entry
+        }
+
 def main_public_export():
     # https://wiki.warframe.com/w/Public_Export
     wd = WarframePublicExport()
@@ -1355,6 +1365,34 @@ def main_tmp():
     wof.get_mod_id()
     wof.get_ability_id()
 
+class Alecaframe:
+    def __init__(self):
+        pass
+
+    def get_prices(self, market_names: list[str]):
+        """
+        get the prices of items from alecaframe.gg
+        ReturnValue := [ItemPrice, ...]
+        ItemPrice := {
+            "post": int,        // WTS price
+            "insta": int,       // WTB price
+            "postMax": int,     // WTS price for max ranked mod / arcane
+            "minR0": int,       // (unused, not sure)
+            "minRMax": int,     // (unused, not sure)
+            "volume": int       // (unused, not sure) 
+        }
+        """
+        import requests
+        url = "https://api.alecaframe.com/prices/priceData"
+        r = requests.post(
+            url, 
+            headers={"Content-Type": "application/json"}, 
+            json=market_names
+        )
+        if r.status_code != 200:
+            raise Exception(f"Failed to get prices from {url}, status code: {r.status_code}")
+        data = r.json()
+        return data
 
 if __name__ == '__main__':
     # main_decrypt_lastdata()
@@ -1368,4 +1406,5 @@ if __name__ == '__main__':
     # main_disposition()
     # pe_weapon = WarframePublicExport()._get_public_export('ExportWeapons')
     # print(set([w['productCategory'] for w in pe_weapon]))
-    main_tmp()
+    # main_tmp()
+    print(Alecaframe().get_prices(["primed_chamber", "scorch"]))

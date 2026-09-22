@@ -154,7 +154,7 @@ function getRelicAvailableForItem(relicRewards, itemCount) {
   return itemRelicCount;
 }
 
-function getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, inventoryData) {
+function getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, inventoryData, ducatPrice) {
   /*
     for each item, return the info about it to be rendered
     i.e., 
@@ -163,6 +163,7 @@ function getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, inventory
       itemUname: string    // the unique name of the item
       itemName: string     // the name of the item
       itemCount: int       // the number of this item the user has
+      ducatPrice: int  // the ducat price of the item
       icon: string         // url
       relicSetUnames: [relicSetUname, ...] // the relic set that contains this item
       lackingCount: int    // the lacking count of an item
@@ -180,6 +181,7 @@ function getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, inventory
       itemUname: itemUname,
       itemName: nameLookupMap[itemUname] || null,
       itemCount: itemCount[itemUname] || 0,
+      ducatPrice: ducatPrice[itemUname] || 0,
       icon: iconMap[itemUname] || null,
       relicSetUnames: itemToRelicSet[itemUname],
       lackingCount: itemLackingCount[itemUname] || 0,
@@ -249,15 +251,22 @@ export default function Relic({setting}) {
 
   let itemTable = null;
   if (relicData && setting.inventory?.data) {
-    const {relic_sets: relicSets, icon_map: iconMap, name_lookup_map: nameLookupMap, relic_rewards: relicRewards} = relicData;
+    const {
+      ducat_price: ducatPrice, 
+      relic_sets: relicSets, 
+      icon_map: iconMap, 
+      name_lookup_map: nameLookupMap, 
+      relic_rewards: relicRewards
+    } = relicData;
     console.log("relicSets", relicSets, "iconMap", iconMap, "nameLookupMap", nameLookupMap);
-    const itemInfos = getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, setting.inventory.data);
+    const itemInfos = getItemInfos(relicSets, relicRewards, iconMap, nameLookupMap, setting.inventory.data, ducatPrice);
     const itemCount = getItemCount(setting.inventory.data);
     
     itemTable = {
       "headers": [
         // {"id": str, "name": str, "type": Literal["number", "deviation", "string", "url", "item_name"], setting: Optional[dict]}
-        {id: "item_name", name: "Item Name", type: "string"},
+        {id: "item_name", name: "Item Name", type: "string", setting: {filterable: false}},
+        {id: "ducat_price", name: "Ducat Price", type: "integer"},
         {id: "item_count", name: "Item Count", type: "integer"},
         {id: "lacking_count", name: "Lacking Count", type: "integer"},
         {id: "relic_count", name: "Relic Count", type: "integer"},
@@ -266,6 +275,7 @@ export default function Relic({setting}) {
       ],
       "items": Object.values(itemInfos).map(itemInfo => ({
         "item_name": itemInfo.itemName,
+        "ducat_price": itemInfo.ducatPrice,
         "item_count": itemInfo.itemCount,
         "lacking_count": itemInfo.lackingCount,
         "relic_count": itemInfo.relicCount.totalCount,

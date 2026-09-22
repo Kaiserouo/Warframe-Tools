@@ -18,6 +18,7 @@ fetch_urls = [
     'api/public_export/data/en/get_riven_loctag_map',
     'api/public_export/data/en/get_incarnon_weapons',
     'api/public_export/data/en/get_icon_map',
+    'api/public_export/data/en/get_ducat_price',
     'api/wiki/data/get_weapon_uname_family_map',
     'api/wiki/data/get_weapon_family_unames_map',
     'api/wiki/data/get_baro_items',

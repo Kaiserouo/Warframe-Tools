@@ -77,3 +77,5 @@ ItemPrice := {
     "volume": int       // (unused, not sure) 
 }
 ```
+
+Note that the oracle / aggregation function they used to get that value is not known (you need their server's code to do that). 

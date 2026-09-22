@@ -236,6 +236,7 @@ const queryPERelicRewards = makeStaticQuery('pe__relic_rewards', 'api/public_exp
 const queryPENameLookupMap = makeStaticQuery('pe__name_lookup_map', 'api/public_export/data/en/get_name_lookup_map');
 const queryPEWarframeInfoMap = makeStaticQuery('pe__warframe_info_map', 'api/public_export/data/en/get_warframe_info_map');
 const queryPEAbilityInfoMap = makeStaticQuery('pe__ability_info_map', 'api/public_export/data/en/get_ability_info_map');
+const queryPEDucatPrice = makeStaticQuery('pe__ducat_price', 'api/public_export/data/en/get_ducat_price');
 
 // WarframeWiki()
 const queryWikiMissingItemChecklist = makeStaticQuery('missing_item_checklist', 'api/missing_item_checklist');
@@ -272,6 +273,7 @@ export const queriesInventoryRelicData = makeStaticQueries({
   relic_rewards: queryPERelicRewards,
   icon_map: queryPEIconMap,
   name_lookup_map: queryPENameLookupMap,
+  ducat_price: queryPEDucatPrice
 });
 export const queriesMissingItemChecklistData = makeStaticQueries({
   missing_item_checklist: queryWikiMissingItemChecklist,

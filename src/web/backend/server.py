@@ -924,7 +924,8 @@ def data_public_export(lang, function_name):
         'get_relic_sets': lambda lang: wpe.get_relic_sets(lang, use_cache=True),
         'get_name_lookup_map': lambda lang: wpe.get_name_lookup_map(lang, use_cache=True),
         'get_warframe_info_map': lambda lang: wpe.get_warframe_info_map(lang, use_cache=True),
-        'get_ability_info_map': lambda lang: wpe.get_ability_info_map(lang, use_cache=True)
+        'get_ability_info_map': lambda lang: wpe.get_ability_info_map(lang, use_cache=True),
+        'get_ducat_price': lambda lang: wpe.get_ducat_price(use_cache=True)
     }
 
     if function_name in function_map:
