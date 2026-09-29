@@ -195,7 +195,9 @@ function MainContent({currentPage, setting}) {
 function Footer() {
   return (
     <footer className="fixed bottom-0 w-full bg-[#222831] text-white p-4 text-center">
-      <p>@Kaiserouo</p>
+      <p>
+        <a href="https://github.com/Kaiserouo" target="_blank" rel="noopener noreferrer" className='underline'>@Kaiserouo</a> • <a href="https://github.com/Kaiserouo/Warframe-Tools" target="_blank" rel="noopener noreferrer" className='underline'>Warframe-Tools</a>
+      </p>
     </footer>
   );
 }

@@ -1288,7 +1288,18 @@ class MissingItemChecklist:
             "name": "Requiem Mods",
             "items": items
         }
-    
+    def _list_drift_mods(self):
+        ls = ["Stealth Drift", "Speed Drift", "Power Drift", "Endurance Drift", "Cunning Drift", "Coaction Drift", "Agility Drift"]
+        items = [
+            {"name": mod_name, "type": "Mod", "owned": "No", "tag": "", "status": "", "source": "Orokin Moon"}
+            for mod_name in ls
+        ]
+        return {
+            "name": "Drift Mods",
+            "items": items
+        }
+
+
     def get_table(self):
         """
         get all table
@@ -1326,6 +1337,7 @@ class MissingItemChecklist:
             self._list_syndicate_augment(),
             self._list_nightwave(),
             self._list_requiem(),
+            self._list_drift_mods(),
         ]
         ret = {}
         headers = [

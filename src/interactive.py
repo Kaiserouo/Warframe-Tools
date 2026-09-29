@@ -1,3 +1,8 @@
+"""
+this was the first implementation of the app before i move to a web based solution
+mostly deprecated, but some functions defined in here are used by others so do not remove this file
+"""
+
 from typing import *
 import prompt_toolkit
 from prompt_toolkit import prompt, print_formatted_text

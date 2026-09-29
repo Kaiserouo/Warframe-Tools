@@ -75,8 +75,8 @@ This will be used in e.g., `inventory['Melee']`'s configs.
 ## General
 - `Consumables`: Consumables. Has `ItemCount: int` and `ItemType: uname`
 - `FlavourItems`: Should be stuff about cosmetic / skins (`Skins`, landing craft, etc) / animation set / emote (`Emotes`) / glyph (`AvatarImages`) / color palette / honoria (`Titles`) / games from cephalon simaris (`Arcade`).  Since there's no count information in here, I suppose anything that can only be obtained once / each player can only have one would be here
-- `RawUpgrades`: Unupgraded mod
-- `Upgrades`: Upgraded mod
+- `RawUpgrades`: Unupgraded mod and arcanes
+- `Upgrades`: Upgraded mod and arcanes
 - `WeaponSkins`: warframe skin, mainly skins and helmets, maybe also everything else that can be installed on a warframe? And also weapon skins.
 - `MiscItems`: Normal resources, e.g., rubedo, orokin cell, etc. Also other stuff that you can see in your in-game inventory page. Note that blueprints AREN'T in here, they're in `Recipes` instead
 - `Recipes`: Blueprints
@@ -180,9 +180,9 @@ Should be (some) integer(s)
 
 # Archimedea
 - `EntratiLabConquestActiveFrameVariants`: personal modifiers
-- `EntratiLabConquestHardModeStatus`: bool, whether EDA is selected
+- `EntratiLabConquestHardModeStatus`: bool
 - `EntratiVaultCountResetDate`: not sure, weekly renewal time?
-- `EntratiLabConquestUnlocked`: bool, whether EDA is unlocked
+- `EntratiLabConquestUnlocked`: bool
 - `EntratiVaultCountLastPeriod`: not sure, for me it's a number `5`
 - `EntratiLabConquestCacheScoreMission`: the scores already gotten this week (for the progress bar below)
 

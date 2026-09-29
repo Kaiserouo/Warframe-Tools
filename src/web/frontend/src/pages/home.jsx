@@ -10,12 +10,19 @@ export default function Home({setting}) {
       <div className="text-l text-gray-200">
         <h2 className='text-2xl font-bold text-white'>Function</h2>
         <ul className="list-disc list-inside">
-          <li><span className="text-yellow-400 font-bold">Item Info</span>: Show item information and market prices on warframe.market. <b className='text-white'>Can search multiple items at once.</b></li>
-          <li><span className="text-yellow-400 font-bold">Relic</span>: Gives expected plat reward for relics.</li>
-          <li><span className="text-yellow-400 font-bold">Syndicate</span>: Show item information and market prices sold by the syndicate.</li>
-          <li><span className="text-yellow-400 font-bold">Transient Reward</span>: Show item information and market prices sold of transient rewards.</li>
-          <li><span className="text-yellow-400 font-bold">Find Best Trade</span>: For a list of items, find the best users to trade with to minimize total price deviation from oracle price. (also serves as mass query for multiple items' current market prices & best to buy item currently)</li>
+          <li><span className="text-yellow-400 font-bold">Item Info</span>: Show item market information on warframe.market. Can search multiple items at once.</li>
+          <li><span className="text-yellow-400 font-bold">Relic</span>: Calculate expected plat reward for relics.</li>
+          <li><span className="text-yellow-400 font-bold">Syndicate</span>: Show syndicate item information and market prices.</li>
+          <li><span className="text-yellow-400 font-bold">Transient Reward</span>: Show transient reward item information and market prices.</li>
+          <li><span className="text-yellow-400 font-bold">Find Best Trade</span>: For a list of items you want to buy, find the best buyers to buy from.</li>
           <li><span className="text-yellow-400 font-bold">Inventory</span>: Inventory related functionalities.</li>
+          <ul className="list-disc list-inside ml-4">
+            <li><span className="text-yellow-400 font-bold">Riven</span>: Riven viewer with advanced sorting and filtering.</li>
+            <li><span className="text-yellow-400 font-bold">Missing Item Checklist</span>: Check missing items from all sorts of farms.</li>
+            <li><span className="text-yellow-400 font-bold">Loadout</span>: Loadout viewer for all items in inventory.</li>
+            <li><span className="text-yellow-400 font-bold">Relic</span>: Find items in relic to make sets.</li>
+            <li><span className="text-yellow-400 font-bold">JSON Viewer</span>: View raw inventory JSON file.</li>
+          </ul>
         </ul>
         <br />
         <p>Item name with underline show additional information and links in the hovering info box.</p>

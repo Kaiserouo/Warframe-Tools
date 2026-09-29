@@ -1,0 +1,9 @@
+services:
+  warframe-tools:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: warframe-tools:latest
+    ports:
+      - "5000:5000"
+    restart: unless-stopped

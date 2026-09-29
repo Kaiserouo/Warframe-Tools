@@ -1,0 +1,12 @@
+__pycache__/
+.gitignore
+.git
+**/node_modules/
+**/build/
+**/build_github_page/
+ubuntu_notif/
+hash/
+src/web/backend/config.py
+server_market_cache.pkl
+src/data/inventory/export
+tmp/

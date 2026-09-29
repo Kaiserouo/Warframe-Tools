@@ -1,30 +1,42 @@
-# Warframe CLI Tool
+# Web GUI
 
-> **For Web GUI, refer to [Web GUI Readme](./src/web/README.md).**
-> 
-> **Video Demo (Youtube)**
-> 
-> [<img src="https://img.youtube.com/vi/AZY_MeDa9XM/hqdefault.jpg" width="540" height="360"/>](https://www.youtube.com/watch?v=AZY_MeDa9XM)
+A web version GUI for roughly the same tasks, but with more interactability
 
-I need some functionality that I want full control of, so, um, this.
+![](../../asset/screenshot_web_gui.png)
 
-This acts as some sort of warframe market bulk search / analysis tool, which I have control over e.g., how to calculate a reasonable price for an item (i.e., price oracle). The functionality includes:
+## Functionality
 
-The supported functionalities are: *(note that Web GUI implement them a bit different, please refer to the description on web GUI readme / homepage)*
+More information could be found in the server homepage
+```
+Function:
+    - Item Info: Show item information and market prices on warframe.market. Can search multiple items at once.
+    - Relic: Gives expected plat reward for relics.
+    - Syndicate: Show item information and market prices sold by the syndicate.
+    - Transient Reward: Show item information and market prices sold of transient rewards.
+    - Find Best Trade: For a list of items, find the best users to trade with to minimize total price deviation from oracle price. (also serves as mass query for multiple items' current market prices & best to buy item currently)
+    - Inventory: Inventory related functionalities.
+        - Riven: Riven viewer with advanced sorting and filtering.
+        - Missing Item Checklist: Check missing item in inventory.
+        - Loadout: Loadout viewer for all items in inventory.
+        - Relic: Find items in relic to make sets.
+        - JSON Viewer: View raw inventory JSON file.
+```
 
-- Item Info: Show market information about items. It can search in bulk by searching information for all items with a substring.
-  - e.g., to search all component blueprint price of Volt Prime, type `Volt Prime` and it will show all component and set price at once.
-- Relic Plat: Gives expected plat reward for specific relic (set), similar to how Alecaframe implements them (but I can control the price used in the calculation)
-- Relic Item: Get all relics containing item and give expected plat for each relic.
-- Relic Plat Multiple: Can input multiple items.
-  - e.g., type "Lith B9 + Lith C5 + Lith D6" to search their expected plat at once.
-  - Useful for determining which relic to buy from Varzia. You can use [this page](https://wiki.warframe.com/w/Varzia) to get a list of relics
-- Syndicate: Show item market price sold by syndicate. 
-  - Useful for determining what thing to buy to sell on the market
-- Transient Reward: Get available transient mission rewards and show market price.
-- Find Best Trade: For a list of items, find the best users to trade with to minimize total price deviation from oracle price.
+## Docker
 
-## Install
+There is a docker compose file for localhost usage.
+```bash
+# in the repo folder (Warframe-Tools/)
+docker compose up -d
+```
+
+The website will be on `http://localhost:5000`.
+
+Note that:
+- This only supports localhost. For hosting on other servers, do manual installation & deployment and refer to the *Non-Localhost Server* section and *HTTPS* section below.
+- This does not support automated overframe data fetching. Please update the nonce according to the *Note > Overframe Data* section below.
+
+## Manual Installation
 
 ```bash
 # we use conda here, ref. https://www.anaconda.com/docs/getting-started/miniconda/install
@@ -33,63 +45,117 @@ conda activate warframe
 
 # install packages
 pip install -r requirement.txt
+
+# we use node.js, ref. https://nodejs.org/en/download
+# note that we use the newest version, versions too old wouldn't be able to run
+cd Warframe-Tool/src/web/frontend
+npm install
+
+# if it complains that it doesn't have vite:
+npm install vite @vitejs/plugin-react --save-dev
+
+# install xvfb, ref. src/data/inventory/overframe.md: Overframe > Data > Data Fetching > Webpack Fetching
+sudo apt-get install -y xvfb
 ```
 
-## Run
+### Development
 
+To run the server, you need node.js and related packages:
 ```bash
-cd Warframe-Tool/   # at the repo directory
-python -m src.main
+# start developer frontend server
+cd Warframe-Tool/src/web/frontend
+npm start
+
+# in another terminal, run the API server
+cd Warframe-Tool
+python -m src.web.backend.server
+
+# ALTERNATIVELY, there's a script that sets up tmux
+# to run the above 2 commands in a tmux window
+cd Warframe-Tool
+bash dev_tmux.sh
 ```
 
-## Functions
-Those are what I currently have, as an example of how to use `warframe_market.py`.
+The URL should be something like `http://localhost:5173` (vite default URL).
+We use vite, and you can change the code and restart the server with the new code by typing `r` in the vite terminal.
 
+### Deployment
+```bash
+# in one terminal, run the API server
+cd Warframe-Tool    # at the repo folder
+conda activate warframe
+python -m src.web.backend.server
+
+# in another terminal, build the frontend website
+# the built code should be in web/frontend/build, and will be also served by the API server
+cd Warframe-Tool/web/frontend
+npm build
+
+# ALTERNATIVELY, there's a script that sets up tmux
+# to run the above 2 commands in a tmux window
+cd Warframe-Tool
+bash prod_tmux.sh
 ```
-Function:
-- Item Info: Show item info
-- Relic Plat: Gives expected plat for specific relic (set)
-- Relic Item: Get all relics containing item and give expected plat
-- Syndicate: Show syndicate item market price
 
-Note:
-- Press TAB to use autocomplete menu, or just type away.
-- Use arrow key and press ENTER to choose an item in the menu.
-- If not specified, please choose a specific choice (case-sensitive).
-- Some functions explicitly shows that it matches ALL items shown in the menu.
-  In that case you don't need to choose a specific item. Most of these are case-insensitive, too.
-```
+The flask server also hosts the files in `src/web/frontend/build`, the URL should be something like `http://localhost:5000` (flask default URL).
 
-## Warning
-- Spaghetti code. You can argue I don't have any idea how to structure my code properly. I tried to make it easier to maintain in `warframe_market.py` but i literally just gave up in `interactive.py`.
-- **The price oracle (`PriceOracle`) should be changed to fit your needs!** This is the sole reason why I made this whole thing because sometimes alecaframe doesn't show reasonable price and, according to what items I wanna deal with, the price oracle should change accordingly, too. **Don't just use this without knowing what you're doing. At least check if the price oracle fits your needs.**
-  - e.g., if an item is common and the price is relatively stable (e.g., equilibrium), I might want to use the median price for the last 48 hours or so.
-  - e.g., when a prime is just out (e.g., sevagoth prime as of now), I might only wanna look at the price of the last 3 hours because of how fast the price drops and if i use the price several hours or days ago I am never gonna sell anything.
-  - i haven't written the code to choose the price oracle in the CLI for now. please change the code directly. at least im doing it this way for now.
-- Mostly useful when you wanna query a lot of items all at once, instead of looking at warframe market page one item at a time.
-- A little bit faster than to type the thing on google or warframe market imo, because of the substring matching and stuff.
-- Syndicate function can deal with your syndicate standing spending needs if you don't wanna just put all that into relic packs (or, in some syndicate, you can't even buy relic packs so you gotta find something else to sell)
-- Relic expected plat calculation is another reason why I made this, because aya relics are not in the database for some reason and alecaframe can't calculate the expected value per relic. I don't have much aya so I'm just gonna calculate that expected price on my own.
-- Can also do some weird things that I parsed all warframe market data. Not implemented btw.
-  - e.g., auto notify when an item with your expected sell price appears, because I seriously think no one uses the buy function on the market.
+Note that the server should be hosted on `localhost`, since this is a development flask server, with service that's very easily DoS-ed, and generally shouldn't be exposed. Even without these issues, warframe market API request-per-second limitation also limits the potential of this server being used by multiple people. **Please host your own server (`python -m src.web.backend.server`) if you wanna use this, and DON'T EXPOSE THIS SERVER TO PUBLIC.**
 
+> #### Non-Localhost Server
+> If you do wanna host it on a different computer, please put your server under VPN or use other tactics to access the server without exposing the server to public. Remember to manually change the IP of the flask server in `server.py` to your VPN IP instead, OR, write the setting to `config.py` and the server will use that instead:
+> ```bash
+> # change to your own IP and port, DEBUG toggles the debug mode for Flask
+> echo "DEBUG, HOST, PORT = False, 'localhost', 5000" > src/web/backend/config.py    
+> ```
 
-## Trivia
+> #### IPv6 Disable
+> For reasons unknown, if you use IPv6 to request api.warframe.market, it would hang after the server runs for a while. We need to make sure python request doesn't use IPv6.
+> 
+> There is no clean way to do so. Disabling IPv6 for the whole system is the solution that works for me.
+> ```bash
+> # to automatically disable ipv6 after startup:
+> sudo nano /etc/sysctl.d/99-disable-ipv6.conf
+> 
+> # type the following into the config file
+> net.ipv6.conf.all.disable_ipv6 = 1
+> net.ipv6.conf.default.disable_ipv6 = 1
+> 
+> # back in terminal
+> sudo sysctl --system  # apply immediately
+> ``` 
 
-### Browser CLI
+> #### HTTPS
+> For the inventory file related functionality (e.g., the Riven page. most notably the decryption of `lastData.dat`), we need the built-in crypto library, which is only available if (1) you host the server on localhost `http://localhost:<port>` or (2) you host it on another computer but you have HTTPS enabled `https://<addr>:<port>`.
+> 
+> If you are hosting it on a different computer, please use reverse proxy with a production web server (e.g., nginx, apache) with a self-signed certificate (at least) to make the website HTTPS enabled.
+> 
+> For example, if the host has IP `<VPN_IP_ADDR>`, uses apache server, have a self-signed certificate, have the python server run on localhost port 5000 and want to have the reverse proxy on port 6001 (note that you can't use the [unsafe ports defined by chromium](https://superuser.com/questions/188058/which-ports-are-considered-unsafe-by-chrome)), your site-enabled file should have something like:
+> ```
+> <VirtualHost *:6001>
+>    ServerName <VPN_IP_ADDR>
+>    DocumentRoot /var/www/html
+> 
+>    SSLEngine on
+>    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+>    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+> 
+>    ProxyPass / http://localhost:5000/
+>    ProxyPassReverse / http://localhost:5000/
+>    ProxyRequests Off
+> </VirtualHost>
+> ```
+> and you should be connected via `https://<VPN_IP_ADDR>:6001/`
 
-I tried to use some python REPL on browser stuff to make this thing run directly on browser (because i just don't wanna properly port a CLI program onto browser myself). It turns out to be almost impossible, at least without some heavy code changing:
-- All `requests` cannot be done if not using javascript's fetch (probably because of some CORS stuff). This is a relatively small problem as long as I can know if the code is currently running in browser.
-- `prompt_toolkit` is doomed. Pyodite claimed that the module `termios` (which is required by `wcwidth`, further which is required by `prompt_toolkit`) is not possible on pyodute due to "browser limits"
+## Note
 
-## TODO
-- warframe data/ scripts that fetches data from warframe wiki: use new wiki instead
-- when you wanna buy multiple stuff, find the best trade strategy (or simply just, who do you wanna trade with in order to minimize trade times)
-  - 1. get a list of items you wanna buy (maybe make a function in the main program to record this in a prettier format, with intellisence)
-  - 2. for each item, get all players online and put them in a set
-  - 3. in the player set, query all player's orders and see:
-    - 1. what items do they have?
-    - 2. for their price, how much do they deviate from the oracle price we have?
-    - 3. in total, how much IN TOTAL do they deviate from the price? (sum 2. together)
-  - 4. sort the players by (1) the items they have (2) the price they DONT deviate from the oracle price (minimize additional cost)
-  - 5. list everything 
+### Overframe Data
+
+> ref. `src/data/inventory/overframe.md`
+
+To get overframe data automatically, we need to use non-headless Selenium to get the webpack nonce.
+This is not possible in two cases:
+- In github actions, cloudflare blocks this method.
+- In architectures in which chromium isn't available (e.g., aarch64, i.e., on raspberry pi).
+
+This can be mitigated by manually entering the nonce in `src/data/inventory/overframe_link.py`.
+Make sure to update it manually if you want overframe related functionalities (e.g., Inventory > Loadout page). Refer to that python file for instructions.

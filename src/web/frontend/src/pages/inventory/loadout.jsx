@@ -219,8 +219,8 @@ export default function Loadout({setting}) {
       <div>
         <div className="text-white font-sans my-2">
           <p className="text-yellow-500 font-bold">&lt; Requires inventory file: add that in the Options menu &gt;</p>
-          <p>An loadout viewer... kinda.</p>
-          <p>Generates overframe links for the loadout.</p>
+          <p>A loadout viewer for your entire inventory.</p>
+          <p>Generates overframe links for the loadouts.</p>
         </div>
 
         <SearchBar 

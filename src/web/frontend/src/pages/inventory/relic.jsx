@@ -102,22 +102,37 @@ function getRelicAvailableForItem(relicRewards, itemCount) {
     return {itemUname: relicCountInfo}
     relicCountInfo := {
       totalCount: int,
-      t1Count: int,
-      t2Count: int,
-      t3Count: int,
-      t4Count: int,
+
+      t1Count: int, // Lith
+      t2Count: int, // Meso
+      t3Count: int, // Neo
+      t4Count: int, // Axi
+
+      bronzeCount: int,    // Intact
+      silverCount: int,    // Exceptional
+      goldCount: int,      // Flawless
+      platinumCount: int,  // Radiant
       
       relics: {relicUname: int, ...}
     }
-
-
-    Silver
-    Bronze
-    Platinum
   */
+  function _getRelicGrade(relicUname) {
+    if (relicUname.includes("Bronze")) {
+      return "bronze";
+    } else if (relicUname.includes("Silver")) {
+      return "silver";
+    } else if (relicUname.includes("Gold")) {
+      return "gold";
+    } else if (relicUname.includes("Platinum")) {
+      return "platinum";
+    }
+  }
+
   const itemRelicCount = {};
   for (let [relicUname, relic] of Object.entries(relicRewards)) {
     const relicType = relicUname.split('/').slice(-1)[0].slice(0, 2); // T1, T2, T3, T4
+    const relicGrade = _getRelicGrade(relicUname); // bronze, silver, gold, platinum
+
     if (!itemCount[relicUname]) {
       continue;
     }
@@ -130,6 +145,10 @@ function getRelicAvailableForItem(relicRewards, itemCount) {
           t2Count: 0,
           t3Count: 0,
           t4Count: 0,
+          bronzeCount: 0,
+          silverCount: 0,
+          goldCount: 0,
+          platinumCount: 0,
           relics: {}
         };
       }
@@ -146,6 +165,20 @@ function getRelicAvailableForItem(relicRewards, itemCount) {
           break;
         case 'T4':
           itemRelicCount[itemUname].t4Count += itemCount[relicUname];
+          break;
+      }
+      switch (relicGrade) {
+        case 'bronze':
+          itemRelicCount[itemUname].bronzeCount += itemCount[relicUname];
+          break;
+        case 'silver':
+          itemRelicCount[itemUname].silverCount += itemCount[relicUname];
+          break;
+        case 'gold':
+          itemRelicCount[itemUname].goldCount += itemCount[relicUname];
+          break;
+        case 'platinum':
+          itemRelicCount[itemUname].platinumCount += itemCount[relicUname];
           break;
       }
       itemRelicCount[itemUname].relics[relicUname] = itemCount[relicUname];
@@ -201,12 +234,17 @@ function RelicTypesString(itemInfo) {
     header = (<p className="text-gray-400">No Relics</p>);
     content = null;
   } else {
-    header = (<p className="text-white font-bold">(
+    header = (<><p className="text-white font-bold">(
       <span className="text-amber-500">{itemInfo.relicCount.t1Count}</span>/
       <span className="text-gray-300">{itemInfo.relicCount.t2Count}</span>/
       <span className="text-gray-100">{itemInfo.relicCount.t3Count}</span>/
       <span className="text-yellow-300">{itemInfo.relicCount.t4Count}</span>
-    )</p>);
+    )</p><p className="text-white font-bold">(
+      <span className="text-cyan-50">{itemInfo.relicCount.bronzeCount}</span>/
+      <span className="text-cyan-100">{itemInfo.relicCount.silverCount}</span>/
+      <span className="text-cyan-200">{itemInfo.relicCount.goldCount}</span>/
+      <span className="text-cyan-300">{itemInfo.relicCount.platinumCount}</span>
+    )</p></>);
   }
 
   return (<Infobox header={header} content={content} pos="right" />);
@@ -293,7 +331,7 @@ export default function Relic({setting}) {
     </div>
     <div className="text-white font-sans my-2">
       <p className="text-yellow-500 font-bold">&lt; Requires inventory file: add that in the Options menu &gt;</p>
-      <p>Sometimes, you wanna see what relics to farm based on whether you can make more sets of items.</p>
+      <p>Sometimes, you wanna see what relics to farm based on whether you can <b>make more sets of items</b>.</p>
       <p className="text-gray-400">(Take Lex Prime for example: if you have 3 Blueprints, 13 Barrels, 17 Receivers, you wanna farm Blueprints because you can make more sets of Lex Prime out of it.)</p>
       <br />
       <p>We caculate the <span className="font-bold">Lacking Count</span> of each item based on your inventory.</p>
@@ -301,6 +339,17 @@ export default function Relic({setting}) {
       <p className="text-gray-400">(In the above example, the lacking count of Blueprint is 10, because you can make 10 more Lex Prime Sets if you get 10 more Blueprints. Note that the lacking count of Barrel is 0 because you can't make any more sets even if you get more of it.)</p>
       <br />
       <p>We only show inventory where lacking count is greater than 0. Relic count is the number of relics in your inventory with that item.</p>
+      <p>Relic type is indicated by <span className="text-white font-bold">(
+          <span className="text-amber-500">Lith</span>/
+          <span className="text-gray-300">Meso</span>/
+          <span className="text-gray-100">Neo</span>/
+          <span className="text-yellow-300">Axi</span>
+        )</span> and <span className="text-white font-bold">(
+          <span className="text-cyan-50">Intact</span>/
+          <span className="text-cyan-100">Exceptional</span>/
+          <span className="text-cyan-200">Flawless</span>/
+          <span className="text-cyan-300">Radiant</span>
+        )</span></p>
     </div>
 
     {/* we separate the loading progress and error display because if there is still data from last time, we still wanna display that */}
