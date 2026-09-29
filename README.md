@@ -2,7 +2,11 @@
 
 A web version GUI for roughly the same tasks, but with more interactability
 
-![](../../asset/screenshot_web_gui.png)
+![](asset/screenshot_web_gui.png)
+
+> **Video Demo (Youtube)**
+> 
+> [<img src="https://img.youtube.com/vi/AZY_MeDa9XM/hqdefault.jpg" width="540" height="360"/>](https://www.youtube.com/watch?v=AZY_MeDa9XM)
 
 ## Functionality
 
