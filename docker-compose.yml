@@ -5,7 +5,7 @@ services:
       dockerfile: dockerfile
     image: warframe-tools:latest
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     # volumes:
     #   - ./src/data:/app/src/data
     restart: unless-stopped
@@ -13,5 +13,5 @@ services:
     image: selenium/standalone-chromium:latest
     container_name: selenium
     ports:
-      - "4444:4444"
+      - "127.0.0.1:4444:4444"
     restart: unless-stopped
