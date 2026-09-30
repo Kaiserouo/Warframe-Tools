@@ -6,4 +6,12 @@ services:
     image: warframe-tools:latest
     ports:
       - "5000:5000"
+    # volumes:
+    #   - ./src/data:/app/src/data
+    restart: unless-stopped
+  selenium:
+    image: selenium/standalone-chromium:latest
+    container_name: selenium
+    ports:
+      - "4444:4444"
     restart: unless-stopped

@@ -28,6 +28,12 @@ try:
 except ImportError:
     DEBUG, HOST, PORT = True, 'localhost', 5000
 
+try:
+    from .config import OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL
+except ImportError:
+    OVERFRAME_GET_WEBPAGE_MODE = 'xvcf'
+    OVERFRAME_GET_WEBPAGE_REMOTE_URL = 'https://example.com'
+
 wfm.RETRY_MAX_TIME = 1    # reduce retry time for better responsiveness
 
 market_lock = threading.Lock()   # ok ngl i don't really know why i added this but better safe than sorry
@@ -39,7 +45,8 @@ wpe = WarframePublicExport()
 wwiki = WarframeWiki()
 ducat_data = None
 cache = {}
-wof = Overframe()
+wof_lock = threading.Lock()
+wof = Overframe(OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL)
 
 # args, kwargs is passed to price oracle functions
 # for now, kwargs = stat_filter
@@ -55,7 +62,7 @@ oracle_price_fn_map = {
 }
 
 def refresh():
-    global market_items, market_map, market_id_map, market_data_update_date, wpe, wwiki, ducat_data, cache
+    global market_items, market_map, market_id_map, market_data_update_date, wpe, wwiki, ducat_data, cache, wof
     print(f'{util.GREEN}[*] get market item...{util.RESET}')
     market_items = wfm.get_market_item_list()
     market_map = wfm.get_market_items_name_map(market_items)
@@ -67,9 +74,8 @@ def refresh():
     print(f'{util.GREEN}[*] get public export data...{util.RESET}')
     wpe._prefetch_all_public_export(lang='en')
     wwiki = WarframeWiki()
-    wof = Overframe()
+    wof = Overframe(OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL)
     cache = {}
-
 
 def use(name, callback):
     """
@@ -78,7 +84,6 @@ def use(name, callback):
     if name not in cache:
         cache[name] = callback()
     return cache[name]
-
 
 """
 Task management
@@ -948,17 +953,18 @@ def data_wiki(function_name):
 
 @app.route('/api/overframe/data/<string:function_name>')
 def data_overframe(function_name):
-    function_map = {
-        'get_item_id': lambda: wof.get_item_id(use_cache=True),
-        'get_mod_id': lambda: wof.get_mod_id(use_cache=True),
-        'get_ability_id': lambda: wof.get_ability_id(use_cache=True),
-        'get_riven_tag_id': lambda: wof.get_riven_tag_id(use_cache=True),
-    }
+    with wof_lock:
+        function_map = {
+            'get_item_id': lambda: wof.get_item_id(use_cache=True),
+            'get_mod_id': lambda: wof.get_mod_id(use_cache=True),
+            'get_ability_id': lambda: wof.get_ability_id(use_cache=True),
+            'get_riven_tag_id': lambda: wof.get_riven_tag_id(use_cache=True),
+        }
 
-    if function_name in function_map:
-        return use(f'OVERFRAME__{function_name}', lambda: function_map[function_name]())
-    else:
-        return {'error': 'Function not found'}, 404
+        if function_name in function_map:
+            return use(f'OVERFRAME__{function_name}', lambda: function_map[function_name]())
+        else:
+            return {'error': 'Function not found'}, 404
 
 @app.route('/api/other/data/<string:function_name>')
 def data_other(function_name):
@@ -1018,7 +1024,6 @@ class MissingItemChecklist:
         self.wwiki = wwiki
         self.wpe = wpe
 
-    
     bounty_data = {
         "Cetus Bounty": [
             ["Gladiator Aegis", "Cetus, Tier 3 Bounty (L20-40), Group A"],

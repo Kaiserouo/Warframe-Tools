@@ -15,11 +15,13 @@ COPY --from=build /app/src/web/frontend/build /app/src/web/frontend/build
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# for now, selenium fails for some reason, so we disable it for now
-# RUN apt-get update && apt-get install -y xvfb
 
 COPY <<EOF ./src/web/backend/config.py
-DEBUG, HOST, PORT = True, "0.0.0.0", 5000
+DEBUG, HOST, PORT = False, "0.0.0.0", 5000
+
+# ref. docker-compose.yml
+OVERFRAME_GET_WEBPAGE_MODE = "remote"
+OVERFRAME_GET_WEBPAGE_REMOTE_URL = "http://selenium:4444"
 EOF
 
 EXPOSE 5000

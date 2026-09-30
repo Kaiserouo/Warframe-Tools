@@ -1166,8 +1166,16 @@ def get_archon_shard_info():
     return data
 
 class Overframe:
-    def __init__(self):
+    def __init__(self, get_webpage_mode: str = ['xvcf', 'remote'], get_webpage_remote_url: str = 'https://example.com'):
+        """
+        Args:
+            get_webpage_*: ref. get_webpage.py
+                get_webpage_mode: str, the mode to get webpage, can be 'xvcf' or 'remote'
+                get_webpage_remote_url: str, the remote url to get webpage if mode is 'remote'
+        """
         self.DEFAULT_PAGE = "https://overframe.gg/build/new/13/atlas/"
+        self.get_webpage_mode = get_webpage_mode
+        self.get_webpage_remote_url = get_webpage_remote_url
         self.overframe_page_cache = {}
         self.overframe_url_map_cache = None
         self.overframe_page_data_cache = {}
@@ -1181,7 +1189,7 @@ class Overframe:
             return self.overframe_page_cache[page_url]
         script_path = Path(__file__).parent / 'get_webpage.py'
         text = subprocess.Popen(
-            ['xvfb-run', '-a', 'python', str(script_path), page_url], 
+            ['python', str(script_path), '--mode', self.get_webpage_mode, '--remote-url', self.get_webpage_remote_url, page_url], 
             stdout=subprocess.PIPE
         ).stdout.read().decode('utf-8')
         if use_cache:
@@ -1211,9 +1219,10 @@ class Overframe:
         except Exception as e:
             # we use a backup link...
             from .overframe_link import OVERFRAME_WEBPACK_FILENAME, OVERFRAME_LAST_UPDATE_DATE
-            print(f"Failed to get webpack filename from overframe.gg, error: {e}")
-            print(f"Using backup link {OVERFRAME_WEBPACK_FILENAME} to get webpack filename... (Last update date: {OVERFRAME_LAST_UPDATE_DATE})")
+            print(f"[Overframe()] Failed to get webpack filename from overframe.gg, error: {e}", file=sys.stderr)
+            print(f"[Overframe()] Using backup link {OVERFRAME_WEBPACK_FILENAME} to get webpack filename... (Last update date: {OVERFRAME_LAST_UPDATE_DATE})", file=sys.stderr)
             webpack_filename = OVERFRAME_WEBPACK_FILENAME
+        print(f"[Overframe()] Using {webpack_filename}", file=sys.stderr)
 
         r = requests.get(f'https://static.overframe.gg/_next/static/chunks/{webpack_filename}')
         t = r.text

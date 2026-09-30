@@ -10,17 +10,17 @@ A web version GUI for roughly the same tasks, but with more interactability
 
 ## Functionality
 
-More information could be found in the server homepage
+More information could be found in the [homepage](https://kaiserouo.github.io/Warframe-Tools/).
 ```
 Function:
-    - Item Info: Show item information and market prices on warframe.market. Can search multiple items at once.
-    - Relic: Gives expected plat reward for relics.
-    - Syndicate: Show item information and market prices sold by the syndicate.
-    - Transient Reward: Show item information and market prices sold of transient rewards.
-    - Find Best Trade: For a list of items, find the best users to trade with to minimize total price deviation from oracle price. (also serves as mass query for multiple items' current market prices & best to buy item currently)
+    - Item Info: Show item market information on warframe.market. Can search multiple items at once.
+    - Relic: Calculate expected plat reward for relics.
+    - Syndicate: Show syndicate item information and market prices.
+    - Transient Reward: Show transient reward item information and market prices.
+    - Find Best Trade: For a list of items you want to buy, find the best buyers to buy from.
     - Inventory: Inventory related functionalities.
         - Riven: Riven viewer with advanced sorting and filtering.
-        - Missing Item Checklist: Check missing item in inventory.
+        - Missing Item Checklist: Check missing items from all sorts of farms.
         - Loadout: Loadout viewer for all items in inventory.
         - Relic: Find items in relic to make sets.
         - JSON Viewer: View raw inventory JSON file.
@@ -36,9 +36,9 @@ docker compose up -d
 
 The website will be on `http://localhost:5000`.
 
-Note that:
-- This only supports localhost. For hosting on other servers, do manual installation & deployment and refer to the *Non-Localhost Server* section and *HTTPS* section below.
-- This does not support automated overframe data fetching. Please update the nonce according to the *Note > Overframe Data* section below.
+Note that this only supports localhost. If you intend to host this on other server, refer to the *HTTPS* section below.
+
+> Do **NOT** follow the *Non-Localhost Server* section: docker already expose the website to localhost, and you don't need to care about `config.py`. You only need to let a production web server reverse proxy the request to `http://localhost:5000`.
 
 ## Manual Installation
 
@@ -55,8 +55,8 @@ pip install -r requirement.txt
 cd Warframe-Tool/src/web/frontend
 npm install
 
-# if it complains that it doesn't have vite:
-npm install vite @vitejs/plugin-react --save-dev
+# if it complains that it lacks packages etc:
+npm ci
 
 # install xvfb, ref. src/data/inventory/overframe.md: Overframe > Data > Data Fetching > Webpack Fetching
 sudo apt-get install -y xvfb
@@ -64,7 +64,7 @@ sudo apt-get install -y xvfb
 
 ### Development
 
-To run the server, you need node.js and related packages:
+To do development, you need a frontend vite server and a backend python flask server:
 ```bash
 # start developer frontend server
 cd Warframe-Tool/src/web/frontend
@@ -84,6 +84,8 @@ The URL should be something like `http://localhost:5173` (vite default URL).
 We use vite, and you can change the code and restart the server with the new code by typing `r` in the vite terminal.
 
 ### Deployment
+
+To deploy, build the frontend and use the python flask server to serve as API server as well as frontend server:
 ```bash
 # in one terminal, run the API server
 cd Warframe-Tool    # at the repo folder
@@ -129,7 +131,7 @@ Note that the server should be hosted on `localhost`, since this is a developmen
 > ``` 
 
 > #### HTTPS
-> For the inventory file related functionality (e.g., the Riven page. most notably the decryption of `lastData.dat`), we need the built-in crypto library, which is only available if (1) you host the server on localhost `http://localhost:<port>` or (2) you host it on another computer but you have HTTPS enabled `https://<addr>:<port>`.
+> For the inventory file related functionality, we need the built-in crypto library for the decryption of `lastData.dat`, which is only available if (1) you host the server on localhost `http://localhost:<port>` or (2) you host it on another computer but you have HTTPS enabled `https://<addr>:<port>`.
 > 
 > If you are hosting it on a different computer, please use reverse proxy with a production web server (e.g., nginx, apache) with a self-signed certificate (at least) to make the website HTTPS enabled.
 > 
@@ -163,3 +165,9 @@ This is not possible in two cases:
 
 This can be mitigated by manually entering the nonce in `src/data/inventory/overframe_link.py`.
 Make sure to update it manually if you want overframe related functionalities (e.g., Inventory > Loadout page). Refer to that python file for instructions.
+
+> If you have a [remote webdriver](https://www.selenium.dev/documentation/webdriver/drivers/remote_webdriver/) that can get around the constraints (e.g., use [a docker container](https://hub.docker.com/r/selenium/standalone-chromium)), you can let the python flask server use that instead of invoking xvfb + selenium on the server itself:
+> ```bash
+> # you can change the remote URL of the remote webdriver
+> echo "OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL = 'remote', 'http://selenium:4444'" > src/web/backend/config.py    
+> ```
