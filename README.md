@@ -36,9 +36,11 @@ docker compose up -d
 
 The website will be on `http://localhost:5000`.
 
-Note that this only supports localhost. If you intend to host this on other server, refer to the *HTTPS* section below.
-
-> Do **NOT** follow the *Non-Localhost Server* section: docker already expose the website to localhost, and you don't need to care about `config.py`. You only need to let a production web server reverse proxy the request to `http://localhost:5000`.
+Note that:
+- This would only supports localhost. If you intend to host this on other server, refer to the *HTTPS* section below.
+    - Do **NOT** follow the *Non-Localhost Server* section: docker already expose the website to localhost, and you don't need to care about `config.py`. You only need to let a production web server reverse proxy the request to `http://localhost:5000`.
+- This is meant as an alternative for deployment. For development, use manual installation below.
+- This uses docker and uses 2 containers. For resource constrained servers (e.g., raspberry pi), use manual installation below.
 
 ## Manual Installation
 
@@ -59,6 +61,7 @@ npm install
 npm ci
 
 # install xvfb, ref. src/data/inventory/overframe.md: Overframe > Data > Data Fetching > Webpack Fetching
+# (alternatively you can use remote webdriver, ref. Note > Overframe below)
 sudo apt-get install -y xvfb
 ```
 
@@ -166,8 +169,11 @@ This is not possible in two cases:
 This can be mitigated by manually entering the nonce in `src/data/inventory/overframe_link.py`.
 Make sure to update it manually if you want overframe related functionalities (e.g., Inventory > Loadout page). Refer to that python file for instructions.
 
-> If you have a [remote webdriver](https://www.selenium.dev/documentation/webdriver/drivers/remote_webdriver/) that can get around the constraints (e.g., use [a docker container](https://hub.docker.com/r/selenium/standalone-chromium)), you can let the python flask server use that instead of invoking xvfb + selenium on the server itself:
+> If you have a [selenium remote webdriver](https://www.selenium.dev/documentation/webdriver/drivers/remote_webdriver/) that can get around the constraints (e.g., use [a chromium docker container](https://hub.docker.com/r/selenium/standalone-chromium)), you can let the python flask server use that instead of invoking xvfb + selenium on the server itself:
 > ```bash
+> # ref. https://hub.docker.com/r/selenium/standalone-chromium
+> docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-chromium:latest
+> 
 > # you can change the remote URL of the remote webdriver
 > echo "OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL = 'remote', 'http://selenium:4444'" > src/web/backend/config.py    
 > ```
