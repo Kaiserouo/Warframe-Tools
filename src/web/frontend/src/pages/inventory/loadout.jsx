@@ -191,6 +191,9 @@ function parseLoadoutInfos(loadoutData, inventoryData) {
         archwing: _parseCategory('archwing', inventoryData['SpaceSuits']),
         necramech: _parseCategory('necramech', inventoryData['MechSuits']),
         exalted: _parseCategory('exalted', inventoryData['SpecialItems']),
+        archgun: _parseCategory('archgun', inventoryData['SpaceGuns']),
+        archmelee: _parseCategory('archmelee', inventoryData['SpaceMelee']),
+        companion_weapon: _parseCategory('companion weapons', inventoryData['SentinelWeapons']),
     }
 }
 

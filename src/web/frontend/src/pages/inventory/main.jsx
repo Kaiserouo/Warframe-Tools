@@ -4,6 +4,7 @@ import Relic from './relic.jsx';
 import MissingItemChecklist from './missing_item_checklist.jsx';
 import Loadout from './loadout.jsx';
 import JsonViewer from './json_viewer.jsx';
+import InventoryItems from './inventory_items.jsx';
 
 let pageMap = {
   'riven': {
@@ -25,6 +26,10 @@ let pageMap = {
   'json': {
     'name': 'JSON Viewer',
     'factory': (setting) => (<JsonViewer setting={setting} />)
+  },
+  'items': {
+    'name': 'Items',
+    'factory': (setting) => (<InventoryItems setting={setting} />)
   }
 };
 

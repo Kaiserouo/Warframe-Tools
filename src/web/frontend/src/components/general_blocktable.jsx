@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 // TODO: should support copy organizer and a static method changing it
 class Organizer {
   constructor(filterOptions, sortOptions) {
-    this.filterOptions = filterOptions || {};
+    this.filterOptions = filterOptions || [];
     this.sortOptions = sortOptions || {};
 
     this.viableSettings = {
@@ -19,7 +19,7 @@ class Organizer {
     }
     this.filterCallbacks = {};
     this.sortCallbacks = {};
-    for (const category of filterOptions) {
+    for (const category of this.filterOptions) {
         for (const option of category.filterOptions) {
             if (category.categoryId.includes('__') || option.optionId.includes('__')) {
                 throw new Error(`Category ID and Option ID should not contain "__" (categoryId: ${category.categoryId}, optionId: ${option.optionId})`);
@@ -31,7 +31,7 @@ class Organizer {
             this.filterCallbacks[category.categoryId + '__' + option.optionId] = option.filterCallback;
         }
     }
-    for (const sortOption of sortOptions) {
+    for (const sortOption of this.sortOptions) {
         this.viableSettings.sortOptions.sortOrderType.push(sortOption.optionId);
         this.setting.sortOptions.sortOrder.push({
             type: sortOption.optionId,
@@ -289,7 +289,9 @@ export function GeneralBlockTable({
     searchText,
     renderBlockCallback,
     filterOptions,
-    sortOptions
+    sortOptions,
+    gridCols = 4,
+    flexWrap = false,   // if you have blocks of fixed size and you wanna flex wrap the blocks
 }) {
     /*
         - blockInfos: a list of Info. Info is a dict with self-defined keys.
@@ -333,11 +335,18 @@ export function GeneralBlockTable({
     return organizer.organizeBlockInfo(blockInfos, searchText);
   }, [organizer, blockInfos, searchText]);
 
+  const blockClassname = (
+    flexWrap ? `flex flex-wrap gap-x-3 gap-y-3 w-full` :
+    `grid gap-x-3 grid-cols-1 md:grid-cols-${gridCols} gap-y-3 w-full`
+  )
+
   return (<>
     <OrganizeBar organizer={organizer} setOrganizer={setOrganizer} />
 
     <div className="flex flex-row">
-      <div className="grid gap-x-3 grid-cols-1 md:grid-cols-4 gap-y-3 w-full">
+      <div className={blockClassname}>
+
+        {/* TODO: should make this somehow keeps the index, otherwise it will re-render every time*/}
         {organizedBlockInfos.map((blockInfo, idx) => (
           <div key={idx}>
             {renderBlockCallback(blockInfo)}

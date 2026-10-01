@@ -293,3 +293,7 @@ export const queriesLoadoutData = makeStaticQueries({
   overframe_ability_id_map: queryOverframeAbilityIdMap,
   overframe_riven_tag_id_map: queryOverframeRiven_tagIdMap,
 });
+export const queriesInventoryItemsData = makeStaticQueries({
+  icon_map: queryPEIconMap,
+  name_lookup_map: queryPENameLookupMap,
+});

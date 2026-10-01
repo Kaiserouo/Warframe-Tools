@@ -124,7 +124,10 @@ export default function LoadoutTable({loadoutData, loadoutInfos, searchText}) {
           { optionId: 'companions', optionName: 'Companions', filterCallback: makeFilterCallbackByKey('category', 'companions') },
           { optionId: 'archwing', optionName: 'Archwing', filterCallback: makeFilterCallbackByKey('category', 'archwing') },
           { optionId: 'necramech', optionName: 'Necramech', filterCallback: makeFilterCallbackByKey('category', 'necramech') },
-          { optionId: 'exalted', optionName: 'Exalted', filterCallback: makeFilterCallbackByKey('category', 'exalted') }
+          { optionId: 'exalted', optionName: 'Exalted', filterCallback: makeFilterCallbackByKey('category', 'exalted') },
+          { optionId: 'archgun', optionName: 'Archgun', filterCallback: makeFilterCallbackByKey('category', 'archgun') },
+          { optionId: 'archmelee', optionName: 'Archmelee', filterCallback: makeFilterCallbackByKey('category', 'archmelee') },
+          { optionId: 'companion_weapon', optionName: 'Companion Weapon', filterCallback: makeFilterCallbackByKey('category', 'companion_weapon') }
       ]
     }
   ];
