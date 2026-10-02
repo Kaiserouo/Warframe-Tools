@@ -35,7 +35,7 @@ function InventoryItemBlockTitle({itemInfo}) {
         )}
       <div className="relative w-32 h-32">
         {isBlueprint ? <img src="https://wiki.warframe.com/images/MarketBoxBP.png" className="absolute w-full h-full" alt="" /> : null}
-        <img src={iconMap[uname]} alt={name} className="w-32 h-32" />
+        <img src={iconMap[uname]} alt={name} className="w-32 h-32" loading="lazy" />
       </div>
       <div className="relative">
         <h3 className={`text-xs text-white absolute left-0 top-0 w-full h-full flex items-center justify-center text-center whitespace-normal ${name == null ? 'break-all' : 'break-words'} drop-shadow-[0_0_1.5px_rgba(0,0,0,1)]`}>

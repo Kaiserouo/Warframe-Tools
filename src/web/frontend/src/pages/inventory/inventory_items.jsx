@@ -17,7 +17,8 @@ function parseInventoryItems(invQueryData, inventoryData) {
                 category: str
                 isUniqueItem: bool, // if the item is unique, won't show the count. count should be 1
                 isBlueprint: bool, // if the item is a blueprint, will show the count. count should be 1
-                invQueryData: dict
+                invQueryData: dict,
+                blockId: str, // a unique string to identify the block, can be the uname or something else
             }
         category:
             warframes
@@ -59,6 +60,7 @@ function parseInventoryItems(invQueryData, inventoryData) {
                     isBlueprint: isBlueprint,
                     category: category,
                     invQueryData: invQueryData,
+                    blockId: `${category}__${ls.length}`,
                 };
     
                 item['searchString'] = `${item['name']}`;

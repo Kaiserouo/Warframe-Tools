@@ -295,6 +295,7 @@ export function GeneralBlockTable({
 }) {
     /*
         - blockInfos: a list of Info. Info is a dict with self-defined keys.
+                      each info should have a blockId, which is a unique string to identify the block
         - searchText: a string, the text to search for. will be searching `Info.searchString`. 
                       if null, then no search filter is applied
         - renderBlockCallback: a function to render a block. (Info) => ReactNode
@@ -346,9 +347,8 @@ export function GeneralBlockTable({
     <div className="flex flex-row">
       <div className={blockClassname}>
 
-        {/* TODO: should make this somehow keeps the index, otherwise it will re-render every time*/}
         {organizedBlockInfos.map((blockInfo, idx) => (
-          <div key={idx}>
+          <div key={blockInfo.blockId || `GENERALBLOCKTABLE_${idx}`}>
             {renderBlockCallback(blockInfo)}
           </div>
         ))}

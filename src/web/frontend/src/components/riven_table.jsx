@@ -417,6 +417,7 @@ function RivenOrganizeBar({rivenOrganizer, setRivenOrganizer}) {
   </>);
 }
 
+// TODO: use general block table instead
 export default function RivenTable({rivenModInfos, searchText}) {
   const [rivenOrganizer, setRivenOrganizer] = useState(new RivenOrganizer());
 
