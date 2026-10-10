@@ -31,7 +31,7 @@ const riven_tags = {
     "LotusArchgunRandomModRare": [
         {
             "tag": "WeaponArmorPiercingDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "insi",
             "suffix": "cak"
         },
@@ -43,7 +43,7 @@ const riven_tags = {
         },
         {
             "tag": "WeaponCritDamageMod",
-            "value": 0.0089,
+            "value": 0.0088999998,
             "prefix": "acri",
             "suffix": "tis"
         },
@@ -73,7 +73,7 @@ const riven_tags = {
         },
         {
             "tag": "WeaponImpactDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "magna",
             "suffix": "ton"
         },
@@ -85,13 +85,13 @@ const riven_tags = {
         },
         {
             "tag": "WeaponSlashDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "sci",
             "suffix": "sus"
         },
         {
             "tag": "WeaponStunChanceMod",
-            "value": 0.0067,
+            "value": 0.0066999998,
             "prefix": "hexa",
             "suffix": "dex"
         },
@@ -109,7 +109,7 @@ const riven_tags = {
         },
         {
             "tag": "WeaponClipMaxMod",
-            "value": 0.0067,
+            "value": 0.0066999998,
             "prefix": "arma",
             "suffix": "tin"
         },
@@ -121,19 +121,19 @@ const riven_tags = {
         },
         {
             "tag": "WeaponFireIterationsMod",
-            "value": 0.0067,
+            "value": 0.0066999998,
             "prefix": "sati",
             "suffix": "can"
         },
         {
             "tag": "WeaponPunctureDepthMod",
-            "value": 0.03,
+            "value": 0.029999999,
             "prefix": "lexi",
             "suffix": "nok"
         },
         {
             "tag": "WeaponRecoilReductionMod",
-            "value": -0.01,
+            "value": -0.0099999998,
             "prefix": "zeti",
             "suffix": "mag"
         },
@@ -145,27 +145,111 @@ const riven_tags = {
         },
         {
             "tag": "WeaponFactionDamageCorpus",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "manti",
             "suffix": "tron"
         },
         {
             "tag": "WeaponFactionDamageGrineer",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "argi",
             "suffix": "con"
+        },
+        {
+            "tag": "WeaponFactionDamageInfested",
+            "value": 0.0049999999,
+            "prefix": "pura",
+            "suffix": "ada"
         },
         {
             "tag": "WeaponZoomFovMod",
             "value": 0.006666,
             "prefix": "hera",
             "suffix": "lis"
+        },
+        {
+            "tag": "WeaponWeakpointDamage",
+            "value": 0.025,
+            "prefix": "eni",
+            "suffix": "vo"
+        },
+        {
+            "tag": "WeaponWeakpointCriticalChance",
+            "value": 0.0275,
+            "prefix": "exiti",
+            "suffix": "eus"
+        },
+        {
+            "tag": "WeaponAmmoEfficiency",
+            "value": -0.0049999999,
+            "prefix": "parci",
+            "suffix": "pia"
+        },
+        {
+            "tag": "WeaponStatusDamage",
+            "value": 0.0099999998,
+            "prefix": "plaga",
+            "suffix": "mna"
+        },
+        {
+            "tag": "WeaponGasDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cali",
+            "suffix": "fel"
+        },
+        {
+            "tag": "WeaponCorrosiveDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cori",
+            "suffix": "or"
+        },
+        {
+            "tag": "WeaponViralDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cari",
+            "suffix": "sco"
+        },
+        {
+            "tag": "WeaponRadiationDamageMod",
+            "value": 0.0099999998,
+            "prefix": "radi",
+            "suffix": "lo"
+        },
+        {
+            "tag": "WeaponBlastDamageMod",
+            "value": 0.0099999998,
+            "prefix": "fraga",
+            "suffix": "tus"
+        },
+        {
+            "tag": "WeaponMagneticDamageMod",
+            "value": 0.0099999998,
+            "prefix": "magni",
+            "suffix": "bra"
+        },
+        {
+            "tag": "WeaponFactionDamageOrokin",
+            "value": 0.0049999999,
+            "prefix": "effi",
+            "suffix": "tas"
+        },
+        {
+            "tag": "WeaponFactionDamageTechrot",
+            "value": 0.0049999999,
+            "prefix": "muti",
+            "suffix": "gia"
+        },
+        {
+            "tag": "WeaponFactionDamageScaldra",
+            "value": 0.0049999999,
+            "prefix": "exsi",
+            "suffix": "llo"
         }
     ],
     "LotusModularMeleeRandomModRare": [
         {
             "tag": "WeaponMeleeDamageMod",
-            "value": 0.0183,
+            "value": 0.018300001,
             "prefix": "visi",
             "suffix": "ata"
         },
@@ -195,31 +279,31 @@ const riven_tags = {
         },
         {
             "tag": "WeaponCritDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "acri",
             "suffix": "tis"
         },
         {
             "tag": "WeaponElectricityDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "vexi",
             "suffix": "tio"
         },
         {
             "tag": "WeaponFireDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "igni",
             "suffix": "pha"
         },
         {
             "tag": "WeaponFreezeDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "geli",
             "suffix": "do"
         },
         {
             "tag": "WeaponToxinDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "toxi",
             "suffix": "tox"
         },
@@ -231,37 +315,37 @@ const riven_tags = {
         },
         {
             "tag": "WeaponMeleeFactionDamageCorpus",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "manti",
             "suffix": "tron"
         },
         {
             "tag": "WeaponMeleeFactionDamageGrineer",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "argi",
             "suffix": "con"
         },
         {
             "tag": "WeaponMeleeFactionDamageInfested",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "pura",
             "suffix": "ada"
         },
         {
             "tag": "WeaponFireRateMod",
-            "value": 0.0061,
+            "value": 0.0060999999,
             "prefix": "croni",
             "suffix": "dra"
         },
         {
             "tag": "WeaponStunChanceMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "hexa",
             "suffix": "dex"
         },
         {
             "tag": "ComboDurationMod",
-            "value": 0.09,
+            "value": 0.090000004,
             "prefix": "tempi",
             "suffix": "nem"
         },
@@ -273,7 +357,7 @@ const riven_tags = {
         },
         {
             "tag": "WeaponMeleeRangeIncMod",
-            "value": 0.02158,
+            "value": 0.021579999,
             "prefix": "locti",
             "suffix": "tor"
         },
@@ -285,25 +369,111 @@ const riven_tags = {
         },
         {
             "tag": "WeaponMeleeComboEfficiencyMod",
-            "value": 0.00816,
+            "value": 0.0081599997,
             "prefix": "forti",
             "suffix": "us"
         },
         {
             "tag": "WeaponMeleeComboInitialBonusMod",
-            "value": 0.27224,
+            "value": 0.27224001,
             "prefix": "para",
             "suffix": "um"
         },
         {
             "tag": "WeaponMeleeComboPointsOnHitMod",
-            "value": -0.01165
+            "value": -0.01165,
+            "prefix": "",
+            "suffix": ""
         },
         {
             "tag": "WeaponMeleeComboBonusOnHitMod",
-            "value": 0.00653,
+            "value": 0.0065299999,
             "prefix": "laci",
             "suffix": "nus"
+        },
+        {
+            "tag": "WeaponMeleeHeavyAttackDamageMod",
+            "value": 0.0133,
+            "prefix": "laci",
+            "suffix": "nus"
+        },
+        {
+            "tag": "WeaponMeleeHeavyAttackChargeMod",
+            "value": 0.0133,
+            "prefix": "laci",
+            "suffix": "nus"
+        },
+        {
+            "tag": "WeaponMeleeParryAngleMod",
+            "value": 0.0089999996,
+            "prefix": "laci",
+            "suffix": "nus"
+        },
+        {
+            "tag": "WeaponMeleeSlamDamageMod",
+            "value": 0.0133,
+            "prefix": "laci",
+            "suffix": "nus"
+        },
+        {
+            "tag": "WeaponGasDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cali",
+            "suffix": "fel"
+        },
+        {
+            "tag": "WeaponCorrosiveDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cori",
+            "suffix": "or"
+        },
+        {
+            "tag": "WeaponViralDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cari",
+            "suffix": "sco"
+        },
+        {
+            "tag": "WeaponRadiationDamageMod",
+            "value": 0.0099999998,
+            "prefix": "radi",
+            "suffix": "lo"
+        },
+        {
+            "tag": "WeaponBlastDamageMod",
+            "value": 0.0099999998,
+            "prefix": "fraga",
+            "suffix": "tus"
+        },
+        {
+            "tag": "WeaponMagneticDamageMod",
+            "value": 0.0099999998,
+            "prefix": "magni",
+            "suffix": "bra"
+        },
+        {
+            "tag": "WeaponFactionDamageOrokin",
+            "value": 0.0049999999,
+            "prefix": "effi",
+            "suffix": "tas"
+        },
+        {
+            "tag": "WeaponFactionDamageTechrot",
+            "value": 0.0049999999,
+            "prefix": "muti",
+            "suffix": "gia"
+        },
+        {
+            "tag": "WeaponFactionDamageScaldra",
+            "value": 0.0049999999,
+            "prefix": "exsi",
+            "suffix": "llo"
+        },
+        {
+            "tag": "WeaponStatusDamage",
+            "value": 0.0099999998,
+            "prefix": "plaga",
+            "suffix": "mna"
         }
     ],
     "LotusModularPistolRandomModRare": [
@@ -315,37 +485,37 @@ const riven_tags = {
         },
         {
             "tag": "WeaponCritChanceMod",
-            "value": 0.016666,
+            "value": 0.016666001,
             "prefix": "crita",
             "suffix": "cron"
         },
         {
             "tag": "WeaponCritDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "acri",
             "suffix": "tis"
         },
         {
             "tag": "WeaponElectricityDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "vexi",
             "suffix": "tio"
         },
         {
             "tag": "WeaponFireDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "igni",
             "suffix": "pha"
         },
         {
             "tag": "WeaponFireRateMod",
-            "value": 0.0083,
+            "value": 0.0082999999,
             "prefix": "croni",
             "suffix": "dra"
         },
         {
             "tag": "WeaponFreezeDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "geli",
             "suffix": "do"
         },
@@ -369,25 +539,25 @@ const riven_tags = {
         },
         {
             "tag": "WeaponStunChanceMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "hexa",
             "suffix": "dex"
         },
         {
             "tag": "WeaponToxinDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "toxi",
             "suffix": "tox"
         },
         {
             "tag": "WeaponAmmoMaxMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "ampi",
             "suffix": "bin"
         },
         {
             "tag": "WeaponClipMaxMod",
-            "value": 0.005555,
+            "value": 0.0055550002,
             "prefix": "arma",
             "suffix": "tin"
         },
@@ -405,51 +575,135 @@ const riven_tags = {
         },
         {
             "tag": "WeaponProjectileSpeedMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "conci",
             "suffix": "nak"
         },
         {
             "tag": "WeaponPunctureDepthMod",
-            "value": 0.03,
+            "value": 0.029999999,
             "prefix": "lexi",
             "suffix": "nok"
         },
         {
             "tag": "WeaponRecoilReductionMod",
-            "value": -0.01,
+            "value": -0.0099999998,
             "prefix": "zeti",
             "suffix": "mag"
         },
         {
             "tag": "WeaponReloadSpeedMod",
-            "value": 0.005555,
+            "value": 0.0055550002,
             "prefix": "feva",
             "suffix": "tak"
         },
         {
             "tag": "WeaponFactionDamageCorpus",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "manti",
             "suffix": "tron"
         },
         {
             "tag": "WeaponFactionDamageGrineer",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "argi",
             "suffix": "con"
         },
         {
             "tag": "WeaponFactionDamageInfested",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "pura",
             "suffix": "ada"
         },
         {
             "tag": "WeaponZoomFovMod",
-            "value": 0.0089,
+            "value": 0.0088999998,
             "prefix": "hera",
             "suffix": "lis"
+        },
+        {
+            "tag": "WeaponWeakpointDamage",
+            "value": 0.025,
+            "prefix": "eni",
+            "suffix": "vo"
+        },
+        {
+            "tag": "WeaponWeakpointCriticalChance",
+            "value": 0.0275,
+            "prefix": "exiti",
+            "suffix": "eus"
+        },
+        {
+            "tag": "WeaponAmmoEfficiency",
+            "value": -0.0049999999,
+            "prefix": "parci",
+            "suffix": "pia"
+        },
+        {
+            "tag": "WeaponMagazineReloadHolstered",
+            "value": 0.0099999998,
+            "prefix": "parci",
+            "suffix": "pia"
+        },
+        {
+            "tag": "WeaponStatusDamage",
+            "value": 0.0099999998,
+            "prefix": "plaga",
+            "suffix": "mna"
+        },
+        {
+            "tag": "WeaponGasDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cali",
+            "suffix": "fel"
+        },
+        {
+            "tag": "WeaponCorrosiveDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cori",
+            "suffix": "or"
+        },
+        {
+            "tag": "WeaponViralDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cari",
+            "suffix": "sco"
+        },
+        {
+            "tag": "WeaponRadiationDamageMod",
+            "value": 0.0099999998,
+            "prefix": "radi",
+            "suffix": "lo"
+        },
+        {
+            "tag": "WeaponBlastDamageMod",
+            "value": 0.0099999998,
+            "prefix": "fraga",
+            "suffix": "tus"
+        },
+        {
+            "tag": "WeaponMagneticDamageMod",
+            "value": 0.0099999998,
+            "prefix": "magni",
+            "suffix": "bra"
+        },
+        {
+            "tag": "WeaponFactionDamageOrokin",
+            "value": 0.0049999999,
+            "prefix": "effi",
+            "suffix": "tas"
+        },
+        {
+            "tag": "WeaponFactionDamageTechrot",
+            "value": 0.0049999999,
+            "prefix": "muti",
+            "suffix": "gia"
+        },
+        {
+            "tag": "WeaponFactionDamageScaldra",
+            "value": 0.0049999999,
+            "prefix": "exsi",
+            "suffix": "llo"
         }
     ],
     "LotusPistolRandomModRare": [
@@ -461,37 +715,37 @@ const riven_tags = {
         },
         {
             "tag": "WeaponCritChanceMod",
-            "value": 0.016666,
+            "value": 0.016666001,
             "prefix": "crita",
             "suffix": "cron"
         },
         {
             "tag": "WeaponCritDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "acri",
             "suffix": "tis"
         },
         {
             "tag": "WeaponElectricityDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "vexi",
             "suffix": "tio"
         },
         {
             "tag": "WeaponFireDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "igni",
             "suffix": "pha"
         },
         {
             "tag": "WeaponFireRateMod",
-            "value": 0.0083,
+            "value": 0.0082999999,
             "prefix": "croni",
             "suffix": "dra"
         },
         {
             "tag": "WeaponFreezeDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "geli",
             "suffix": "do"
         },
@@ -515,25 +769,25 @@ const riven_tags = {
         },
         {
             "tag": "WeaponStunChanceMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "hexa",
             "suffix": "dex"
         },
         {
             "tag": "WeaponToxinDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "toxi",
             "suffix": "tox"
         },
         {
             "tag": "WeaponAmmoMaxMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "ampi",
             "suffix": "bin"
         },
         {
             "tag": "WeaponClipMaxMod",
-            "value": 0.005555,
+            "value": 0.0055550002,
             "prefix": "arma",
             "suffix": "tin"
         },
@@ -551,51 +805,135 @@ const riven_tags = {
         },
         {
             "tag": "WeaponProjectileSpeedMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "conci",
             "suffix": "nak"
         },
         {
             "tag": "WeaponPunctureDepthMod",
-            "value": 0.03,
+            "value": 0.029999999,
             "prefix": "lexi",
             "suffix": "nok"
         },
         {
             "tag": "WeaponRecoilReductionMod",
-            "value": -0.01,
+            "value": -0.0099999998,
             "prefix": "zeti",
             "suffix": "mag"
         },
         {
             "tag": "WeaponReloadSpeedMod",
-            "value": 0.005555,
+            "value": 0.0055550002,
             "prefix": "feva",
             "suffix": "tak"
         },
         {
             "tag": "WeaponFactionDamageCorpus",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "manti",
             "suffix": "tron"
         },
         {
             "tag": "WeaponFactionDamageGrineer",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "argi",
             "suffix": "con"
         },
         {
             "tag": "WeaponFactionDamageInfested",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "pura",
             "suffix": "ada"
         },
         {
             "tag": "WeaponZoomFovMod",
-            "value": 0.0089,
+            "value": 0.0088999998,
             "prefix": "hera",
             "suffix": "lis"
+        },
+        {
+            "tag": "WeaponWeakpointDamage",
+            "value": 0.025,
+            "prefix": "eni",
+            "suffix": "vo"
+        },
+        {
+            "tag": "WeaponWeakpointCriticalChance",
+            "value": 0.0275,
+            "prefix": "exiti",
+            "suffix": "eus"
+        },
+        {
+            "tag": "WeaponAmmoEfficiency",
+            "value": -0.0049999999,
+            "prefix": "parci",
+            "suffix": "pia"
+        },
+        {
+            "tag": "WeaponMagazineReloadHolstered",
+            "value": 0.0099999998,
+            "prefix": "parci",
+            "suffix": "pia"
+        },
+        {
+            "tag": "WeaponStatusDamage",
+            "value": 0.0099999998,
+            "prefix": "plaga",
+            "suffix": "mna"
+        },
+        {
+            "tag": "WeaponGasDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cali",
+            "suffix": "fel"
+        },
+        {
+            "tag": "WeaponCorrosiveDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cori",
+            "suffix": "or"
+        },
+        {
+            "tag": "WeaponViralDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cari",
+            "suffix": "sco"
+        },
+        {
+            "tag": "WeaponRadiationDamageMod",
+            "value": 0.0099999998,
+            "prefix": "radi",
+            "suffix": "lo"
+        },
+        {
+            "tag": "WeaponBlastDamageMod",
+            "value": 0.0099999998,
+            "prefix": "fraga",
+            "suffix": "tus"
+        },
+        {
+            "tag": "WeaponMagneticDamageMod",
+            "value": 0.0099999998,
+            "prefix": "magni",
+            "suffix": "bra"
+        },
+        {
+            "tag": "WeaponFactionDamageOrokin",
+            "value": 0.0049999999,
+            "prefix": "effi",
+            "suffix": "tas"
+        },
+        {
+            "tag": "WeaponFactionDamageTechrot",
+            "value": 0.0049999999,
+            "prefix": "muti",
+            "suffix": "gia"
+        },
+        {
+            "tag": "WeaponFactionDamageScaldra",
+            "value": 0.0049999999,
+            "prefix": "exsi",
+            "suffix": "llo"
         }
     ],
     "LotusRifleRandomModRare": [
@@ -607,7 +945,7 @@ const riven_tags = {
         },
         {
             "tag": "WeaponCritChanceMod",
-            "value": 0.016666,
+            "value": 0.016666001,
             "prefix": "crita",
             "suffix": "cron"
         },
@@ -619,13 +957,13 @@ const riven_tags = {
         },
         {
             "tag": "WeaponElectricityDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "vexi",
             "suffix": "tio"
         },
         {
             "tag": "WeaponFireDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "igni",
             "suffix": "pha"
         },
@@ -637,7 +975,7 @@ const riven_tags = {
         },
         {
             "tag": "WeaponFreezeDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "geli",
             "suffix": "do"
         },
@@ -661,79 +999,79 @@ const riven_tags = {
         },
         {
             "tag": "WeaponStunChanceMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "hexa",
             "suffix": "dex"
         },
         {
             "tag": "WeaponToxinDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "toxi",
             "suffix": "tox"
         },
         {
             "tag": "WeaponAmmoMaxMod",
-            "value": 0.00555,
+            "value": 0.0055499999,
             "prefix": "ampi",
             "suffix": "bin"
         },
         {
             "tag": "WeaponClipMaxMod",
-            "value": 0.005555,
+            "value": 0.0055550002,
             "prefix": "arma",
             "suffix": "tin"
         },
         {
             "tag": "WeaponDamageAmountMod",
-            "value": 0.018333,
+            "value": 0.018333299,
             "prefix": "visi",
             "suffix": "ata"
         },
         {
             "tag": "WeaponFireIterationsMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "sati",
             "suffix": "can"
         },
         {
             "tag": "WeaponProjectileSpeedMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "conci",
             "suffix": "nak"
         },
         {
             "tag": "WeaponPunctureDepthMod",
-            "value": 0.03,
+            "value": 0.029999999,
             "prefix": "lexi",
             "suffix": "nok"
         },
         {
             "tag": "WeaponRecoilReductionMod",
-            "value": -0.01,
+            "value": -0.0099999998,
             "prefix": "zeti",
             "suffix": "mag"
         },
         {
             "tag": "WeaponReloadSpeedMod",
-            "value": 0.005555,
+            "value": 0.0055550002,
             "prefix": "feva",
             "suffix": "tak"
         },
         {
             "tag": "WeaponFactionDamageCorpus",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "manti",
             "suffix": "tron"
         },
         {
             "tag": "WeaponFactionDamageGrineer",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "argi",
             "suffix": "con"
         },
         {
             "tag": "WeaponFactionDamageInfested",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "pura",
             "suffix": "ada"
         },
@@ -742,6 +1080,90 @@ const riven_tags = {
             "value": 0.006666,
             "prefix": "hera",
             "suffix": "lis"
+        },
+        {
+            "tag": "WeaponWeakpointDamage",
+            "value": 0.025,
+            "prefix": "eni",
+            "suffix": "vo"
+        },
+        {
+            "tag": "WeaponWeakpointCriticalChance",
+            "value": 0.0275,
+            "prefix": "exiti",
+            "suffix": "eus"
+        },
+        {
+            "tag": "WeaponAmmoEfficiency",
+            "value": -0.0049999999,
+            "prefix": "parci",
+            "suffix": "pia"
+        },
+        {
+            "tag": "WeaponMagazineReloadHolstered",
+            "value": 0.0099999998,
+            "prefix": "parci",
+            "suffix": "pia"
+        },
+        {
+            "tag": "WeaponStatusDamage",
+            "value": 0.0099999998,
+            "prefix": "plaga",
+            "suffix": "mna"
+        },
+        {
+            "tag": "WeaponGasDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cali",
+            "suffix": "fel"
+        },
+        {
+            "tag": "WeaponCorrosiveDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cori",
+            "suffix": "or"
+        },
+        {
+            "tag": "WeaponViralDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cari",
+            "suffix": "sco"
+        },
+        {
+            "tag": "WeaponRadiationDamageMod",
+            "value": 0.0099999998,
+            "prefix": "radi",
+            "suffix": "lo"
+        },
+        {
+            "tag": "WeaponBlastDamageMod",
+            "value": 0.0099999998,
+            "prefix": "fraga",
+            "suffix": "tus"
+        },
+        {
+            "tag": "WeaponMagneticDamageMod",
+            "value": 0.0099999998,
+            "prefix": "magni",
+            "suffix": "bra"
+        },
+        {
+            "tag": "WeaponFactionDamageOrokin",
+            "value": 0.0049999999,
+            "prefix": "effi",
+            "suffix": "tas"
+        },
+        {
+            "tag": "WeaponFactionDamageTechrot",
+            "value": 0.0049999999,
+            "prefix": "muti",
+            "suffix": "gia"
+        },
+        {
+            "tag": "WeaponFactionDamageScaldra",
+            "value": 0.0049999999,
+            "prefix": "exsi",
+            "suffix": "llo"
         }
     ],
     "LotusShotgunRandomModRare": [
@@ -753,37 +1175,37 @@ const riven_tags = {
         },
         {
             "tag": "WeaponCritChanceMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "crita",
             "suffix": "cron"
         },
         {
             "tag": "WeaponCritDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "acri",
             "suffix": "tis"
         },
         {
             "tag": "WeaponElectricityDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "vexi",
             "suffix": "tio"
         },
         {
             "tag": "WeaponFireDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "igni",
             "suffix": "pha"
         },
         {
             "tag": "WeaponFireRateMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "croni",
             "suffix": "dra"
         },
         {
             "tag": "WeaponFreezeDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "geli",
             "suffix": "do"
         },
@@ -807,31 +1229,31 @@ const riven_tags = {
         },
         {
             "tag": "WeaponStunChanceMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "hexa",
             "suffix": "dex"
         },
         {
             "tag": "WeaponToxinDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "toxi",
             "suffix": "tox"
         },
         {
             "tag": "WeaponAmmoMaxMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "ampi",
             "suffix": "bin"
         },
         {
             "tag": "WeaponClipMaxMod",
-            "value": 0.005555,
+            "value": 0.0055550002,
             "prefix": "arma",
             "suffix": "tin"
         },
         {
             "tag": "WeaponDamageAmountMod",
-            "value": 0.0183,
+            "value": 0.018300001,
             "prefix": "visi",
             "suffix": "ata"
         },
@@ -843,51 +1265,141 @@ const riven_tags = {
         },
         {
             "tag": "WeaponProjectileSpeedMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "conci",
             "suffix": "nak"
         },
         {
             "tag": "WeaponPunctureDepthMod",
-            "value": 0.03,
+            "value": 0.029999999,
             "prefix": "lexi",
             "suffix": "nok"
         },
         {
             "tag": "WeaponRecoilReductionMod",
-            "value": -0.01,
+            "value": -0.0099999998,
             "prefix": "zeti",
             "suffix": "mag"
         },
         {
             "tag": "WeaponReloadSpeedMod",
-            "value": 0.005555,
+            "value": 0.0055550002,
             "prefix": "feva",
             "suffix": "tak"
         },
         {
             "tag": "WeaponFactionDamageCorpus",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "manti",
             "suffix": "tron"
         },
         {
             "tag": "WeaponFactionDamageGrineer",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "argi",
             "suffix": "con"
         },
         {
             "tag": "WeaponFactionDamageInfested",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "pura",
             "suffix": "ada"
+        },
+        {
+            "tag": "WeaponWeakpointDamage",
+            "value": 0.025,
+            "prefix": "eni",
+            "suffix": "vo"
+        },
+        {
+            "tag": "WeaponWeakpointCriticalChance",
+            "value": 0.0275,
+            "prefix": "exiti",
+            "suffix": "eus"
+        },
+        {
+            "tag": "WeaponAmmoEfficiency",
+            "value": -0.0049999999,
+            "prefix": "parci",
+            "suffix": "pia"
+        },
+        {
+            "tag": "WeaponMagazineReloadHolstered",
+            "value": 0.0099999998,
+            "prefix": "parci",
+            "suffix": "pia"
+        },
+        {
+            "tag": "WeaponStatusDamage",
+            "value": 0.0099999998,
+            "prefix": "plaga",
+            "suffix": "mna"
+        },
+        {
+            "tag": "WeaponGasDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cali",
+            "suffix": "fel"
+        },
+        {
+            "tag": "WeaponCorrosiveDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cori",
+            "suffix": "or"
+        },
+        {
+            "tag": "WeaponViralDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cari",
+            "suffix": "sco"
+        },
+        {
+            "tag": "WeaponRadiationDamageMod",
+            "value": 0.0099999998,
+            "prefix": "radi",
+            "suffix": "lo"
+        },
+        {
+            "tag": "WeaponBlastDamageMod",
+            "value": 0.0099999998,
+            "prefix": "fraga",
+            "suffix": "tus"
+        },
+        {
+            "tag": "WeaponMagneticDamageMod",
+            "value": 0.0099999998,
+            "prefix": "magni",
+            "suffix": "bra"
+        },
+        {
+            "tag": "WeaponFactionDamageOrokin",
+            "value": 0.0049999999,
+            "prefix": "effi",
+            "suffix": "tas"
+        },
+        {
+            "tag": "WeaponFactionDamageTechrot",
+            "value": 0.0049999999,
+            "prefix": "muti",
+            "suffix": "gia"
+        },
+        {
+            "tag": "WeaponFactionDamageScaldra",
+            "value": 0.0049999999,
+            "prefix": "exsi",
+            "suffix": "llo"
+        },
+        {
+            "tag": "WeaponZoomFovMod",
+            "value": 0.0046660001,
+            "prefix": "hera",
+            "suffix": "lis"
         }
     ],
     "PlayerMeleeWeaponRandomModRare": [
         {
             "tag": "WeaponMeleeDamageMod",
-            "value": 0.0183,
+            "value": 0.018300001,
             "prefix": "visi",
             "suffix": "ata"
         },
@@ -917,31 +1429,31 @@ const riven_tags = {
         },
         {
             "tag": "WeaponCritDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "acri",
             "suffix": "tis"
         },
         {
             "tag": "WeaponElectricityDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "vexi",
             "suffix": "tio"
         },
         {
             "tag": "WeaponFireDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "igni",
             "suffix": "pha"
         },
         {
             "tag": "WeaponFreezeDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "geli",
             "suffix": "do"
         },
         {
             "tag": "WeaponToxinDamageMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "toxi",
             "suffix": "tox"
         },
@@ -953,37 +1465,37 @@ const riven_tags = {
         },
         {
             "tag": "WeaponMeleeFactionDamageCorpus",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "manti",
             "suffix": "tron"
         },
         {
             "tag": "WeaponMeleeFactionDamageGrineer",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "argi",
             "suffix": "con"
         },
         {
             "tag": "WeaponMeleeFactionDamageInfested",
-            "value": 0.005,
+            "value": 0.0049999999,
             "prefix": "pura",
             "suffix": "ada"
         },
         {
             "tag": "WeaponFireRateMod",
-            "value": 0.0061,
+            "value": 0.0060999999,
             "prefix": "croni",
             "suffix": "dra"
         },
         {
             "tag": "WeaponStunChanceMod",
-            "value": 0.01,
+            "value": 0.0099999998,
             "prefix": "hexa",
             "suffix": "dex"
         },
         {
             "tag": "ComboDurationMod",
-            "value": 0.09,
+            "value": 0.090000004,
             "prefix": "tempi",
             "suffix": "nem"
         },
@@ -995,7 +1507,7 @@ const riven_tags = {
         },
         {
             "tag": "WeaponMeleeRangeIncMod",
-            "value": 0.02158,
+            "value": 0.021579999,
             "prefix": "locti",
             "suffix": "tor"
         },
@@ -1007,28 +1519,114 @@ const riven_tags = {
         },
         {
             "tag": "WeaponMeleeComboEfficiencyMod",
-            "value": 0.00816,
+            "value": 0.0081599997,
             "prefix": "forti",
             "suffix": "us"
         },
         {
             "tag": "WeaponMeleeComboInitialBonusMod",
-            "value": 0.27224,
+            "value": 0.27224001,
             "prefix": "para",
             "suffix": "um"
         },
         {
             "tag": "WeaponMeleeComboPointsOnHitMod",
-            "value": -0.01165
+            "value": -0.01165,
+            "prefix": "",
+            "suffix": ""
         },
         {
             "tag": "WeaponMeleeComboBonusOnHitMod",
-            "value": 0.00653,
+            "value": 0.0065299999,
             "prefix": "laci",
             "suffix": "nus"
+        },
+        {
+            "tag": "WeaponMeleeHeavyAttackDamageMod",
+            "value": 0.0133,
+            "prefix": "laci",
+            "suffix": "nus"
+        },
+        {
+            "tag": "WeaponMeleeHeavyAttackChargeMod",
+            "value": 0.0133,
+            "prefix": "laci",
+            "suffix": "nus"
+        },
+        {
+            "tag": "WeaponMeleeParryAngleMod",
+            "value": 0.0089999996,
+            "prefix": "laci",
+            "suffix": "nus"
+        },
+        {
+            "tag": "WeaponMeleeSlamDamageMod",
+            "value": 0.0133,
+            "prefix": "laci",
+            "suffix": "nus"
+        },
+        {
+            "tag": "WeaponGasDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cali",
+            "suffix": "fel"
+        },
+        {
+            "tag": "WeaponCorrosiveDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cori",
+            "suffix": "or"
+        },
+        {
+            "tag": "WeaponViralDamageMod",
+            "value": 0.0099999998,
+            "prefix": "cari",
+            "suffix": "sco"
+        },
+        {
+            "tag": "WeaponRadiationDamageMod",
+            "value": 0.0099999998,
+            "prefix": "radi",
+            "suffix": "lo"
+        },
+        {
+            "tag": "WeaponBlastDamageMod",
+            "value": 0.0099999998,
+            "prefix": "fraga",
+            "suffix": "tus"
+        },
+        {
+            "tag": "WeaponMagneticDamageMod",
+            "value": 0.0099999998,
+            "prefix": "magni",
+            "suffix": "bra"
+        },
+        {
+            "tag": "WeaponFactionDamageOrokin",
+            "value": 0.0049999999,
+            "prefix": "effi",
+            "suffix": "tas"
+        },
+        {
+            "tag": "WeaponFactionDamageTechrot",
+            "value": 0.0049999999,
+            "prefix": "muti",
+            "suffix": "gia"
+        },
+        {
+            "tag": "WeaponFactionDamageScaldra",
+            "value": 0.0049999999,
+            "prefix": "exsi",
+            "suffix": "llo"
+        },
+        {
+            "tag": "WeaponStatusDamage",
+            "value": 0.0099999998,
+            "prefix": "plaga",
+            "suffix": "mna"
         }
-    ]
-};
+    ],
+}
 
 function rivenIntToFloat(i) {
     const f = i / 0x3FFFFFFF; // 1073741823

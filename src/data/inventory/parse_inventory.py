@@ -1404,16 +1404,17 @@ class Alecaframe:
         return data
 
 if __name__ == '__main__':
-    # main_decrypt_lastdata()
-    # main_incarnon_riven()
-    # main_incarnon()
-    # main_corrupted_mods()
-    # main_explore_inventory()
-    # print(WarframeWiki().get_augment_mods())
-    # main_get_platform_name()
-    # main_public_export()
-    # main_disposition()
-    # pe_weapon = WarframePublicExport()._get_public_export('ExportWeapons')
-    # print(set([w['productCategory'] for w in pe_weapon]))
-    # main_tmp()
-    print(Alecaframe().get_prices(["primed_chamber", "scorch"]))
+    wpe = WarframePublicExport()
+    upgrades = wpe._get_public_export('ExportUpgrades')
+    print(json.dumps({
+        mod['uniqueName']: [
+            {
+                "tag": entry["tag"],
+                "value": entry["upgradeValues"][0]["value"],
+                "prefix": entry["prefixTag"],
+                "suffix": entry["suffixTag"],
+            }
+            for entry in mod['upgradeEntries'] if 'upgradeValues' in entry and 'locTag' in entry['upgradeValues'][0]
+        ]
+        for mod in upgrades if 'upgradeEntries' in mod
+    }))

@@ -106,7 +106,6 @@ function getRivenModInfos(rivenData, rivenMods, inventoryData) {
       }
     }
   }
-  console.log(rivenModOidSet, equippedModsOidSet);
   for (const rivenModInfo of rivenModInfos) {
     rivenModInfo.isEquipped = equippedModsOidSet.has(rivenModInfo.oid);
   }
@@ -153,13 +152,6 @@ function getRivenStatText(rivenItemType, rivenUpgradeFingerprint, rivenStat, riv
   );
 }
 
-function RivenIncarnonPage({rivenData, rivenModInfos, searchText}) {
-  return <RivenIncarnonList
-    rivenModInfos={rivenModInfos}
-    searchText={searchText}
-  />
-}
-
 function TableTypeChoice({choices, tableType, setTableType, setSearchText}) {
   // make buttons for each choice
   function onClick(choice) {
@@ -194,6 +186,7 @@ export default function Riven({setting}) {
   const [tableType, setTableType] = useState('riven');  // riven, incarnon
 
   const { isPending: rivenIsPending, error: rivenError, data: rivenData } = useQueries(queriesRivenData);
+
   console.log(`rivenIsPending: ${rivenIsPending}, rivenError: ${rivenError}, rivenData: `, rivenData);
 
   const rivenMods = setting.inventory ? (
@@ -208,6 +201,8 @@ export default function Riven({setting}) {
     },
     [rivenData, rivenMods, setting.inventory?.data]
   );
+
+  console.log(`rivenModInfos`, rivenModInfos);
 
 
   return (<>

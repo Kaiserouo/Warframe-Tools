@@ -164,6 +164,7 @@ function renderInventoryMetadata(inventoryData) {
     const vosfor = findItem('MiscItems', '/Lotus/Types/Items/MiscItems/DistillPoints');
     const kahlStock = findItem('MiscItems', '/Lotus/Types/Items/MiscItems/KahlCreds');
     const voidTraces = findItem('MiscItems', '/Lotus/Types/Items/MiscItems/VoidTearDrop');
+    const aya = findItem('MiscItems', '/Lotus/Types/Items/MiscItems/SchismKey');
 
     const sMap = (inventoryData['Affiliations'] || []).reduce((acc, syndicate) => {
         acc[syndicate['Tag']] = syndicate;
@@ -183,6 +184,7 @@ function renderInventoryMetadata(inventoryData) {
         <CurrencyBlock value={vosfor} label="Vosfor" iconUrl="https://wiki.warframe.com/images/Vosfor.png" />
         <CurrencyBlock value={kahlStock} label="Kahl Stock" iconUrl="https://wiki.warframe.com/images/KahlStock.png" />
         <CurrencyBlock value={voidTraces} label="Void Traces" iconUrl="https://wiki.warframe.com/images/LuminousIconLarge.png" />
+        <CurrencyBlock value={aya} label="Aya" iconUrl="https://wiki.warframe.com/images/Aya.png" />
     </div>
 
 
