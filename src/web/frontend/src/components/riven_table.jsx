@@ -23,11 +23,12 @@ const iconHasDuplicate = makeIcon("https://wiki.warframe.com/images/IconModDupli
 const makeIconHasDuplicateCount = (count) => makeIcon("https://wiki.warframe.com/images/IconModDuplicates%28xWhite%29.png", `Has ${count} duplicates for this weapon`, "#6E2323", 6, count.toString());
 const iconVariants = makeIcon("https://wiki.warframe.com/images/HouseLavan%28xWhite%29.png", "Has variant riven for this weapon", "#6E2323", 6)
 const makeIconVariants = (count) => makeIcon("https://wiki.warframe.com/images/HouseLavan%28xWhite%29.png", "", "#6E2323", 6, count.toString());
-export { iconIncarnon, iconIsEquipped, iconHasDuplicate, iconVariants };
+const iconSpliced = makeIcon("https://wiki.warframe.com/images/HouseVidar%28xWhite%29.png", "This Riven is spliced", "#6fb4b8", 6)
+export { iconIncarnon, iconIsEquipped, iconHasDuplicate, iconVariants, iconSpliced };
 
 
 function RivenSide({rivenModInfo}) {
-  const { isIncarnon, isEquipped, hasDuplicate, familyUnames } = rivenModInfo;
+  const { isIncarnon, isEquipped, hasDuplicate, familyUnames, isSpliced } = rivenModInfo;
   const [color, setColor] = useState('#FFFFFF');
   const [showTestColor, setShowTestColor] = useState(false);
   
@@ -47,6 +48,7 @@ function RivenSide({rivenModInfo}) {
     </div>
     <div>
       {isIncarnon && iconIncarnon}
+      {isSpliced && iconSpliced}
       {isEquipped && iconIsEquipped}
       {hasDuplicate && makeIconHasDuplicateCount(rivenModInfo.duplicateCount)}
       {familyUnames.length > 1 && <RivenVariantsInfobox 
@@ -93,19 +95,36 @@ function RivenEntry({rivenModInfo}) {
     <div className="mt-2">
       {
         rivenStats.map((s, idx) => {
-          return <p key={idx} className={s.isBuff ? "text-green-400" : "text-red-400"}>{s.displayText}</p>;
+          return <p key={idx}>
+            {/* use span to avoid the background spanning the entire block, making the gradient not really visible*/}
+            <span className={s.isSpliced ? "bg-linear-to-r from-cyan-400 to-green-200 bg-clip-text text-transparent" : s.isBuff ? "text-green-400" : "text-red-400"}>
+              {s.displayText}
+            </span>
+          </p>;
         })
       }
     </div>
   </>);
 }
 function RivenMod({rivenModInfo}) {
+  const { isSpliced } = rivenModInfo;
+  const colorCode = isSpliced ? "spliced" : "normal";
+  
+  const sideBgColor = {
+    "normal": "#511a6d",
+    "spliced": "#236b6e",
+  }[colorCode];
+  const mainBgColor = {
+    "normal": "#2b2130",
+    "spliced": "#212f30",
+  }[colorCode];
+
   return (
     <div className="flex border border-gray-600 rounded my-2" >
-      <div className={`p-2 bg-[#511a6d] text-white border-r border-gray-600`}>
+      <div className={`p-2 text-white border-r border-gray-600`} style={{ backgroundColor: sideBgColor }}>
         <RivenSide rivenModInfo={rivenModInfo} />
       </div>
-      <div className={`p-4 grow bg-[#2b2130]`}>
+      <div className={`p-4 grow`} style={{ backgroundColor: mainBgColor }}>
         <RivenTitle rivenModInfo={rivenModInfo} />
         <RivenEntry rivenModInfo={rivenModInfo} />
       </div>
@@ -119,6 +138,7 @@ class RivenOrganizer {
   viableSetting = {
     filterOptions: {
       isIncarnon: [null, true, false],
+      isSpliced: [null, true, false],
       isEquipped: [null, true, false],
       hasDuplicate: [null, true, false],
       isUpgraded: [null, true, false],
@@ -133,7 +153,7 @@ class RivenOrganizer {
     },
     sortOptions: {
       sortOrderType: [
-        'weaponName', 'disposition', 'isIncarnon', 'isEquipped', 'hasDuplicate', 'duplicateCount'
+        'weaponName', 'disposition', 'isIncarnon', 'isSpliced', 'isEquipped', 'hasDuplicate', 'duplicateCount'
       ],
     }
   };
@@ -153,6 +173,7 @@ class RivenOrganizer {
     this.setting = {
       filterOptions: {
         isIncarnon: null,
+        isSpliced: null,
         isEquipped: null,
         hasDuplicate: null,
         isUpgraded: null,
@@ -169,6 +190,7 @@ class RivenOrganizer {
           {type: 'weaponName', isAsc: null},
           {type: 'disposition', isAsc: null},
           {type: 'isIncarnon', isAsc: null},
+          {type: 'isSpliced', isAsc: null},
           {type: 'isEquipped', isAsc: null},
           {type: 'hasDuplicate', isAsc: null},
           {type: 'duplicateCount', isAsc: null},
@@ -254,6 +276,7 @@ function FilterOptionToggleButton({ label, state, onClick }) {
 function RivenFilterBar({rivenOrganizer, setRivenOrganizer}) {
   const keyLabels = {
     isIncarnon: "Is Incarnon",
+    isSpliced: "Is Spliced",
     isEquipped: "Is Equipped",
     hasDuplicate: "Has Duplicate",
     isUpgraded: "Is Upgraded",
@@ -335,6 +358,7 @@ function RivenSortBar({rivenOrganizer, setRivenOrganizer}) {
     weaponName: "Weapon Name",
     disposition: "Disposition",
     isIncarnon: "Is Incarnon",
+    isSpliced: "Is Spliced",
     isEquipped: "Is Equipped",
     hasDuplicate: "Has Duplicate",
     duplicateCount: "Duplicate Count"

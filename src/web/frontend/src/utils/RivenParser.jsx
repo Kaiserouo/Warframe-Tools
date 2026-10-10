@@ -1628,6 +1628,27 @@ const riven_tags = {
     ],
 }
 
+const spliced_tag_set = new Set([
+    "WeaponAmmoEfficiency",
+    "WeaponBlastDamageMod",
+    "WeaponCorrosiveDamageMod",
+    "WeaponFactionDamageOrokin",
+    "WeaponFactionDamageScaldra",
+    "WeaponFactionDamageTechrot",
+    "WeaponGasDamageMod",
+    "WeaponMagazineReloadHolstered",
+    "WeaponMagneticDamageMod",
+    "WeaponMeleeHeavyAttackChargeMod",
+    "WeaponMeleeHeavyAttackDamageMod",
+    "WeaponMeleeParryAngleMod",
+    "WeaponMeleeSlamDamageMod",
+    "WeaponRadiationDamageMod",
+    "WeaponStatusDamage",
+    "WeaponViralDamageMod",
+    "WeaponWeakpointCriticalChance",
+    "WeaponWeakpointDamage",
+]);
+
 function rivenIntToFloat(i) {
     const f = i / 0x3FFFFFFF; // 1073741823
     if (f >= 0.0 && f <= 1.0) {
@@ -1648,7 +1669,10 @@ const numBuffsAtten = [0, 1, .66000003, .5, .40000001, .34999999];
 const numBuffsCurseAtten = [0, 1, .33000001, .5, 1.25, 1.5];
 
 function valueToDisplayValue(tag, value) {
-    if (tag == "WeaponFactionDamageGrineer" || tag == "WeaponFactionDamageCorpus" || tag == "WeaponFactionDamageInfested" || tag == "WeaponMeleeFactionDamageGrineer" || tag == "WeaponMeleeFactionDamageCorpus" || tag == "WeaponMeleeFactionDamageInfested") {
+    if (tag == "WeaponFactionDamageGrineer" || tag == "WeaponFactionDamageCorpus" || tag == "WeaponFactionDamageInfested" || 
+        tag == "WeaponMeleeFactionDamageGrineer" || tag == "WeaponMeleeFactionDamageCorpus" || tag == "WeaponMeleeFactionDamageInfested" ||
+        tag == "WeaponFactionDamageInfested" || tag == "WeaponFactionDamageOrokin" || tag == "WeaponFactionDamageScaldra" || tag == "WeaponFactionDamageTechrot"
+    ) {
         return Math.round(value * 100) / 100;
     }
     if (tag == "WeaponMeleeComboInitialBonusMod" || tag == "ComboDurationMod" || tag == "WeaponMeleeRangeIncMod" || tag == "WeaponPunctureDepthMod") {
@@ -1698,7 +1722,8 @@ function parseRiven(
             tag: buff.Tag,
             value: upgradeValue,
             displayValue: valueToDisplayValue(buff.Tag, upgradeValue),
-            isBuff: true
+            isBuff: true,
+            isSpliced: spliced_tag_set.has(buff.Tag)
         });
     }
 
@@ -1713,7 +1738,8 @@ function parseRiven(
             tag: curse.Tag,
             value: upgradeValue,
             displayValue: valueToDisplayValue(curse.Tag, upgradeValue),
-            isBuff: false
+            isBuff: false,
+            isSpliced: spliced_tag_set.has(curse.Tag)
         });
     }
 
@@ -1799,6 +1825,20 @@ function floatToGrade(value) {
     return "X";
 }
 
+function isSplicedRiven(fingerprint) {
+    for (const buff of fingerprint.buffs) {
+        if (spliced_tag_set.has(buff.Tag)) {
+            return true;
+        }
+    }
+    for (const curse of fingerprint.curses) {
+        if (spliced_tag_set.has(curse.Tag)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 
 const RivenParser = {
@@ -1812,6 +1852,7 @@ const RivenParser = {
     unparseBuff,
     unparseCurse,
     floatToGrade,
+    isSplicedRiven
 };
 
 export default RivenParser;

@@ -4,7 +4,7 @@ import { useQueries } from '@tanstack/react-query'
 import SearchBar from '../../components/search_bar.jsx';
 import RivenTable from '../../components/riven_table.jsx';
 import RivenTableLackIncarnon from '../../components/riven_table_lack_incarnon.jsx';
-import { iconIncarnon, iconIsEquipped, iconHasDuplicate, iconVariants } from '../../components/riven_table.jsx';
+import { iconIncarnon, iconIsEquipped, iconHasDuplicate, iconVariants, iconSpliced } from '../../components/riven_table.jsx';
 import { Loading, LoadingProgress, Error } from '../../components/loading_status.jsx';
 import { queriesRivenData } from '../../api/fetch.jsx';
 import { makeHandleSubmit } from '../../api/task.jsx';
@@ -41,12 +41,14 @@ function getRivenModInfo(rivenData, rivenMod, inventoryData) {
   }
 
   const isIncarnon = rivenData.incarnon_weapon_uname.includes(uname);
+  const isSpliced = RivenParser.isSplicedRiven(upgradeFingerprint);
 
   const searchString = (
     `${weaponName} ${rivenSuffix} | ` +
     `${rivenStats.map((s) => s.displayText).join(', ')} | ` +
     `${familyUnames.map((uname) => weaponNameMap[uname] || uname).join(', ')} | ` +
     `lv${upgradeFingerprint.lvl || 0} | ${disposition.toFixed(2)}x | ` + 
+    (isSpliced ? "isSpliced | " : "") +
     (isIncarnon ? "isIncarnon | " : "")
   ).toLowerCase();
 
@@ -74,6 +76,8 @@ function getRivenModInfo(rivenData, rivenMod, inventoryData) {
     rivenSuffix: rivenSuffix,
 
     isIncarnon: isIncarnon,
+
+    isSpliced: isSpliced,
 
     searchString: searchString,
 
@@ -136,7 +140,11 @@ function getRivenModInfos(rivenData, rivenMods, inventoryData) {
 }
 
 function getRivenStatText(rivenItemType, rivenUpgradeFingerprint, rivenStat, riven_loctag_map) {
-  const factionDamageTags = ["WeaponFactionDamageGrineer", "WeaponFactionDamageCorpus", "WeaponFactionDamageInfested", "WeaponMeleeFactionDamageGrineer", "WeaponMeleeFactionDamageCorpus", "WeaponMeleeFactionDamageInfested"];
+  const factionDamageTags = [
+    "WeaponFactionDamageGrineer", "WeaponFactionDamageCorpus", "WeaponFactionDamageInfested",
+    "WeaponMeleeFactionDamageGrineer", "WeaponMeleeFactionDamageCorpus", "WeaponMeleeFactionDamageInfested",
+    "WeaponFactionDamageInfested", "WeaponFactionDamageOrokin", "WeaponFactionDamageScaldra", "WeaponFactionDamageTechrot"
+  ];
 
   const prefix = (!factionDamageTags.includes(rivenStat.tag) && rivenStat.displayValue > 0 ? "+" : "");
   const suffix = (factionDamageTags.includes(rivenStat.tag) ? "x" : "")
@@ -238,6 +246,7 @@ export default function Riven({setting}) {
       </div>
       <div className="text-white">
         <span className="flex flex-row items-center">{iconIncarnon}: Is incarnon</span>
+        <span className="flex flex-row items-center">{iconSpliced}: Spliced riven</span>
         <span className="flex flex-row items-center">{iconIsEquipped}: Is currently equipped</span>
         <span className="flex flex-row items-center">{iconHasDuplicate}: Has duplicate riven for this weapon</span>
         <span className="flex flex-row items-center">{iconVariants}: Variants for this weapon</span>
