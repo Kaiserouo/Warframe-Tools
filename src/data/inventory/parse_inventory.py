@@ -255,6 +255,8 @@ class WarframePublicExport:
 
     def get_weapon_riven_disposition(self, use_cache=True):
         """
+        (Note that this returns 1.2 for all weapons. To see retired disposition values, ref. WarframeWiki.get_retired_disposition())
+
         get a mapping of weapon unique names to their riven disposition
         e.g.,
         {
@@ -1139,6 +1141,22 @@ class WarframeWiki:
             self.warframe_pve_augment_mods_cache = augment_mods
         return augment_mods
 
+    def get_retired_disposition(self, use_cache=True):
+        """
+        get the retired riven disposition value
+
+        return {uname: float}
+        """
+        weapon_data = self._get_all_weapon_data(use_cache=use_cache)
+        dispo_map = {}
+        for data in weapon_data.values():
+            for info in data.values():
+                uname = info.get('InternalName', None)
+                dispo = info.get('_RetiredDisposition', None)
+                if uname is None or dispo is None:
+                    continue
+                dispo_map[uname] = dispo
+        return dispo_map
     
     def main(self):
         a = self.get_baro_items()
@@ -1404,17 +1422,9 @@ class Alecaframe:
         return data
 
 if __name__ == '__main__':
-    wpe = WarframePublicExport()
-    upgrades = wpe._get_public_export('ExportUpgrades')
-    print(json.dumps({
-        mod['uniqueName']: [
-            {
-                "tag": entry["tag"],
-                "value": entry["upgradeValues"][0]["value"],
-                "prefix": entry["prefixTag"],
-                "suffix": entry["suffixTag"],
-            }
-            for entry in mod['upgradeEntries'] if 'upgradeValues' in entry and 'locTag' in entry['upgradeValues'][0]
-        ]
-        for mod in upgrades if 'upgradeEntries' in mod
-    }))
+    wwiki = WarframeWiki()
+
+    print(json.dumps(wwiki.get_weapon_uname_family_map(use_cache=True))[:100])
+    print(json.dumps(wwiki.get_weapon_family_unames_map(use_cache=True))[:100])
+    print(json.dumps(wwiki.get_baro_items(use_cache=True))[:100])
+    print(json.dumps(wwiki.get_retired_disposition(use_cache=True))[:100])

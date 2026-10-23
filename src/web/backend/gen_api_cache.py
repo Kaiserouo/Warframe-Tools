@@ -22,6 +22,7 @@ fetch_urls = [
     'api/wiki/data/get_weapon_uname_family_map',
     'api/wiki/data/get_weapon_family_unames_map',
     'api/wiki/data/get_baro_items',
+    'api/wiki/data/get_retired_disposition',
     'api/public_export/data/en/get_mod_name_map',
     'api/public_export/data/en/get_relic_sets',
     'api/public_export/data/en/get_relic_rewards',

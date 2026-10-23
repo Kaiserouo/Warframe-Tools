@@ -64,16 +64,27 @@ oracle_price_fn_map = {
 def refresh():
     global market_items, market_map, market_id_map, market_data_update_date, wpe, wwiki, ducat_data, cache, wof
     print(f'{util.GREEN}[*] get market item...{util.RESET}')
+    print("""market_items = wfm.get_market_item_list()""")
     market_items = wfm.get_market_item_list()
+    print("""market_map = wfm.get_market_items_name_map(market_items)""")
     market_map = wfm.get_market_items_name_map(market_items)
+    print("""market_id_map = wfm.get_market_items_id_map(market_items)""")
     market_id_map = wfm.get_market_items_id_map(market_items)
     print(f'{util.GREEN}[*] get ducat data...{util.RESET}')
+    print("""ducat_data = wfm.get_ducat_data(market_items)""")
     ducat_data = wfm.get_ducat_data(market_items)
+    print("""market_data_update_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))""")
     market_data_update_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
-    wpe = WarframePublicExport()
     print(f'{util.GREEN}[*] get public export data...{util.RESET}')
+    print("""wpe = WarframePublicExport()""")
+    wpe = WarframePublicExport()
+    print("""wpe._prefetch_all_public_export(lang='en')""")
     wpe._prefetch_all_public_export(lang='en')
+    print(f'{util.GREEN}[*] get wiki data...{util.RESET}')
+    print("""wwiki = WarframeWiki()""")
     wwiki = WarframeWiki()
+    print(f'{util.GREEN}[*] get overframe data...{util.RESET}')
+    print("""wof = Overframe(OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL)""")
     wof = Overframe(OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL)
     cache = {}
 
@@ -944,6 +955,7 @@ def data_wiki(function_name):
         'get_weapon_uname_family_map': lambda: wwiki.get_weapon_uname_family_map(use_cache=True),
         'get_weapon_family_unames_map': lambda: wwiki.get_weapon_family_unames_map(use_cache=True),
         'get_baro_items': lambda: wwiki.get_baro_items(use_cache=True),
+        'get_retired_disposition': lambda: wwiki.get_retired_disposition(use_cache=True)
     }
 
     if function_name in function_map:

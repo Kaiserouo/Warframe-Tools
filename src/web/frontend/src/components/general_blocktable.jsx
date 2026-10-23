@@ -277,11 +277,20 @@ function OrganizeBar({organizer, setOrganizer}) {
 // making filter callback function
 
 export function makeFilterCallbackByKey(key, value) {
+  // return true if info[key] === value, otherwise return false
+  // if do not provide value, we treat info[key] as a boolean, and return info[key]
+  if (value === undefined) {
+    return (info) => info[key];
+  }
   return (info) => (info[key] === value);
 }
 
 export function makeSortCallbackByKey(key) {
   return (infoA, infoB) => (infoA[key] < infoB[key]);
+}
+
+export function makeSortCallbackByKeyFunction(key_func) {
+  return (infoA, infoB) => (key_func(infoA) < key_func(infoB));
 }
 
 export function GeneralBlockTable({
@@ -338,7 +347,7 @@ export function GeneralBlockTable({
 
   const blockClassname = (
     flexWrap ? `flex flex-wrap gap-x-3 gap-y-3 w-full` :
-    `grid gap-x-3 grid-cols-1 md:grid-cols-${gridCols} gap-y-3 w-full`
+    `grid gap-x-3 grid-cols-${gridCols} gap-y-3`
   )
 
   return (<>

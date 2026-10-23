@@ -243,6 +243,7 @@ const queryWikiMissingItemChecklist = makeStaticQuery('missing_item_checklist', 
 const queryWikiWeaponUnameFamilyMap = makeStaticQuery('wiki__weapon_uname_family_map', 'api/wiki/data/get_weapon_uname_family_map');
 const queryWikiWeaponFamilyUnamesMap = makeStaticQuery('wiki__weapon_family_unames_map', 'api/wiki/data/get_weapon_family_unames_map');
 const queryWikiBaroItems = makeStaticQuery('wiki__baro_items', 'api/wiki/data/get_baro_items');
+const queryWikiRetiredDisposition = makeStaticQuery('wiki__retired_disposition', 'api/wiki/data/get_retired_disposition');
 
 // Overframe()
 const queryOverframeItemIdMap = makeStaticQuery('overframe__get_item_id', 'api/overframe/data/get_item_id');
@@ -262,6 +263,7 @@ export const queriesRivenData = makeStaticQueries({
   icon_map: queryPEIconMap,
   weapon_uname_family_map: queryWikiWeaponUnameFamilyMap,
   weapon_family_unames_map: queryWikiWeaponFamilyUnamesMap,
+  retired_disposition: queryWikiRetiredDisposition
 });
 export const queriesBaroData = makeStaticQueries({
   baro_items: queryWikiBaroItems,

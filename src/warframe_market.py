@@ -21,6 +21,13 @@ from tqdm import tqdm
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
 RETRY_MAX_TIME = 3
+
+JSON_REQUEST_HEADER = {
+    'accept': 'application/json',
+    'Platform': 'pc',
+    'User-agent': USER_AGENT
+}
+
 def retry_request(*args, n_times=None, **kwargs):
     """
         automatically retry request until the request is done.
@@ -981,7 +988,7 @@ def get_ducat_data(market_items: None | list[MarketItem] = None) -> list[dict[st
 
     if market_items is None:
         market_items = get_market_item_list()
-    r = retry_request("https://api.warframe.market/v1/tools/ducats")
+    r = retry_request("https://api.warframe.market/v1/tools/ducats", headers=JSON_REQUEST_HEADER)
     data = json.loads(r.content)['payload']
     previous_hour = data['previous_hour']
     previous_day = data['previous_day']

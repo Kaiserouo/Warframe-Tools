@@ -23,6 +23,7 @@ function getRivenModInfo(rivenData, rivenMod, inventoryData) {
     icon_map: iconMap,
     weapon_uname_family_map: weaponUnameFamilyMap,
     weapon_family_unames_map: weaponFamilyUnamesMap,
+    retired_disposition: retiredDispositionMap,
   } = rivenData;
   const upgradeFingerprint = JSON.parse(rivenMod.UpgradeFingerprint);
 
@@ -31,6 +32,9 @@ function getRivenModInfo(rivenData, rivenMod, inventoryData) {
   const type = weaponTypeMap[upgradeFingerprint.compat] || "Unknown";
   const weaponName = weaponNameMap[upgradeFingerprint.compat] || upgradeFingerprint.compat;
   const disposition = weaponRivenDispositionMap[upgradeFingerprint.compat] || 0;
+
+  const retiredDisposition = retiredDispositionMap[upgradeFingerprint.compat] || null;
+
   const itemType = rivenMod.ItemType;
   const family = weaponUnameFamilyMap[uname] || null;
   const familyUnames = weaponFamilyUnamesMap[family] || [];
@@ -47,7 +51,7 @@ function getRivenModInfo(rivenData, rivenMod, inventoryData) {
     `${weaponName} ${rivenSuffix} | ` +
     `${rivenStats.map((s) => s.displayText).join(', ')} | ` +
     `${familyUnames.map((uname) => weaponNameMap[uname] || uname).join(', ')} | ` +
-    `lv${upgradeFingerprint.lvl || 0} | ${disposition.toFixed(2)}x | ` + 
+    `lv${upgradeFingerprint.lvl || 0} | ${disposition.toFixed(2)}x | ${retiredDisposition ? `${retiredDisposition.toFixed(2)}x` : 'N/A'} | ` +
     (isSpliced ? "isSpliced | " : "") +
     (isIncarnon ? "isIncarnon | " : "")
   ).toLowerCase();
@@ -69,6 +73,7 @@ function getRivenModInfo(rivenData, rivenMod, inventoryData) {
     type: type,
     itemType: rivenMod.ItemType,
     disposition: disposition,
+    retiredDisposition: retiredDisposition,
     family: family,
     familyUnames: familyUnames,
     
@@ -229,9 +234,9 @@ export default function Riven({setting}) {
         <div className="text-white font-sans my-2">
           <p className="text-yellow-500 font-bold">&lt; Requires inventory file: add that in the Options menu &gt;</p>
           <p>A riven viewer... hopefully a bit better than how Alecaframe did it.</p>
-          <p>Provides filter for True / False condition. Provides sorting for ascending / descending.</p>
-          <p>Can enable multiple sorting criteria. Drag & drop to reorder the sequence in which they are applied.</p>
           <p>The search bar can search any keyword you want, include names / tags / etc.</p>
+          <p>The disposition values shown are the <b>retired</b> disposition value.</p>
+          <p>For now, the current riven disposition values (and the one used to calculate stats) are all 1.2.</p>
         </div>
 
 

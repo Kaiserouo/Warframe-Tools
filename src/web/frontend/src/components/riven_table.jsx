@@ -6,6 +6,8 @@ import { PhotoshopPicker } from 'react-color';
 import RivenInfobox from "./riven_infobox.jsx";
 import RivenVariantsInfobox from "./riven_variants_infobox.jsx";
 
+import { GeneralBlockTable, makeFilterCallbackByKey, makeSortCallbackByKey, makeSortCallbackByKeyFunction } from "./general_blocktable.jsx";
+
 
 function makeIcon(src, title, bgColor, iconSize=8, text=null) {
   // iconSize = 8 or 6
@@ -58,7 +60,9 @@ function RivenSide({rivenModInfo}) {
   </>);
 }
 function RivenTitle({rivenModInfo}) {
-  const { iconMap, weaponNameMap, upgradeFingerprint, uname, weaponName, disposition, rivenStats, rivenSuffix } = rivenModInfo;
+  const { iconMap, weaponNameMap, upgradeFingerprint, uname, weaponName, disposition, rivenStats, rivenSuffix, retiredDisposition } = rivenModInfo;
+
+  const dispoText = retiredDisposition ? `${retiredDisposition.toFixed(2)}x` : `(${disposition.toFixed(2)}x)`;
 
   return (<>
     <div className="flex justify-between items-center gap-x-4">
@@ -80,7 +84,7 @@ function RivenTitle({rivenModInfo}) {
         </div>
       </div>
       <div className="flex flex-row items-center">
-        <p className="text-white font-bold text-nowrap">lv{upgradeFingerprint.lvl || 0} | {disposition.toFixed(2)}x</p>
+        <p className="text-white font-bold text-nowrap">lv{upgradeFingerprint.lvl || 0} | {dispoText}</p>
       </div>
     </div>
   </>);
@@ -120,7 +124,7 @@ function RivenMod({rivenModInfo}) {
   }[colorCode];
 
   return (
-    <div className="flex border border-gray-600 rounded my-2" >
+    <div className="flex border border-gray-600 rounded my-2 h-full" >
       <div className={`p-2 text-white border-r border-gray-600`} style={{ backgroundColor: sideBgColor }}>
         <RivenSide rivenModInfo={rivenModInfo} />
       </div>
@@ -134,330 +138,52 @@ function RivenMod({rivenModInfo}) {
 
 const MemoizedRivenMod = memo(RivenMod);
 
-class RivenOrganizer {
-  viableSetting = {
-    filterOptions: {
-      isIncarnon: [null, true, false],
-      isSpliced: [null, true, false],
-      isEquipped: [null, true, false],
-      hasDuplicate: [null, true, false],
-      isUpgraded: [null, true, false],
-      anyDupIsEquipped: [null, true, false],
-      anyDupIsUpgraded: [null, true, false],
-
-      isPrimary: [null, true],
-      isSecondary: [null, true],
-      isMelee: [null, true],
-      isArchgun: [null, true],
-      isCompanion: [null, true],
-    },
-    sortOptions: {
-      sortOrderType: [
-        'weaponName', 'disposition', 'isIncarnon', 'isSpliced', 'isEquipped', 'hasDuplicate', 'duplicateCount'
-      ],
-    }
-  };
-
-  specialFilterCallback = {
-    // filter option -> callback function that takes rivenModInfo and returns a boolean
-    // (if the filter option is not in specialFilterCallback, then we just use rivenModInfo[filterOption] to filter)
-    isUpgraded: (rivenModInfo) => (rivenModInfo.upgradeFingerprint.lvl > 0),
-    isPrimary: (rivenModInfo) => (rivenModInfo.type === 'LongGuns'),
-    isSecondary: (rivenModInfo) => (rivenModInfo.type === 'Pistols'),
-    isMelee: (rivenModInfo) => (rivenModInfo.type === 'Melee'),
-    isArchgun: (rivenModInfo) => (rivenModInfo.type === 'SpaceGuns'),
-    isCompanion: (rivenModInfo) => (rivenModInfo.type === 'SentinelWeapons'),
-  }
-
-  constructor() {
-    this.setting = {
-      filterOptions: {
-        isIncarnon: null,
-        isSpliced: null,
-        isEquipped: null,
-        hasDuplicate: null,
-        isUpgraded: null,
-        anyDupIsEquipped: null,
-        anyDupIsUpgraded: null,
-        isPrimary: null,
-        isSecondary: null,
-        isMelee: null,
-        isArchgun: null,
-        isCompanion: null,
-      },
-      sortOptions: {
-        sortOrder: [
-          {type: 'weaponName', isAsc: null},
-          {type: 'disposition', isAsc: null},
-          {type: 'isIncarnon', isAsc: null},
-          {type: 'isSpliced', isAsc: null},
-          {type: 'isEquipped', isAsc: null},
-          {type: 'hasDuplicate', isAsc: null},
-          {type: 'duplicateCount', isAsc: null},
-          // ...(can have many)
-        ]
-      }
-    }
-  }
-
-  copySetting() {
-    return {
-      filterOptions: {...this.setting.filterOptions},
-      sortOptions: {
-        sortOrder: [...this.setting.sortOptions.sortOrder]
-      }
-    }
-  }
-
-  _filterRiven(rivenModInfos, searchText) {
-    const searchLower = searchText ? searchText.toLowerCase() : null;
-    return rivenModInfos.filter((rivenModInfo) => {
-      if (searchLower) {
-        if (!rivenModInfo.searchString.includes(searchLower)) {
-          return false;
-        }
-      }
-
-      for (const [filterKey, filterValue] of Object.entries(this.setting.filterOptions)) {
-        if (filterValue === null)
-          continue;
-
-        let value = null;
-        if (filterKey in this.specialFilterCallback) {
-          value = this.specialFilterCallback[filterKey](rivenModInfo);
-        } else {
-          value = rivenModInfo[filterKey];
-        }
-
-        if (value !== filterValue)
-          return false;
-      }
-      return true;
-    });
-  }
-
-  _sortRiven(rivenModInfos) {
-    const sortOrder = this.setting.sortOptions.sortOrder;
-
-    return rivenModInfos.sort((a, b) => {
-      for (const {type, isAsc} of sortOrder) {
-        if (a[type] === b[type])
-          continue;
-        if (isAsc === null)
-          continue;
-
-        if (isAsc)
-          return a[type] < b[type] ? -1 : 1;
-        else
-          return a[type] > b[type] ? -1 : 1;
-      }
-      return 0;
-    });
-  }
-
-  organizeRiven(rivenModInfos, searchText) {
-    return this._sortRiven(this._filterRiven(rivenModInfos, searchText));
-  }
-}
-
-function FilterOptionToggleButton({ label, state, onClick }) {
-  const cnNull = "bg-gray-900 hover:bg-gray-700 text-white border-gray-300";
-  const cnTrue = "bg-green-700 hover:bg-green-500 text-white border-gray-300";
-  const cnFalse = "bg-red-700 hover:bg-red-500 text-white border-gray-300";
-  return (
-    <button 
-      className={`mr-2 px-2 py-1 border rounded ${state === null ? cnNull : state ? cnTrue : cnFalse}`}
-      onClick={onClick}>
-        {label}
-    </button>
-  );
-}
-
-function RivenFilterBar({rivenOrganizer, setRivenOrganizer}) {
-  const keyLabels = {
-    isIncarnon: "Is Incarnon",
-    isSpliced: "Is Spliced",
-    isEquipped: "Is Equipped",
-    hasDuplicate: "Has Duplicate",
-    isUpgraded: "Is Upgraded",
-    anyDupIsEquipped: "Any Duplicate Is Equipped",
-    anyDupIsUpgraded: "Any Duplicate Is Upgraded",
-  };
-
-  const categoryLabels = {
-    isPrimary: "Primary",
-    isSecondary: "Secondary",
-    isMelee: "Melee",
-    isArchgun: "Archgun",
-    isCompanion: "Companion",
-  }
-
-  const handleFilterChange = useCallback((filterKey) => {
-    setRivenOrganizer((prev) => {
-      const newRivenOrganizer = new RivenOrganizer();
-      newRivenOrganizer.setting = prev.copySetting();
-      const curKey = newRivenOrganizer.setting.filterOptions[filterKey];
-      const viableFilterOptions = newRivenOrganizer.viableSetting.filterOptions[filterKey];
-      const nextKey = viableFilterOptions[
-        (viableFilterOptions.indexOf(curKey) + 1) % viableFilterOptions.length
-      ];
-      newRivenOrganizer.setting.filterOptions[filterKey] = nextKey;
-      return newRivenOrganizer;
-    })
-  }, [setRivenOrganizer]);
-
-  return (<>
-    <div className="flex font-mono my-1">
-      <p className="mr-2 py-1 text-white text-lg">Filter: </p>
-      {
-        Object.keys(keyLabels).map((key) => (
-          <FilterOptionToggleButton
-            key={key}
-            label={keyLabels[key]}
-            state={rivenOrganizer.setting.filterOptions[key]}
-            onClick={() => handleFilterChange(key)}
-          />
-        ))
-      }
-    </div>
-    <div className="flex font-mono my-1">
-      <p className="mr-2 py-1 text-white text-lg">Filter (Category): </p>
-      {
-        Object.keys(categoryLabels).map((key) => (
-          <FilterOptionToggleButton
-            key={key}
-            label={categoryLabels[key]}
-            state={rivenOrganizer.setting.filterOptions[key]}
-            onClick={() => handleFilterChange(key)}
-          />
-        ))
-      }
-    </div>
-  </>);
-}
-
-function SortOptionToggleButton({ label, state, onClick, draggable, onDragStart, onDragOver, onDrop }) {
-  // state: null, true (isAsc), false (!isAsc)
-  const cnUnselected = "bg-gray-900 hover:bg-gray-700 text-white border-gray-300";
-  const cnSelected = "bg-gray-100 hover:bg-gray-300 text-black border-gray-300";
-  return (
-    <button 
-      className={`mr-2 px-2 py-1 border rounded ${state === null ? cnUnselected : cnSelected}`}
-      onClick={onClick}
-      draggable={draggable}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}>
-        {label}{state === null ? "" : state ? ' ▲' : ' ▼'}
-    </button>
-  );
-}
-
-function RivenSortBar({rivenOrganizer, setRivenOrganizer}) {
-  const keyLabels = {
-    weaponName: "Weapon Name",
-    disposition: "Disposition",
-    isIncarnon: "Is Incarnon",
-    isSpliced: "Is Spliced",
-    isEquipped: "Is Equipped",
-    hasDuplicate: "Has Duplicate",
-    duplicateCount: "Duplicate Count"
-  };
-
-  const [draggedKey, setDraggedKey] = useState(null);
-
-  const handleSortChange = useCallback((filterKey) => {
-    setRivenOrganizer((prev) => {
-      const newRivenOrganizer = new RivenOrganizer();
-      newRivenOrganizer.setting = prev.copySetting();
-      for (const entry of newRivenOrganizer.setting.sortOptions.sortOrder) {
-        if (entry.type === filterKey) {
-          if (entry.isAsc === null) {
-            entry.isAsc = true;
-          } else if (entry.isAsc === true) {
-            entry.isAsc = false;
-          } else {
-            entry.isAsc = null;
-          }
-        }
-      }
-      return newRivenOrganizer;
-    })
-  }, [setRivenOrganizer]);
-
-  const handleDropSortKey = useCallback((dropKey) => {
-    if (!draggedKey || draggedKey === dropKey) {
-      setDraggedKey(null);
-      return;
-    }
-
-    setRivenOrganizer((prev) => {
-      const newRivenOrganizer = new RivenOrganizer();
-      newRivenOrganizer.setting = prev.copySetting();
-      const sortOrder = [...newRivenOrganizer.setting.sortOptions.sortOrder];
-      const draggedIdx = sortOrder.findIndex((entry) => entry.type === draggedKey);
-      const dropIdx = sortOrder.findIndex((entry) => entry.type === dropKey);
-
-      if (draggedIdx === -1 || dropIdx === -1) {
-        return newRivenOrganizer;
-      }
-
-      const [moved] = sortOrder.splice(draggedIdx, 1);
-      sortOrder.splice(dropIdx, 0, moved);
-      newRivenOrganizer.setting.sortOptions.sortOrder = sortOrder;
-      return newRivenOrganizer;
-    });
-
-    setDraggedKey(null);
-  }, [draggedKey, setRivenOrganizer]);
-
-  console.log("rivenOrganizer.setting.sortOptions.sortOrder", rivenOrganizer.setting.sortOptions.sortOrder);
-
-  return (<>
-    <div className="flex font-mono my-1">
-      <p className="mr-2 py-1 text-white text-lg">Sort by: </p>
-      {
-        rivenOrganizer.setting.sortOptions.sortOrder.map(({type, isAsc}) => (
-          <SortOptionToggleButton
-            key={type}
-            label={keyLabels[type]}
-            state={isAsc}
-            onClick={() => handleSortChange(type)}
-            draggable
-            onDragStart={() => setDraggedKey(type)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => handleDropSortKey(type)}
-          />
-        ))
-      }
-    </div>
-  </>);
-}
-
-function RivenOrganizeBar({rivenOrganizer, setRivenOrganizer}) {
-  return (<>
-    <RivenFilterBar rivenOrganizer={rivenOrganizer} setRivenOrganizer={setRivenOrganizer} />
-    <RivenSortBar rivenOrganizer={rivenOrganizer} setRivenOrganizer={setRivenOrganizer} />
-  </>);
-}
-
-// TODO: use general block table instead
 export default function RivenTable({rivenModInfos, searchText}) {
-  const [rivenOrganizer, setRivenOrganizer] = useState(new RivenOrganizer());
 
-  const organizedRivenModInfos = useMemo(() => {
-    return rivenOrganizer.organizeRiven(rivenModInfos, searchText);
-  }, [rivenOrganizer, rivenModInfos, searchText]);
+  const filterOptions = [
+    {
+      categoryId: 'filter', categoryName: 'Filter', choiceType: 'multiple', booleanType: 'all', 
+      filterOptions: [
+          { optionId: 'isIncarnon', optionName: "Is Incarnon", filterCallback: makeFilterCallbackByKey('isIncarnon')},
+          { optionId: 'isSpliced', optionName: "Is Spliced", filterCallback: makeFilterCallbackByKey('isSpliced')},
+          { optionId: 'isEquipped', optionName: "Is Equipped", filterCallback: makeFilterCallbackByKey('isEquipped')},
+          { optionId: 'hasDuplicate', optionName: "Has Duplicate", filterCallback: makeFilterCallbackByKey('hasDuplicate')},
+          { optionId: 'isUpgraded', optionName: "Is Upgraded", filterCallback: (rivenModInfo) => (rivenModInfo.upgradeFingerprint.lvl > 0)},
+          { optionId: 'anyDupIsEquipped', optionName: "Any Duplicate Is Equipped", filterCallback: makeFilterCallbackByKey('anyDupIsEquipped')},
+          { optionId: 'anyDupIsUpgraded', optionName: "Any Duplicate Is Upgraded", filterCallback: makeFilterCallbackByKey('anyDupIsUpgraded')},
+      ]
+    },
+    {
+      categoryId: 'category', categoryName: 'Filter (Category)', choiceType: 'single', booleanType: 'true', 
+      filterOptions: [
+          { optionId: 'isPrimary', optionName: "Primary", filterCallback: (rivenModInfo) => (rivenModInfo.type === 'LongGuns')},
+          { optionId: 'isSecondary', optionName: "Secondary", filterCallback: (rivenModInfo) => (rivenModInfo.type === 'Pistols')},
+          { optionId: 'isMelee', optionName: "Melee", filterCallback: (rivenModInfo) => (rivenModInfo.type === 'Melee')},
+          { optionId: 'isArchgun', optionName: "Archgun", filterCallback: (rivenModInfo) => (rivenModInfo.type === 'SpaceGuns')},
+          { optionId: 'isCompanion', optionName: "Companion", filterCallback: (rivenModInfo) => (rivenModInfo.type === 'SentinelWeapons')},
+      ]
+    }
+  ];
 
-  return (<>
-    <RivenOrganizeBar rivenOrganizer={rivenOrganizer} setRivenOrganizer={setRivenOrganizer} />
+  const sortOptions = [
+    { optionId: 'weaponName', optionName: "Weapon Name", sortCallback: makeSortCallbackByKey('weaponName')},
+    { optionId: 'disposition', optionName: "Retired Disposition", sortCallback: makeSortCallbackByKeyFunction((rivenModInfo) => rivenModInfo.retiredDisposition || rivenModInfo.disposition)},
+    { optionId: 'isIncarnon', optionName: "Is Incarnon", sortCallback: makeSortCallbackByKey('isIncarnon')},
+    { optionId: 'isSpliced', optionName: "Is Spliced", sortCallback: makeSortCallbackByKey('isSpliced')},
+    { optionId: 'isEquipped', optionName: "Is Equipped", sortCallback: makeSortCallbackByKey('isEquipped')},
+    { optionId: 'hasDuplicate', optionName: "Has Duplicate", sortCallback: makeSortCallbackByKey('hasDuplicate')},
+    { optionId: 'duplicateCount', optionName: "Duplicate Count", sortCallback: makeSortCallbackByKey('duplicateCount')},
+  ];
 
-    <div className="flex flex-row">
-      <div className="grid gap-x-3 grid-cols-1 md:grid-cols-4">
-        {organizedRivenModInfos.map((rivenModInfo, idx) => (
-          <MemoizedRivenMod key={idx} rivenModInfo={rivenModInfo} />
-        ))}
-      </div>
-    </div>
-  </>);
+  return (
+    <GeneralBlockTable
+      blockInfos={rivenModInfos}
+      searchText={searchText}
+      renderBlockCallback={(rivenModInfo) => <MemoizedRivenMod rivenModInfo={rivenModInfo} />}
+      filterOptions={filterOptions}
+      sortOptions={sortOptions}
+      gridCols={4}
+      flexWrap={false}
+    />
+  )
 }
