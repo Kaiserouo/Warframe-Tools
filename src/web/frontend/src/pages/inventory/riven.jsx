@@ -31,7 +31,8 @@ function getRivenModInfo(rivenData, rivenMod, inventoryData) {
   const uname = upgradeFingerprint.compat;
   const type = weaponTypeMap[upgradeFingerprint.compat] || "Unknown";
   const weaponName = weaponNameMap[upgradeFingerprint.compat] || upgradeFingerprint.compat;
-  const disposition = weaponRivenDispositionMap[upgradeFingerprint.compat] || 0;
+  // const disposition = weaponRivenDispositionMap[upgradeFingerprint.compat] || 0;
+  const disposition = 1.2;  // 2026-10-23: in github version, content.warframe.com hasn't been updated yet
 
   const retiredDisposition = retiredDispositionMap[upgradeFingerprint.compat] || null;
 
