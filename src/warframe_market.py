@@ -40,12 +40,42 @@ def retry_request(*args, n_times=None, **kwargs):
         if r.status_code == 200:
             break
 
+        print('[RetryRequest] Request failed with status code', r.status_code, 'for', args, kwargs)
+
         # wait a random time because there may be multiple requests
         # at the exact same time as this
         time.sleep(random.uniform(0, RETRY_MAX_TIME))
         if n_times is not None:
             n_times -= 1
     return r
+
+# def retry_request(*args, n_times=None, **kwargs):
+#     """
+#         automatically retry request until the request is done.
+#         this is to retry whenever too many requests happens
+#     """
+#     import subprocess
+#     r = None
+#     while n_times is None or n_times > 0:
+#         cmd = ['curl', '-s', '-L', *args]
+#         for key, value in kwargs.get('headers', {}).items():
+#             cmd.extend(['-H', f'{key}: {value}'])
+#         r = subprocess.run(cmd, capture_output=True, text=True)
+
+#         if r.returncode == 0:
+#             break
+
+#         print('[RetryRequest] Request failed with status code', r.returncode, 'for', args, kwargs, ', r content:', r.stdout)
+
+#         # wait a random time because there may be multiple requests
+#         # at the exact same time as this
+#         time.sleep(random.uniform(0, RETRY_MAX_TIME))
+#         if n_times is not None:
+#             n_times -= 1
+#     class Ret:
+#         def __init__(self, stdout):
+#             self.content = stdout.encode('utf-8')
+#     return Ret(r.stdout)
 
 class Orders:
     """
@@ -598,20 +628,12 @@ class MarketItem:
         # })
 
         # return Orders(json.loads(r.content)['payload']['orders'], version='v1')
-        r = retry_request(f'https://api.warframe.market/v2/orders/item/{self.url_name}', headers={
-            'accept': 'application/json',
-            'Platform': 'pc',
-            'User-agent': USER_AGENT
-        })
+        r = retry_request(f'https://api.warframe.market/v2/orders/item/{self.url_name}', headers=JSON_REQUEST_HEADER)
 
         return Orders(json.loads(r.content)['data'], version='v2')
 
     def _get_statistic(self):
-        r = retry_request(f'https://api.warframe.market/v1/items/{self.url_name}/statistics', headers={
-            'accept': 'application/json',
-            'Platform': 'pc',
-            'User-agent': USER_AGENT
-        })
+        r = retry_request(f'https://api.warframe.market/v1/items/{self.url_name}/statistics', headers=JSON_REQUEST_HEADER)
 
         return Statistic(json.loads(r.content)['payload'])
     
@@ -866,6 +888,11 @@ def get_market_items_name_map(market_items: None | list[MarketItem] = None) -> d
     if market_items is None:
         market_items = get_market_item_list()
     return {i.item_name: i for i in market_items}
+
+def get_market_url_name_map(market_items: None | list[MarketItem] = None) -> dict[str, MarketItem]:
+    if market_items is None:
+        market_items = get_market_item_list()
+    return {i.url_name: i for i in market_items}
 
 def get_market_items_id_map(market_items: None | list[MarketItem] = None) -> dict[str, MarketItem]:
     if market_items is None:

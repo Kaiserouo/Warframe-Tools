@@ -1399,15 +1399,27 @@ class Alecaframe:
     def get_prices(self, market_names: list[str]):
         """
         get the prices of items from alecaframe.gg
-        ReturnValue := [ItemPrice, ...]
+        Args:
+            market_names: list of market names, which is MarketItems.url_name
+
+        ReturnValue := {MarketName: ItemPrice}
+        MarketName := str
         ItemPrice := {
-            "post": int,        // WTS price
-            "insta": int,       // WTB price
-            "postMax": int,     // WTS price for max ranked mod / arcane
-            "minR0": int,       // (unused, not sure)
-            "minRMax": int,     // (unused, not sure)
-            "volume": int       // (unused, not sure) 
+            "post": int,        // WTS price, oracle [1]
+            "insta": int,       // WTB price, oracle [2]
+            "postMax": int,     // WTS price for max ranked mod / arcane, will be the same as "post" if the item is not a mod / arcane
+            "minR0": int,       // Current minimum WTS price [2] for rank 0
+            "minRMax": int,     // Current minimum WTS price [2] for rank max, will be the same as "minR0" if the item is not a mod / arcane
+            "volume": int       // Volume for the last 24 hours [3]
         }
+
+        Note:
+        [1] I suppose they use some sort of price oracle function to determine the expected price from the statistics.
+            Since the calculation is server-side, we can't tell how exactly they determine this price and thus may be a bit off
+            from what you may expect.
+        [2] This is used in the most recent update (2026/10/25), where they show the minimum price on the market.
+            The update is not immediate so this price may be outdated. We don't know how they cache it or how often they update their cache.
+        [3] Note that warframe market lists 48 hours of volume, this only use the most recent 24 hours from that statistics
         """
         import requests
         url = "https://api.alecaframe.com/prices/priceData"
@@ -1418,13 +1430,16 @@ class Alecaframe:
         )
         if r.status_code != 200:
             raise Exception(f"Failed to get prices from {url}, status code: {r.status_code}")
-        data = r.json()
-        return data
+        prices = r.json()
+        price_map = {}
+        for market_name, price in zip(market_names, prices):
+            price_map[market_name] = price
+        return price_map
 
 if __name__ == '__main__':
-    wwiki = WarframeWiki()
-
-    print(json.dumps(wwiki.get_weapon_uname_family_map(use_cache=True))[:100])
-    print(json.dumps(wwiki.get_weapon_family_unames_map(use_cache=True))[:100])
-    print(json.dumps(wwiki.get_baro_items(use_cache=True))[:100])
-    print(json.dumps(wwiki.get_retired_disposition(use_cache=True))[:100])
+    from ...warframe_market import get_market_item_list, get_market_url_name_map
+    market_items = get_market_item_list()
+    alecaframe = Alecaframe()
+    prices = alecaframe.get_prices([i.url_name for i in market_items])
+    with open('./alecaframe_prices.json', 'w') as f:
+        f.write(json.dumps(prices, indent=4))

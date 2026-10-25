@@ -3,7 +3,7 @@ import Infobox from "./infobox";
 export default function RivenVariantsInfobox({ rivenModInfo, header }) {
   const weaponInfo = rivenModInfo.familyUnames.map(uname => {
     const weaponName = rivenModInfo.weaponNameMap[uname] || uname;
-    const disposition = rivenModInfo.weaponRivenDispositionMap[uname] || null;
+    const disposition = rivenModInfo.retiredDispositionMap[uname] || 1.2;
     return { uname, weaponName, disposition };
   });
 

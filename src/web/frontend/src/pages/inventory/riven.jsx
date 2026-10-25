@@ -66,6 +66,7 @@ function getRivenModInfo(rivenData, rivenMod, inventoryData) {
     rivenLoctagMap: rivenLoctagMap,
     iconMap: iconMap,
     weaponUnameFamilyMap: weaponUnameFamilyMap,
+    retiredDispositionMap: retiredDispositionMap,
     
     oid: oid,
     upgradeFingerprint: upgradeFingerprint,
