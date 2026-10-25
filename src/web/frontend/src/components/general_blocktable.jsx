@@ -301,10 +301,11 @@ export function GeneralBlockTable({
     sortOptions,
     gridCols = 4,
     flexWrap = false,   // if you have blocks of fixed size and you wanna flex wrap the blocks
+    blockIdKey = 'blockId',
 }) {
     /*
         - blockInfos: a list of Info. Info is a dict with self-defined keys.
-                      each info should have a blockId, which is a unique string to identify the block
+                      each info should have a blockId, which is a unique string to identify the block (if you need to use other keys, set blockIdKey)
         - searchText: a string, the text to search for. will be searching `Info.searchString`. 
                       if null, then no search filter is applied
         - renderBlockCallback: a function to render a block. (Info) => ReactNode
@@ -336,6 +337,13 @@ export function GeneralBlockTable({
                 ...  // multiple sorting conditions can be applied in any order by dragging the choice blocks.
                      // the condition will be applied from left to right
             ]
+        - blockIdKey: the key in Info to use as the unique id for the block. default is 'blockId'. if you want to use other keys, set this to the key you want to use.
+
+        NOTE:
+        - filterOption and sortOption will only be used ONCE, making an organizer inside the component.
+          Further changes to filterOption and sortOption will NOT be reflected in the component.
+          If somehow you need to e.g., change your filterCallback, or your filterCallback depends on something that changes, please use useRef s.t.,
+          your filterCallback can access their latest values.
     */
   const [organizer, setOrganizer] = useState(new Organizer(filterOptions, sortOptions));
 
@@ -357,7 +365,7 @@ export function GeneralBlockTable({
       <div className={blockClassname}>
 
         {organizedBlockInfos.map((blockInfo, idx) => (
-          <div key={blockInfo.blockId || `GENERALBLOCKTABLE_${idx}`}>
+          <div key={blockInfo[blockIdKey]}>
             {renderBlockCallback(blockInfo)}
           </div>
         ))}
