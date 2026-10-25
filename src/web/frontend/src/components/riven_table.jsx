@@ -159,7 +159,8 @@ export default function RivenTable({rivenModInfos, searchText}) {
   // note that the block items we input into GeneralBlockTable are selectableRivenModInfos,
   // to access the real rivenModInfo, we need to use selectableRivenModInfo.rivenModInfo
   const selectableMakeFilterCallbackByKey = (key) => ((selectableRivenModInfo) => selectableRivenModInfo.rivenModInfo[key]);
-  const selectableMakeSortCallbackByKey = (key) => ((selectableRivenModInfo) => selectableRivenModInfo.rivenModInfo[key]);
+  const selectableMakeSortCallbackByKey = (key) => (makeSortCallbackByKeyFunction((selectableRivenModInfo) => selectableRivenModInfo.rivenModInfo[key]));
+
   const filterOptions = [
     {
       categoryId: 'filter', categoryName: 'Filter', choiceType: 'multiple', booleanType: 'all', 
