@@ -30,7 +30,9 @@ export default function Home({setting}) {
         <br />
         <p>Note that <b className='text-white'>everything is cached, including the prices</b>. The prices will not reflect the true prices on the market after some time.</p>
         <p>Please go to <i className='text-cyan-400'>Options (upper left corner) &gt; Refresh Market Data</i> to refresh the market data from time to time.</p>
+        
         <br />
+        
         <h2 className='text-2xl font-bold text-white'>Price Origin</h2>
         <p>To estimate the price / value for each item from the statistics, we need to calculate an <b className='text-white'>oracle price</b> to represent each item's value.</p>
         <p>The origin of these price related data is called <b className='text-white'>price origin</b>.</p>
@@ -43,7 +45,9 @@ export default function Home({setting}) {
           <li><span className="text-purple-400 font-bold">Ducantor</span>: With prime items, we use the ducantor page on the warframe market to override the price. This speeds up loading time for prime items. The rest uses the Warframe Market price origin.</li>
           <li><span className="text-purple-400 font-bold">Alecaframe</span>: Alecaframe data, fetched from Alecaframe servers. This is the fastest of all, but their price information may be stale and the oracle price calculation algorithm is a blackbox (on their server).</li>
         </ul>
+
         <br />
+        
         <h2 className='text-2xl font-bold text-white'>Inventory</h2>
         <p>With the inventory file, we can do more analysis like how e.g., Alecaframe does its functionalities.</p>
         <p>For currently available methods (August 2026), we can only get this file on PC (Windows / Linux).</p>
