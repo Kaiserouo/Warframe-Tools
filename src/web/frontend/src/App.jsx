@@ -93,7 +93,7 @@ export default function App({ envSetting }) {
         console.log('savedSetting', savedSetting)
         const jsonSetting = JSON.parse(savedSetting)
         if (savedSetting && jsonSetting) {
-          if (json.version === undefined || jsonSetting.version !== defaultSetting.version) {
+          if (jsonSetting.version === undefined || jsonSetting.version !== defaultSetting.version) {
             // If the version is missing or different, we'll use the default setting
             console.log('Version mismatch or missing, using default setting');
             return defaultSetting;
