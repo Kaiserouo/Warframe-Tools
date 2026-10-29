@@ -19,42 +19,42 @@ export async function fetchRelicData() {
   return tryFetchJson('api/relic_data');
 }
 
-export async function fetchFunctionItemSearchText(oracleType, ducantorPriceOverride, searchText) {
+export async function fetchFunctionItemSearchText(priceOrigin, oracleType, searchText) {
   return tryFetchJson(
     'api/function_item', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        'price_origin': priceOrigin,
         'oracle_type': oracleType,
-        'ducantor_price_override': ducantorPriceOverride,
         'search_text': searchText,
       }),
     }
   );
 }
 
-export async function fetchFunctionItemItemList(oracleType, ducantorPriceOverride, itemList) {
+export async function fetchFunctionItemItemList(priceOrigin, oracleType, itemList) {
   return tryFetchJson(
     'api/function_item', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        'price_origin': priceOrigin,
         'oracle_type': oracleType,
-        'ducantor_price_override': ducantorPriceOverride,
         'item_list': itemList,
       }),
     }
   );
 }
 
-export async function fetchPriceOracle(oracleType, ducantorPriceOverride, itemList) {
+export async function fetchPriceOracle(priceOrigin, oracleType, itemList) {
   return tryFetchJson(
     'api/price_oracle', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        'price_origin': priceOrigin,
         'oracle_type': oracleType,
-        'ducantor_price_override': ducantorPriceOverride,
         'item_names': itemList,
       }),
     }
@@ -65,14 +65,14 @@ export async function fetchSyndicateData() {
   return tryFetchJson('api/syndicate_data');
 }
 
-export async function fetchItemInfoboxData(itemName, oracleType, ducantorPriceOverride) {
+export async function fetchItemInfoboxData(itemName, priceOrigin, oracleType) {
   return tryFetchJson(
     'api/item_infobox', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        'price_origin': priceOrigin,
         'oracle_type': oracleType,
-        'ducantor_price_override': ducantorPriceOverride,
         'item_name': itemName,
       }),
     }
@@ -219,7 +219,7 @@ function makeStaticQuery(queryKey, apiUrl) {
 
 // general data
 export const queryMarketData = makeStaticQuery('market_data', 'api/get_market_data');
-export const queryRelicData = makeStaticQuery('relic_data', 'api/get_relic_data');
+export const queryRelicData = makeStaticQuery('relic_data', 'api/relic_data');
 export const querySyndicateData = makeStaticQuery('syndicate_data', 'api/syndicate_data');
 export const queryTransientData = makeStaticQuery('transient_data', 'api/transient_data');
 

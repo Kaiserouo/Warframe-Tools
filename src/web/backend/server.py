@@ -19,6 +19,10 @@ from ... import interactive as wfi
 from ... import util as util
 from ...data.inventory.parse_inventory import WarframePublicExport, WarframeWiki, get_archon_shard_info, Overframe
 
+from .price_origin.warframe_market import WarframeMarketPriceOrigin
+from .price_origin.alecaframe import AlecaframePriceOrigin
+from .price_origin.warframe_market_ducantor import WarframeMarketDucantorPriceOrigin
+
 app = Flask(__name__)
 
 BUILD_DIR = Path('./src/web/frontend/build/')
@@ -34,6 +38,10 @@ except ImportError:
     OVERFRAME_GET_WEBPAGE_MODE = 'xvcf'
     OVERFRAME_GET_WEBPAGE_REMOTE_URL = 'https://example.com'
 
+# during testing, it's kinda annoying to wait for the cache to be refreshed, so we can use a cache file to speed up the process
+# REFRESH_USE_CACHE = Path('./src/web/backend/cache.pkl')
+REFRESH_USE_CACHE = None
+
 wfm.RETRY_MAX_TIME = 1    # reduce retry time for better responsiveness
 
 market_lock = threading.Lock()   # ok ngl i don't really know why i added this but better safe than sorry
@@ -47,6 +55,9 @@ ducat_data = None
 cache = {}
 wof_lock = threading.Lock()
 wof = Overframe(OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL)
+wfm_po = None
+aleca_po = None
+wfm_ducat_po = None
 
 # args, kwargs is passed to price oracle functions
 # for now, kwargs = stat_filter
@@ -62,30 +73,43 @@ oracle_price_fn_map = {
 }
 
 def refresh():
-    global market_items, market_map, market_id_map, market_data_update_date, wpe, wwiki, ducat_data, cache, wof
-    print(f'{util.GREEN}[*] get market item...{util.RESET}')
-    print("""market_items = wfm.get_market_item_list()""")
-    market_items = wfm.get_market_item_list()
-    print("""market_map = wfm.get_market_items_name_map(market_items)""")
-    market_map = wfm.get_market_items_name_map(market_items)
-    print("""market_id_map = wfm.get_market_items_id_map(market_items)""")
-    market_id_map = wfm.get_market_items_id_map(market_items)
-    print(f'{util.GREEN}[*] get ducat data...{util.RESET}')
-    print("""ducat_data = wfm.get_ducat_data(market_items)""")
-    ducat_data = wfm.get_ducat_data(market_items)
-    print("""market_data_update_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))""")
-    market_data_update_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
-    print(f'{util.GREEN}[*] get public export data...{util.RESET}')
-    print("""wpe = WarframePublicExport()""")
-    wpe = WarframePublicExport()
-    print("""wpe._prefetch_all_public_export(lang='en')""")
-    wpe._prefetch_all_public_export(lang='en')
-    print(f'{util.GREEN}[*] get wiki data...{util.RESET}')
-    print("""wwiki = WarframeWiki()""")
-    wwiki = WarframeWiki()
-    print(f'{util.GREEN}[*] get overframe data...{util.RESET}')
-    print("""wof = Overframe(OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL)""")
-    wof = Overframe(OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL)
+    global market_items, market_map, market_id_map, market_data_update_date, wpe, wwiki, ducat_data, cache, wof, wfm_po, aleca_po, wfm_ducat_po
+
+    if REFRESH_USE_CACHE is not None and REFRESH_USE_CACHE.exists():
+        print(f'{util.GREEN}[*] loading cache...{util.RESET}')
+        with REFRESH_USE_CACHE.open('rb') as f:
+            market_items, market_map, market_id_map, market_data_update_date, wpe, wwiki, ducat_data, cache, wof = pickle.load(f)
+    else:
+        print(f'{util.GREEN}[*] get market item...{util.RESET}')
+        market_items = wfm.get_market_item_list()
+        market_map = wfm.get_market_items_name_map(market_items)
+        market_id_map = wfm.get_market_items_id_map(market_items)
+
+        print(f'{util.GREEN}[*] get ducat data...{util.RESET}')
+        ducat_data = wfm.get_ducat_data(market_items)
+        market_data_update_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
+        
+        print(f'{util.GREEN}[*] get public export data...{util.RESET}')
+        wpe = WarframePublicExport()
+        wpe._prefetch_all_public_export(lang='en')
+        
+        print(f'{util.GREEN}[*] get wiki data...{util.RESET}')
+        wwiki = WarframeWiki()
+        
+        print(f'{util.GREEN}[*] get overframe data...{util.RESET}')
+        wof = Overframe(OVERFRAME_GET_WEBPAGE_MODE, OVERFRAME_GET_WEBPAGE_REMOTE_URL)
+    
+    print(f'{util.GREEN}[*] make price origin...{util.RESET}')
+    wfm_po = WarframeMarketPriceOrigin(market_items=market_items, market_lock=market_lock, oracle='default_oracle_price_48h')
+    aleca_po = AlecaframePriceOrigin(market_items=market_items, market_lock=market_lock, prefetch_all=True)
+    wfm_ducat_po = WarframeMarketDucantorPriceOrigin(market_items=market_items, market_lock=market_lock, ducat_data=ducat_data, oracle='HOUR/default_oracle_price_48h')
+
+    if REFRESH_USE_CACHE is not None:
+        print(f'{util.GREEN}[*] save cache...{util.RESET}')
+        REFRESH_USE_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        with REFRESH_USE_CACHE.open('wb') as f:
+            pickle.dump((market_items, market_map, market_id_map, market_data_update_date, wpe, wwiki, ducat_data, cache, wof), f)
+
     cache = {}
 
 def use(name, callback):
@@ -251,6 +275,45 @@ def task_prepare_market_items(task_status, stop_obj, market_item_names):
     parallel()
     return 
 
+def task_prepare_price_origin_items(task_status, stop_obj, url_names, price_origin):
+    print(f'{util.CYAN}Preparing market items: {util.GREEN}{url_names}{util.RESET}')
+    total = len(url_names)
+    task_status['total'] = total
+    task_status['current'] = 0
+
+    def sequential():
+        for url_name in url_names:
+            print(f'{util.CYAN}{task_status["current"]}/{total}{util.RESET}')
+            price_origin.fetch_price(url_name)
+            if stop_obj['stop']:
+                break
+            task_status['current'] += 1
+
+    def parallel():
+        def task(url_name):
+            if stop_obj['stop']:
+                return
+            print(f'{util.CYAN}{task_status["current"]}/{total} [{url_name}]{util.RESET}')
+            price_origin.fetch_price(url_name)
+            task_status['current'] += 1
+            return None
+    
+        results = Parallel(n_jobs=5, require='sharedmem')(delayed(task)(url_name) for url_name in url_names)
+
+    def use_fetch_prices():
+        task_status['total'] = 1
+        print(f'{util.CYAN}fetch prices [{url_names}]{util.RESET}')
+        price_origin.fetch_prices(url_names)
+        task_status['current'] = 1
+
+    if price_origin.support_faster_fetch_prices():
+        use_fetch_prices()
+    elif price_origin.support_parallel_fetch():
+        parallel()
+    else:
+        sequential()
+    return 
+
 # --------------------
 
 @app.route('/', defaults={'path': ''})
@@ -317,37 +380,57 @@ def refresh_all_data():
         refresh()
     return {}
 
-def _get_price_oracle(item_names, oracle_type, ducantor_price_override):
+@app.route('/api/refresh_price_origin_cache')
+def refresh_price_origin_cache():
+    """
+    Refreshes the cache of price origins.
+    """
+    global wfm_po, wca_po
+    with market_lock:
+        wfm_po.clear_cache()
+        aleca_po.clear_cache()
+    return {}
+
+def _get_price_oracle(item_names, price_origin):
     """
     return item_name -> oracle price
     assume all items has been prepared (or ducantor price override can deal with it)
-    
-    this function will request for market_lock! do NOT require it again in the caller
     """
-    ducat_data_map = {} if ducantor_price_override == 'none' else ducat_data[f'previous_{ducantor_price_override}']
-    with market_lock:
-        return {
-            item_name: \
-                ducat_data_map[item_name]['wa_price'] if item_name in ducat_data_map
-                else oracle_price_fn_map[oracle_type](market_map[item_name].price) if item_name in market_map 
-                else None
-            for item_name in item_names
-        }
+    return {
+        item_name: price_origin.fetch_price(market_map[item_name].url_name)['price'] if item_name in market_map else None
+        for item_name in item_names
+    }
+
+def _get_price_origin(price_origin_str, oracle_type_str):
+    """
+    BUG: _get_price_oracle() will have race conditions if multiple tasks are running at the same time,
+        more specifically, 
+    """
+    global wfm_po, aleca_po
+    if price_origin_str == 'warframe_market':
+        wfm_po.set_oracle(oracle_type_str)
+        return wfm_po
+    elif price_origin_str == 'alecaframe':
+        return aleca_po
+    elif price_origin_str == 'warframe_market_ducantor':
+        return wfm_ducat_po
+    else:
+        raise ValueError(f"Invalid price origin: {price_origin_str}. Valid options are: ['warframe_market', 'alecaframe']")
 
 @app.route('/api/price_oracle', methods=['POST'])
 def get_price_oracle():
     """
     Given a list of item names, returns their price oracle values.
+    (we assume this gets rank 0 price for mods and arcanes)
     Task API: nonblocking but should poll from /api/progress/${task_id} to get the result
 
     request json:
     {
-        // price oracle calculation, ref. oracle_price_fn_map
-        "oracle_type": str,
+        // price origin to use
+        "price_origin": str
 
-        // if prime item, whether to override oracle with ducantor price to speed up the process
-        // "none": no override, "day / hour": use ducantor price for day / hour
-        "ducantor_price_override": "none" | "day" | "hour",  
+        // price oracle calculation for supported price origins
+        "oracle_type": str,
 
         "item_names": [str, ...],
     }
@@ -361,20 +444,21 @@ def get_price_oracle():
 
     data = request.json
     item_names = data.get('item_names')
-    ducantor_price_override = data.get('ducantor_price_override')
-    if ducantor_price_override not in ['none', 'day', 'hour']:
-        return {"error": "invalid ducantor_price_override"}, 400
-    
-    ducat_data_map = {} if ducantor_price_override == 'none' else ducat_data[f'previous_{ducantor_price_override}']
-    prepare_item_names = [item_name for item_name in item_names if item_name in market_map and market_map[item_name].price is None]
-    prepare_item_names = [item_name for item_name in prepare_item_names if item_name not in ducat_data_map]
+    price_origin_str = data.get('price_origin')
+    oracle_type_str = data.get('oracle_type')
+
+    price_origin = _get_price_origin(price_origin_str, oracle_type_str)
+
+    url_names = [market_map[item_name].url_name for item_name in item_names if item_name in market_map]
+    cache_status = price_origin.is_item_cached(url_names)
+    unprepared_url_names = [url_name for url_name in url_names if not cache_status[url_name]]
 
     def task(task_id, task_status, stop_obj):
-        task_prepare_market_items(task_status, stop_obj, prepare_item_names)
+        task_prepare_price_origin_items(task_status, stop_obj, unprepared_url_names, price_origin)
         if stop_obj['stop']:
             task_stop(task_id)
             return
-        task_status['data'] = _get_price_oracle(item_names, data['oracle_type'], ducantor_price_override)
+        task_status['data'] = _get_price_oracle(item_names, price_origin)
         task_status['status'] = 'done'
 
     task_id = register_task(task)
@@ -388,12 +472,11 @@ def item_infobox():
 
     request json:
     {
-        // price oracle calculation, ref. oracle_prince_fn_map
-        "oracle_type": str,
+        // price origin to use
+        "price_origin": str
 
-        // if prime item, whether to override oracle with ducantor price to speed up the process
-        // "none": no override, "day / hour": use ducantor price for day / hour
-        "ducantor_price_override": "none" | "day" | "hour",  
+        // price oracle calculation for supported price origins
+        "oracle_type": str,
 
         "item_name": str
     }
@@ -414,68 +497,30 @@ def item_infobox():
 
     data = request.json
     item_name = data.get('item_name')
+    price_origin_str = data.get('price_origin')
+    oracle_type_str = data.get('oracle_type')
+    price_origin = _get_price_origin(price_origin_str, oracle_type_str)
+    print(price_origin)
 
-    # do prepare
     if item_name not in market_map:
         return {}
-    
-    ducat_price_override = data.get('ducantor_price_override')
-    if ducat_price_override == 'none':
-        ducat_price_map = {}
-    elif ducat_price_override == 'day':
-        ducat_price_map = ducat_data[f'previous_day']
-    elif ducat_price_override == 'hour':
-        ducat_price_map = ducat_data[f'previous_hour']
-    else:
-        print("invalid ducantor_price_override:", ducat_price_override)
-        return {"error": "invalid ducantor_price_override"}, 400
-    
-    if item_name not in ducat_price_map:
-        # default
-        with market_lock:
-            item = market_map[item_name]
-            if item.price is None:
-                wfm.prepare_market_items([item])
 
-        return {
-            'item_name': item_name,
-            'thumb_url': item.get_thumbnail_url(),
-            'icon_url': item.get_icon_url(),
-            'type': wfi.resolve_item_type(item, default=None),
+    item = market_map[item_name]
+    url_name = item.url_name
 
-            'oracle_price': oracle_price_fn_map[data['oracle_type']](item.price),
-            'cur_lowest_sell_price': item.orders.get_ingame_lowest_sell_price(),
+    # do prepare
+    if price_origin.is_item_cached([url_name])[url_name] is False:
+        price_origin.fetch_price(url_name)
 
-            '48h_volume': item.statistic.get_volume_for_last_hours(48),
-            '90d_volume': item.statistic.get_volume_for_last_days(90),
+    return {
+        'item_name': item_name,
+        'thumb_url': item.get_thumbnail_url(),
+        'icon_url': item.get_icon_url(),
+        'type': wfi.resolve_item_type(item, default=None),
+        'market_link': item.get_wfm_url(),
 
-            'wiki_link': item.wiki_link,
-            'market_link': item.get_wfm_url(),
-
-            'last_update': item.prepare_datetime.isoformat() if item.prepare_datetime else None,
-        }
-    else:
-        item = market_map[item_name]
-        item_ducat_data = ducat_price_map[item_name]
-        return {
-            'item_name': item_name,
-            'thumb_url': item.get_thumbnail_url(),
-            'icon_url': item.get_icon_url(),
-            'type': wfi.resolve_item_type(item, default=None),
-
-            'oracle_price': item_ducat_data['wa_price'],
-            'cur_lowest_sell_price': None,
-
-            '48h_volume': None,
-            '90d_volume': None,
-
-            'wiki_link': None,
-            'market_link': item.get_wfm_url(),
-
-            'last_update': item_ducat_data['datetime'] if item_ducat_data['datetime'] else None,    # should already be ISO
-
-            'ducantor_price_override': ducat_price_override,
-        }
+        **price_origin.get_item_info([url_name])[url_name],
+    }
 
 @app.route('/api/relic_data')
 def relic_data():
@@ -637,12 +682,11 @@ def function_item():
 
     request json:
     {
-        // price oracle calculation, ref. oracle_price_fn_map
-        "oracle_type": str,
+        // price origin to use
+        "price_origin": str
 
-        // if prime item, whether to override oracle with ducantor price to speed up the process
-        // "none": no override, "day / hour": use ducantor price for day / hour
-        "ducantor_price_override": "none" | "day" | "hour",  
+        // price oracle calculation for supported price origins
+        "oracle_type": str,
         
         "search_text": str | None,
         "item_list": [str, ...] | None,
@@ -654,14 +698,14 @@ def function_item():
     - item_list: directly specify the item names, if an item name is not found
     
     returns: ItemTable format
-
-    # TODO: cache oracle price?
     """
 
     data = request.json
     search_text = data.get('search_text')
     item_list = data.get('item_list')
-    ducantor_price_override = data.get('ducantor_price_override')
+    price_origin_str = data.get('price_origin')
+    oracle_type_str = data.get('oracle_type')
+    price_origin = _get_price_origin(price_origin_str, oracle_type_str)
 
     if search_text is not None and item_list is not None:
         return f"Only one of search_text and item_list should be provided. Provided {data}", 400
@@ -694,22 +738,17 @@ def function_item():
         print("Warning: function_item returning more than 1000 items, abort:", len(market_item_ls))
         print("data:", data)
         return {"error": "Too many items matched. Please narrow down your search."}, 400
-    
-    prepare_item_names = [item.item_name for item in market_item_ls if item.price is None]
-    if ducantor_price_override in ['day', 'hour']:
-        # only prepare things that are not in ducantor price map
-        ducat_map = ducat_data[f'previous_{ducantor_price_override}']
-        prepare_item_names = [
-            item_name for item_name in prepare_item_names
-            if item_name not in ducat_map
-        ]
+
+    url_names = [item.url_name for item in market_item_ls]
+    cache_status = price_origin.is_item_cached(url_names)
+    prepare_item_names = [url_name for url_name in url_names if not cache_status[url_name]]
     
     def task(task_id, task_status, stop_obj):
-        task_prepare_market_items(task_status, stop_obj, prepare_item_names)    
+        task_prepare_price_origin_items(task_status, stop_obj, prepare_item_names, price_origin)
         if stop_obj['stop']:
             task_stop(task_id)
             return
-        task_status['data'] = get_function_item_format(market_item_ls, data['oracle_type'], data['ducantor_price_override'])
+        task_status['data'] = price_origin.get_item_table(url_names)
         task_status['status'] = 'done'
 
     task_id = register_task(task)
@@ -893,6 +932,7 @@ def _function_best_trade(spec: dict[str, int], price_oracle: dict[str, int]):
 def function_best_trade():
     """
     find best trade for the given items
+    we will basically force to use warframe market price oracle, and we will prepare all items that are not prepared yet
     Task API: nonblocking but should poll from /api/progress/${task_id} to get the result
 
     request json:
@@ -920,7 +960,7 @@ def function_best_trade():
         if stop_obj['stop']:
             task_stop(task_id)
             return
-        task_status['data'] = _function_best_trade(spec, _get_price_oracle(item_names, data['oracle_type'], 'none'))
+        task_status['data'] = _function_best_trade(spec, _get_price_oracle(item_names, wfm_po))
         task_status['status'] = 'done'
 
     task_id = register_task(task)

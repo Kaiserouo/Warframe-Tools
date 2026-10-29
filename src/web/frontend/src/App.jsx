@@ -48,10 +48,10 @@ let pageMap = {
     'name': 'Best Trade',
     'factory': (setting) => (<BestTrade setting={setting} />)
   },
-  // 'test': {
-  //   'name': 'Test',
-  //   'factory': (setting) => (<Test setting={setting} />)
-  // },
+  'test': {
+    'name': 'Test',
+    'factory': (setting) => (<Test setting={setting} />)
+  },
   'inventory': {
     'name': 'Inventory',
     'factory': (setting) => (<Inventory setting={setting} />)
@@ -75,8 +75,9 @@ let githubPageMap = {
 
 export default function App({ envSetting }) {
   const defaultSetting = {
-    'oracle_type': 'default_oracle_price_48h',
-    'ducantor_price_override': 'day',
+    'version': '1.0.0',
+    'price_origin': 'alecaframe',
+    'oracle_type': null,
     'update_count': 1,
     'inventory_file': null,
 
@@ -92,6 +93,11 @@ export default function App({ envSetting }) {
         console.log('savedSetting', savedSetting)
         const jsonSetting = JSON.parse(savedSetting)
         if (savedSetting && jsonSetting) {
+          if (json.version === undefined || jsonSetting.version !== defaultSetting.version) {
+            // If the version is missing or different, we'll use the default setting
+            console.log('Version mismatch or missing, using default setting');
+            return defaultSetting;
+          }
           return {
             ...defaultSetting,
             ...jsonSetting,

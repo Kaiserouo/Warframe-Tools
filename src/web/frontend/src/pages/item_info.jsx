@@ -19,12 +19,12 @@ export default function ItemInfo({setting}) {
   const { isPending: marketIsPending, error: marketError, data: marketData } = useQuery(queryMarketData);
 
   const fetchTaskIdCallback = useCallback(
-    async () => fetchFunctionItemSearchText(setting.oracle_type, setting.ducantor_price_override, searchText).then(data => data.task_id),
-    [searchText, setting.oracle_type, setting.ducantor_price_override]
+    async () => fetchFunctionItemSearchText(setting.price_origin, setting.oracle_type, searchText).then(data => data.task_id),
+    [searchText, setting.price_origin, setting.oracle_type]
   );
   const handleSubmit = useCallback(
     makeHandleSubmit(setItemPollStatus, fetchTaskIdCallback),
-    [searchText, setting.oracle_type, setting.ducantor_price_override]
+    [searchText, setting.price_origin, setting.oracle_type]
   );
   
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function ItemInfo({setting}) {
       handleSubmit(ignore_obj);
     }
     return () => { ignore_obj['ignore'] = true; };
-  }, [searchText, handleSubmit, setting.oracle_type, setting.ducantor_price_override]);
+  }, [searchText, handleSubmit, setting.price_origin, setting.oracle_type]);
   
   let itemTable = null;
   if (searchText !== null && itemPollStatus.data) {

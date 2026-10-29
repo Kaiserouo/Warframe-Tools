@@ -4,6 +4,47 @@ import { Loading, Error } from '../components/loading_status.jsx';
 import { queryMarketData, fetchRefreshData } from '../api/fetch.jsx';
 import { getInventoryFromFile } from '../utils/inventory.jsx';
 
+const priceOriginOptions = {
+  'warframe_market': {
+    'name': 'Warframe Market',
+    'oracle_type': {
+      'default_oracle_price_48h': "Default Oracle Price (48h)",
+      'top_30%_avg_in_48h': "Top 30% Avg (48h)",
+      'bottom_30%_avg_in_48h': "Bottom 30% Avg (48h)",
+      'all_avg_in_48h': "All Avg (48h)",
+      'top_30%_avg_in_90d': "Top 30% Avg (90d)",
+      'bottom_30%_avg_in_90d': "Bottom 30% Avg (90d)",
+      'all_avg_in_90d': "All Avg (90d)",
+      'cur_lowest_price': "Current Lowest Price",
+    }
+  },
+  'warframe_market_ducantor': {
+    'name': 'Ducantor',
+    'oracle_type': {
+      'DAY/default_oracle_price_48h': "(DAY) Default Oracle Price (48h)",
+      'HOUR/default_oracle_price_48h': "(HOUR) Default Oracle Price (48h)",
+      'DAY/top_30%_avg_in_48h': "(DAY) Top 30% Avg (48h)",
+      'HOUR/top_30%_avg_in_48h': "(HOUR) Top 30% Avg (48h)",
+      'DAY/bottom_30%_avg_in_48h': "(DAY) Bottom 30% Avg (48h)",
+      'HOUR/bottom_30%_avg_in_48h': "(HOUR) Bottom 30% Avg (48h)",
+      'DAY/all_avg_in_48h': "(DAY) All Avg (48h)",
+      'HOUR/all_avg_in_48h': "(HOUR) All Avg (48h)",
+      'DAY/top_30%_avg_in_90d': "(DAY) Top 30% Avg (90d)",
+      'HOUR/top_30%_avg_in_90d': "(HOUR) Top 30% Avg (90d)",
+      'DAY/bottom_30%_avg_in_90d': "(DAY) Bottom 30% Avg (90d)",
+      'HOUR/bottom_30%_avg_in_90d': "(HOUR) Bottom 30% Avg (90d)",
+      'DAY/all_avg_in_90d': "(DAY) All Avg (90d)",
+      'HOUR/all_avg_in_90d': "(HOUR) All Avg (90d)",
+      'DAY/cur_lowest_price': "(DAY) Current Lowest Price",
+      'HOUR/cur_lowest_price': "(HOUR) Current Lowest Price",
+    }
+  },
+  "alecaframe": {
+    'name': 'AlecaFrame',
+    'oracle_type': null
+  }
+}
+
 function SettingItemRefreshMarketData({setting, setSetting}) {
   const [clicked, setClicked] = useState(false);
   console.log("SettingItemRefreshMarketData clicked:", clicked);
@@ -48,42 +89,54 @@ function SettingItemRefreshMarketData({setting, setSetting}) {
   );
 }
 
-function SettingItemPriceOracle({setting, setSetting}) {
-    return (
-      <div className="p-4 border-b border-gray-600">
-        <p className="text-sm font-semibold mb-2">Price Oracle</p>
-        <select
-          className="w-full bg-gray-600 text-white p-2 rounded"
-          value={setting.oracle_type}
-          onChange={(e) => setSetting({...setting, 'oracle_type': e.target.value})}
-        >
-          <option value="default_oracle_price_48h">Default Oracle Price (48h)</option>
-          <option value="top_30%_avg_in_48h">Top 30% Avg (48h)</option>
-          <option value="bottom_30%_avg_in_48h">Bottom 30% Avg (48h)</option>
-          <option value="all_avg_in_48h">All Avg (48h)</option>
-          <option value="top_30%_avg_in_90d">Top 30% Avg (90d)</option>
-          <option value="bottom_30%_avg_in_90d">Bottom 30% Avg (90d)</option>
-          <option value="all_avg_in_90d">All Avg (90d)</option>
-          <option value="cur_lowest_price">Current Lowest Price</option>
-        </select>
-      </div>
-    );
-}
+function SettingItemPriceOrigin({setting, setSetting}) {
+    const { price_origin: priceOrigin, oracle_type: oracleType } = setting;
 
-function SettingItemDucantorPriceOverride({setting, setSetting}) {
+    const onChangePriceOrigin = (e) => {
+      const newPriceOrigin = e.target.value;
+      if (newPriceOrigin === priceOrigin) {
+        return;
+      }
+      let newOracleType = null;
+      if (priceOriginOptions[newPriceOrigin] && priceOriginOptions[newPriceOrigin].oracle_type) {
+        newOracleType = Object.keys(priceOriginOptions[newPriceOrigin].oracle_type)[0];
+      }
+      setSetting({...setting, 'price_origin': newPriceOrigin, 'oracle_type': newOracleType});
+    }
+
+    const onChangeOracleType = (e) => {
+      const newOracleType = e.target.value;
+      setSetting({...setting, 'oracle_type': newOracleType});
+    };
+
+
     return (
       <div className="p-4 border-b border-gray-600">
-        <p className="text-sm font-semibold mb-2">Ducantor Price Override</p>
-        <p className="text-sm text-gray-300 mb-2">Override oracle price with the price from <a href="https://warframe.market/tools/ducats" target="_blank" rel="noopener noreferrer" className='underline text-blue-400 font-bold'>ducantor page</a><br /> to speed up loading time <i>(only works for prime items)</i></p>
-        
+        <p className="text-sm font-semibold mb-2">Price Origin</p>
+        <select
+          className="w-full bg-gray-600 text-white p-2 rounded mb-2"
+          value={setting.price_origin}
+          onChange={onChangePriceOrigin}
+        >
+          {Object.entries(priceOriginOptions).map(([key, value]) => (
+            <option key={key} value={key}>{value.name}</option>
+          ))}
+        </select>
+
+        <br />
+
+        <p className="text-sm font-semibold mb-2">Oracle Type</p>
         <select
           className="w-full bg-gray-600 text-white p-2 rounded"
-          value={setting.ducantor_price_override}
-          onChange={(e) => setSetting({...setting, 'ducantor_price_override': e.target.value})}
+          value={oracleType || ""}
+          onChange={onChangeOracleType}
+          disabled={!priceOriginOptions[priceOrigin].oracle_type}
         >
-          <option value="none">No override</option>
-          <option value="hour">Override with hourly price (WA 48h)</option>
-          <option value="day">Override with daily price (WA 90d)</option>
+          {priceOriginOptions[priceOrigin].oracle_type ? 
+            Object.entries(priceOriginOptions[priceOrigin].oracle_type).map(([key, value]) => (
+              <option key={key} value={key}>{value}</option>
+            )) : 
+            <option value="" disabled>N/A</option>}
         </select>
       </div>
     );
@@ -141,8 +194,7 @@ function NavbarSettingMenuInner({setting, setSetting}) {
   return (
     <div className="mt-2 bg-gray-700 text-white rounded shadow-lg z-10 md:min-w-max">
       {setting.env_setting.is_github_page ? null : <SettingItemRefreshMarketData setting={setting} setSetting={setSetting} />}
-      {setting.env_setting.is_github_page ? null : <SettingItemPriceOracle setting={setting} setSetting={setSetting} />}
-      {setting.env_setting.is_github_page ? null : <SettingItemDucantorPriceOverride setting={setting} setSetting={setSetting} />}
+      {setting.env_setting.is_github_page ? null : <SettingItemPriceOrigin setting={setting} setSetting={setSetting} />}
       <SettingInventoryFile setting={setting} setSetting={setSetting} />
     </div>
   )

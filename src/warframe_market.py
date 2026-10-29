@@ -19,7 +19,8 @@ from .data.syndicate_data import additional_syndicates
 from . import util
 from tqdm import tqdm
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+# USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
+USER_AGENT = "WarframeTools/1.0 (https://github.com/Kaiserouo/WarframeTools)"
 RETRY_MAX_TIME = 3
 
 JSON_REQUEST_HEADER = {
@@ -38,6 +39,9 @@ def retry_request(*args, n_times=None, **kwargs):
         r = requests.get(*args, **kwargs)
 
         if r.status_code == 200:
+            break
+        if r.status_code == 403:
+            # forbidden
             break
 
         print('[RetryRequest] Request failed with status code', r.status_code, 'for', args, kwargs)
@@ -1033,14 +1037,4 @@ def get_ducat_data(market_items: None | list[MarketItem] = None) -> list[dict[st
 
 if __name__ == '__main__':
     market_items = get_market_item_list()
-    # print(util.str_type(market_items[0], print_unknown_obj_vars=True))
-    # print(get_ducat_data())
-    # rewards = get_transient_mission_rewards()
-    # print(rewards.keys())
-    # p = Player(user_slug='kaiserouo')
-    # p.fetch_data()
-    # print(f"{get_syndicate_items('Arbiters of Hexis', return_standing=True) = }")
-    # print(f"{get_syndicate_items('Arbiters of Hexis', return_standing=False) = }")
-    print(f"{get_syndicate_items('New Loka', return_standing=True) = }")
-    # print(f"{get_syndicate_items('The Hex', return_standing=False) = }")
-    # print(f"{get_all_syndicate_items(return_standing=True)['New Loka'] = }")
+    print(market_items[0])
