@@ -1,5 +1,6 @@
 
 import Home from '../home.jsx';
+import ItemInfobox from '../../components/item_infobox';
 
 export default function GithubHome({ setting }) {
     return (<>
