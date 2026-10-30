@@ -59,19 +59,6 @@ wfm_po = None
 aleca_po = None
 wfm_ducat_po = None
 
-# args, kwargs is passed to price oracle functions
-# for now, kwargs = stat_filter
-oracle_price_fn_map = {
-    'default_oracle_price_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_oracle_price_48hrs(*args, **kwargs),
-    'top_30%_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_top_k_avg_price_for_last_hours(48, 0.3, *args, **kwargs),
-    'bottom_30%_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_bottom_k_avg_price_for_last_hours(48, 0.3, *args, **kwargs),
-    'all_avg_in_48h': lambda price_oracle, *args, **kwargs: price_oracle.get_top_k_avg_price_for_last_hours(48, 1, *args, **kwargs),
-    'top_30%_avg_in_90d': lambda price_oracle, *args, **kwargs: price_oracle.get_top_k_avg_price_for_last_days(90, 0.3, *args, **kwargs),
-    'bottom_30%_avg_in_90d': lambda price_oracle, *args, **kwargs: price_oracle.get_bottom_k_avg_price_for_last_days(90, 0.3, *args, **kwargs),
-    'all_avg_in_90d': lambda price_oracle, *args, **kwargs: price_oracle.get_top_k_avg_price_for_last_days(90, 1, *args, **kwargs),
-    'cur_lowest_price': lambda price_oracle, *args, **kwargs: price_oracle.get_cur_lowest_price(*args, **kwargs),
-}
-
 def refresh():
     global market_items, market_map, market_id_map, market_data_update_date, wpe, wwiki, ducat_data, cache, wof, wfm_po, aleca_po, wfm_ducat_po
 
@@ -596,84 +583,6 @@ def transient_reward_data():
         return transient_rewards
     return use('transient_data', _get_transient_data)
 
-def get_function_item_format(market_item_ls, oracle_type, ducantor_price_override='none'):
-    """
-    if ducantor_price_override == 'none', you need to prepare all items beforehand
-    if ducantor_price_override != 'none', will use ducantor price for prime items, but we still
-    assume that all other items are prepared
-
-    returns: ItemTable format
-        {
-            "headers": [
-                {"id": str, "name": str, "type": str},  // id is for indexing item's field
-                ...                                     // headers are shown in order
-            ],
-            "items": [
-                {header_id: attr}                       // id should be one of the header id, attr is the value to display in the table
-                ...                                     // items are shown in order
-            ]
-        }
-    """
-    if ducantor_price_override not in ['none', 'day', 'hour']:
-        raise ValueError("invalid ducantor_price_override")
-    
-    ducat_price_map = {} if ducantor_price_override == 'none' else ducat_data[f'previous_{ducantor_price_override}']
-    hour_ducat_price_map = ducat_data['previous_hour']
-
-    def get_plat(item):
-        if ducantor_price_override == 'none' or item.item_name not in ducat_price_map:
-            return oracle_price_fn_map[oracle_type](item.price)
-        return ducat_price_map[item.item_name]['wa_price']
-    def get_rmax_plat(item):
-        if ducantor_price_override == 'none' or item.item_name not in ducat_price_map:
-            return oracle_price_fn_map[oracle_type](item.price, mod_rank_range=[item.mod_max_rank])
-        return None
-    def get_vol(item):  # 48h
-        if ducantor_price_override == 'none' or item.item_name not in ducat_price_map:
-            return item.statistic.get_volume_for_last_hours(48)
-        return None
-    
-    item_format_ls = []
-    with market_lock:
-        for item in market_item_ls:
-            item_format = {
-                'name': item.item_name,
-                'type': wfi.resolve_item_type(item),
-                'plat': get_plat(item),
-                'rmax_plat_div21': None,
-                'rmax_plat': None,
-                'plat_times21': None,
-                'vol': get_vol(item),
-                # 'url': item.get_wfm_url(),
-                # 'wiki': item.wiki_link, # may be None
-            }
-
-            if 'arcane_enhancement' in item.tags:
-                rmax_plat = get_rmax_plat(item)
-                if rmax_plat is not None:
-                    item_format = {
-                        **item_format,
-                        'rmax_plat_div21': rmax_plat / 21,
-                        'rmax_plat': rmax_plat,
-                        'plat_times21': item_format['plat'] * 21,
-                    }
-            item_format_ls.append(item_format)
-
-    return {
-        "headers": [
-            {"id": "name", "name": 'Name', "type": "item_name"},
-            {"id": "type", "name": 'Type', "type": "string"},
-            {"id": "plat", "name": 'Plat\n(48hr)', "type": "float"},
-            {"id": "rmax_plat_div21", "name": 'RMP/21\n(Arcane)', "type": "float"},
-            {"id": "rmax_plat", "name": 'R.Max Plat\n(48hr)', "type": "float"},
-            {"id": "plat_times21", "name": 'P*21\n(Arcane)', "type": "float"},
-            {"id": "vol", "name": 'Volume\n(48hr)', "type": "integer"},
-            # {"id": "url", "name": 'WFM URL', "type": "url"},
-            # {"id": "wiki", "name": 'Wiki', "type": "url"},
-        ],
-        "items": item_format_ls
-    }
-
 @app.route('/api/function_item', methods=['POST'])
 def function_item():
     """
@@ -1028,48 +937,6 @@ def data_other(function_name):
         return use(f'OTHER__{function_name}', lambda: function_map[function_name]())
     else:
         return {'error': 'Function not found'}, 404
-
-def _test_best_trade():
-    USE_CACHE = True
-    CACHE_FILE = Path('server_market_cache.pkl')
-
-    spec = {
-        'Momentous Bond': 1,
-        'Manifold Bond': 2,
-        'Loyal Companion': 10,
-        'Forma Blueprint': 5,   # doesn't exist
-    }
-
-    # load data
-    if USE_CACHE:
-        if CACHE_FILE.exists():
-            print(f'{util.CYAN} loading cache from {CACHE_FILE} {util.RESET}')
-            with open(CACHE_FILE, 'rb') as f:
-                market_items, market_map, market_id_map, market_data_update_date, ducat_data, cache = pickle.load(f)
-        else:
-            print(f'{util.CYAN} cache file {CACHE_FILE} not found{util.RESET}')
-            exit()
-    else:
-        refresh()
-        for item_name in spec:
-            with market_lock:
-                print(f'{util.CYAN} preparing {item_name} {util.RESET}')
-                item = market_map.get(item_name)
-                if item is not None and item.price is None:
-                    item.prepare()
-        with open(CACHE_FILE, 'wb') as f:
-                pickle.dump((market_items, market_map, market_id_map, market_data_update_date, ducat_data, cache), f)
-    
-
-    price_oracle = {
-        item_name: \
-            oracle_price_fn_map['default_oracle_price_48h'](market_map[item_name].price) if item_name in market_map 
-            else None
-        for item_name in spec
-    }
-    result = _function_best_trade(spec, price_oracle)
-    for i in result['trade_options']:
-        print(i)
 
 class MissingItemChecklist:
     def __init__(self, wwiki, wpe):

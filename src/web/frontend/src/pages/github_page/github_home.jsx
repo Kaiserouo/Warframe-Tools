@@ -38,15 +38,9 @@ export default function GithubHome({ setting }) {
                 <li><span className="text-yellow-400 font-bold">Loadout</span>: Loadout viewer for all items in inventory.</li>
                 <li><span className="text-yellow-400 font-bold">Relic</span>: Find items in relic to make sets.</li>
                 <li><span className="text-yellow-400 font-bold">JSON Viewer</span>: View raw inventory JSON file.</li>
+                <li><span className="text-yellow-400 font-bold">Items</span>: Inventory Viewer.</li>
                 </ul>
             </ul>
-            <br />
-            <p>Item name with underline show additional information and links in the hovering info box.</p>
-            <p>e.g.: <ItemInfobox setting={setting} itemName="Serration" />, <ItemInfobox setting={setting} itemName="Kestrel Prime Blade" /> <span className='text-gray-500'>(hover on the item name to see more information)</span></p>
-            <br />
-            <p>Note that <b className='text-white'>everything is cached, including the prices</b>. The prices will not reflect the true prices on the market after some time.</p>
-            <p>Please go to <i className='text-cyan-400'>Options (upper left corner) &gt; Refresh Market Data</i> to refresh the market data from time to time.</p>
-            
             <br />
             
             <h2 className='text-2xl font-bold text-white'>Inventory</h2>
